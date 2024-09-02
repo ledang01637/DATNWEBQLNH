@@ -22,6 +22,6 @@ namespace DATN.Shared
         public bool IsDeleted { get; set; }
         public int AccountId { get; set; }
 
-        public ICollection<Account> Accounts { get; set; }
+        public Account Accounts { get; set; }
     }
 }

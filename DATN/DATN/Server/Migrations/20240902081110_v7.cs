@@ -3,10 +3,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DATN.Server.Migrations
 {
-    public partial class v6 : Migration
+    public partial class v7 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Accounts",
+                columns: table => new
+                {
+                    AccountId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccountType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Accounts", x => x.AccountId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -20,46 +38,6 @@ namespace DATN.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.CategoryId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Customers",
-                columns: table => new
-                {
-                    CustomerId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    AccountId = table.Column<int>(type: "int", nullable: false),
-                    TotalRewardPoint = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Customers", x => x.CustomerId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Employees",
-                columns: table => new
-                {
-                    EmployeeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Position = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Salary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    AccountId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Employees", x => x.EmployeeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -93,18 +71,18 @@ namespace DATN.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleAccounts",
+                name: "Roles",
                 columns: table => new
                 {
-                    RoleaccountId = table.Column<int>(type: "int", nullable: false)
+                    RoleId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Roleid = table.Column<int>(type: "int", nullable: false),
-                    AccountId = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleAccounts", x => x.RoleaccountId);
+                    table.PrimaryKey("PK_Roles", x => x.RoleId);
                 });
 
             migrationBuilder.CreateTable(
@@ -155,6 +133,58 @@ namespace DATN.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Customers",
+                columns: table => new
+                {
+                    CustomerId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    AccountId = table.Column<int>(type: "int", nullable: false),
+                    TotalRewardPoint = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Customers", x => x.CustomerId);
+                    table.ForeignKey(
+                        name: "FK_Customers_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
+                        principalColumn: "AccountId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Employees",
+                columns: table => new
+                {
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Position = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Salary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    AccountId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Employees", x => x.EmployeeId);
+                    table.ForeignKey(
+                        name: "FK_Employees_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
+                        principalColumn: "AccountId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tables",
                 columns: table => new
                 {
@@ -179,90 +209,29 @@ namespace DATN.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Accounts",
+                name: "RoleAccounts",
                 columns: table => new
                 {
-                    AccountId = table.Column<int>(type: "int", nullable: false)
+                    RoleaccountId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AccountType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    RoleAccountsRoleaccountId = table.Column<int>(type: "int", nullable: true),
-                    EmployeesEmployeeId = table.Column<int>(type: "int", nullable: true),
-                    CustomersCustomerId = table.Column<int>(type: "int", nullable: true)
+                    Roleid = table.Column<int>(type: "int", nullable: false),
+                    AccountId = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Accounts", x => x.AccountId);
+                    table.PrimaryKey("PK_RoleAccounts", x => x.RoleaccountId);
                     table.ForeignKey(
-                        name: "FK_Accounts_Customers_CustomersCustomerId",
-                        column: x => x.CustomersCustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "CustomerId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Accounts_Employees_EmployeesEmployeeId",
-                        column: x => x.EmployeesEmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Accounts_RoleAccounts_RoleAccountsRoleaccountId",
-                        column: x => x.RoleAccountsRoleaccountId,
-                        principalTable: "RoleAccounts",
-                        principalColumn: "RoleaccountId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
-                {
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RoleDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    RoleAccountsRoleaccountId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Roles", x => x.RoleId);
-                    table.ForeignKey(
-                        name: "FK_Roles_RoleAccounts_RoleAccountsRoleaccountId",
-                        column: x => x.RoleAccountsRoleaccountId,
-                        principalTable: "RoleAccounts",
-                        principalColumn: "RoleaccountId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "EmployeeShiftes",
-                columns: table => new
-                {
-                    EmployeeShifteId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ShifteDay = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    ShifteId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmployeeShiftes", x => x.EmployeeShifteId);
-                    table.ForeignKey(
-                        name: "FK_EmployeeShiftes_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "EmployeeId",
+                        name: "FK_RoleAccounts_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
+                        principalColumn: "AccountId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EmployeeShiftes_Shiftes_ShifteId",
-                        column: x => x.ShifteId,
-                        principalTable: "Shiftes",
-                        principalColumn: "Shifte_Id",
+                        name: "FK_RoleAccounts_Roles_Roleid",
+                        column: x => x.Roleid,
+                        principalTable: "Roles",
+                        principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -324,6 +293,33 @@ namespace DATN.Server.Migrations
                         column: x => x.VoucherId,
                         principalTable: "Vouchers",
                         principalColumn: "VoucherId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeShiftes",
+                columns: table => new
+                {
+                    EmployeeShifteId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ShifteDay = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    ShifteId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeShiftes", x => x.EmployeeShifteId);
+                    table.ForeignKey(
+                        name: "FK_EmployeeShiftes_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EmployeeShiftes_Shiftes_ShifteId",
+                        column: x => x.ShifteId,
+                        principalTable: "Shiftes",
+                        principalColumn: "Shifte_Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -475,19 +471,10 @@ namespace DATN.Server.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Accounts_CustomersCustomerId",
-                table: "Accounts",
-                column: "CustomersCustomerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Accounts_EmployeesEmployeeId",
-                table: "Accounts",
-                column: "EmployeesEmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Accounts_RoleAccountsRoleaccountId",
-                table: "Accounts",
-                column: "RoleAccountsRoleaccountId");
+                name: "IX_Customers_AccountId",
+                table: "Customers",
+                column: "AccountId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerVouchers_CustomerId",
@@ -498,6 +485,12 @@ namespace DATN.Server.Migrations
                 name: "IX_CustomerVouchers_VoucherId",
                 table: "CustomerVouchers",
                 column: "VoucherId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_AccountId",
+                table: "Employees",
+                column: "AccountId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmployeeShiftes_EmployeeId",
@@ -573,9 +566,14 @@ namespace DATN.Server.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_RoleAccountsRoleaccountId",
-                table: "Roles",
-                column: "RoleAccountsRoleaccountId");
+                name: "IX_RoleAccounts_AccountId",
+                table: "RoleAccounts",
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoleAccounts_Roleid",
+                table: "RoleAccounts",
+                column: "Roleid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tables_FloorId",
@@ -585,9 +583,6 @@ namespace DATN.Server.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Accounts");
-
             migrationBuilder.DropTable(
                 name: "EmployeeShiftes");
 
@@ -604,7 +599,7 @@ namespace DATN.Server.Migrations
                 name: "RewardPointes");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "RoleAccounts");
 
             migrationBuilder.DropTable(
                 name: "Employees");
@@ -622,7 +617,7 @@ namespace DATN.Server.Migrations
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "RoleAccounts");
+                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Categories");
@@ -644,6 +639,9 @@ namespace DATN.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Floors");
+
+            migrationBuilder.DropTable(
+                name: "Accounts");
         }
     }
 }

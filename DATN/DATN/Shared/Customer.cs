@@ -19,7 +19,7 @@ namespace DATN.Shared
         public int AccountId { get; set; }
         public decimal TotalRewardPoint { get; set; }
 
-        public ICollection<Account> Accounts { get; set; }
+        public Account Accounts { get; set; }
         public ICollection<Order> Orders { get; set; }
         public RewardPointe RewardPoints { get; set; }
         public ICollection<CustomerVoucher> CustomerVouchers { get; set; }
