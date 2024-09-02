@@ -1,0 +1,50 @@
+﻿@page "/admincategory"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+
+
+@if (isLoaded)
+{
+    <button class="btn btn-success" @onclick="() => CreateCategory()">Thêm</button>
+    <hr />
+    <h4>Quản lý danh mục</h4>
+    <div class="search-bar">
+        <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="FilterCategories" />
+    </div>
+    <div class="product-table-container">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tên danh mục</th>
+                    <th>CustomerId</th>
+                    <th>Dishs</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cate in filteredCategory)
+                {
+                    <tr>
+                        <td>@cate.CategoryName</td>
+                        <td>@cate.CategoryDescription</td>
+                        <td>@cate.IsDelete</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => EditCategory(cate.CategoryId)">Sửa</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteCategory(cate.CategoryId)">Ẩn</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+
