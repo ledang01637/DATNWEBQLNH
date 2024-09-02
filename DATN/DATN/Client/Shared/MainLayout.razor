@@ -1,7 +1,18 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
+
+<div class="container-fluid col-md-12 row">
+    <div class="col-md-2 bg-dark">
+        <NavMenu />
+    </div>
+    <div class="col-md-10">
+        @Body
+    </div>
+
+</div>
+
+@* <div class="page">
+    <div class="bg-dark" style="height:955px; width:200px;">
         <NavMenu />
     </div>
 
@@ -14,4 +25,4 @@
             @Body
         </div>
     </div>
-</div>
+</div> *@
