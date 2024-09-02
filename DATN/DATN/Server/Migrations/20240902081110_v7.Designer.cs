@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATN.Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240902074056_v6")]
-    partial class v6
+    [Migration("20240902081110_v7")]
+    partial class v7
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,20 +34,11 @@ namespace DATN.Server.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CustomersCustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EmployeesEmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("RoleAccountsRoleaccountId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
@@ -56,12 +47,6 @@ namespace DATN.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AccountId");
-
-                    b.HasIndex("CustomersCustomerId");
-
-                    b.HasIndex("EmployeesEmployeeId");
-
-                    b.HasIndex("RoleAccountsRoleaccountId");
 
                     b.ToTable("Accounts");
                 });
@@ -116,6 +101,9 @@ namespace DATN.Server.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -189,6 +177,9 @@ namespace DATN.Server.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("EmployeeId");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
 
                     b.ToTable("Employees");
                 });
@@ -471,9 +462,6 @@ namespace DATN.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("RoleAccountsRoleaccountId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RoleDescription")
                         .HasColumnType("nvarchar(max)");
 
@@ -481,8 +469,6 @@ namespace DATN.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
-
-                    b.HasIndex("RoleAccountsRoleaccountId");
 
                     b.ToTable("Roles");
                 });
@@ -504,6 +490,10 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("RoleaccountId");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("Roleid");
 
                     b.ToTable("RoleAccounts");
                 });
@@ -609,25 +599,15 @@ namespace DATN.Server.Migrations
                     b.ToTable("Vouchers");
                 });
 
-            modelBuilder.Entity("DATN.Shared.Account", b =>
+            modelBuilder.Entity("DATN.Shared.Customer", b =>
                 {
-                    b.HasOne("DATN.Shared.Customer", "Customers")
-                        .WithMany("Accounts")
-                        .HasForeignKey("CustomersCustomerId");
+                    b.HasOne("DATN.Shared.Account", "Accounts")
+                        .WithOne("Customers")
+                        .HasForeignKey("DATN.Shared.Customer", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("DATN.Shared.Employee", "Employees")
-                        .WithMany("Accounts")
-                        .HasForeignKey("EmployeesEmployeeId");
-
-                    b.HasOne("DATN.Shared.RoleAccount", "RoleAccounts")
-                        .WithMany("Accounts")
-                        .HasForeignKey("RoleAccountsRoleaccountId");
-
-                    b.Navigation("Customers");
-
-                    b.Navigation("Employees");
-
-                    b.Navigation("RoleAccounts");
+                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("DATN.Shared.CustomerVoucher", b =>
@@ -647,6 +627,17 @@ namespace DATN.Server.Migrations
                     b.Navigation("Customers");
 
                     b.Navigation("Vouchers");
+                });
+
+            modelBuilder.Entity("DATN.Shared.Employee", b =>
+                {
+                    b.HasOne("DATN.Shared.Account", "Accounts")
+                        .WithOne("Employees")
+                        .HasForeignKey("DATN.Shared.Employee", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("DATN.Shared.EmployeeShifte", b =>
@@ -776,13 +767,23 @@ namespace DATN.Server.Migrations
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("DATN.Shared.Role", b =>
+            modelBuilder.Entity("DATN.Shared.RoleAccount", b =>
                 {
-                    b.HasOne("DATN.Shared.RoleAccount", "RoleAccounts")
-                        .WithMany("Roles")
-                        .HasForeignKey("RoleAccountsRoleaccountId");
+                    b.HasOne("DATN.Shared.Account", "Accounts")
+                        .WithMany("RoleAccounts")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("RoleAccounts");
+                    b.HasOne("DATN.Shared.Role", "Roles")
+                        .WithMany("RoleAccounts")
+                        .HasForeignKey("Roleid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accounts");
+
+                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("DATN.Shared.Table", b =>
@@ -796,6 +797,15 @@ namespace DATN.Server.Migrations
                     b.Navigation("Floors");
                 });
 
+            modelBuilder.Entity("DATN.Shared.Account", b =>
+                {
+                    b.Navigation("Customers");
+
+                    b.Navigation("Employees");
+
+                    b.Navigation("RoleAccounts");
+                });
+
             modelBuilder.Entity("DATN.Shared.Category", b =>
                 {
                     b.Navigation("Products");
@@ -803,8 +813,6 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.Customer", b =>
                 {
-                    b.Navigation("Accounts");
-
                     b.Navigation("CustomerVouchers");
 
                     b.Navigation("Orders");
@@ -815,11 +823,6 @@ namespace DATN.Server.Migrations
             modelBuilder.Entity("DATN.Shared.CustomerVoucher", b =>
                 {
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("DATN.Shared.Employee", b =>
-                {
-                    b.Navigation("Accounts");
                 });
 
             modelBuilder.Entity("DATN.Shared.Floor", b =>
@@ -846,11 +849,9 @@ namespace DATN.Server.Migrations
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("DATN.Shared.RoleAccount", b =>
+            modelBuilder.Entity("DATN.Shared.Role", b =>
                 {
-                    b.Navigation("Accounts");
-
-                    b.Navigation("Roles");
+                    b.Navigation("RoleAccounts");
                 });
 
             modelBuilder.Entity("DATN.Shared.Shifte", b =>
