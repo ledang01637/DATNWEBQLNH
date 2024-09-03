@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Shared\DATN.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\js\lib\" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,31 @@
+﻿@page "/checkwifi"
+@inject HttpClient httpClient
+
+<h3>Check Wi-Fi IP Address</h3>
+
+@if (wifiIpAddress != null)
+{
+    <p>Your Wi-Fi IP Address is: @wifiIpAddress</p>
+}
+else
+{
+    <p>Could not retrieve Wi-Fi IP Address.</p>
+}
+
+@code {
+    private string wifiIpAddress;
+
+    protected override async Task OnInitializedAsync()
+    {
+        wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
+        string myWifi = "192.168.62.1";
+        if (wifiIpAddress.Equals(myWifi))
+        {
+            wifiIpAddress = "Allow Login";
+        }
+        else
+        {
+            wifiIpAddress = "Define Login";
+        }
+    }
+}
