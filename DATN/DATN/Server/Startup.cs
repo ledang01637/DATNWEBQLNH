@@ -50,7 +50,7 @@ namespace DATN.Server
             services.AddScoped<TableService>();
             services.AddScoped<UnitService>();
             services.AddScoped<VoucherService>();
-
+            services.AddSingleton<NetworkService>();
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
             );
