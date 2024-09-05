@@ -1,4 +1,5 @@
-﻿
+﻿@page "/customer"
+@inject IJSRuntime Js
 <style>
     #video-container {
         position: relative;
@@ -18,6 +19,11 @@
         background: #333;
     }
 
+    video {
+        background: #dee;
+        display: none;
+        opacity: 0;
+    }
     #remoteVideo {
         width: 100%;
         height: 100%;
@@ -60,10 +66,32 @@
 
     <div class="row">
         <div class="col" id="action-buttons">
-            <button style="display: none;" id="callButton" class="btn btn-success">Call</button>
+            <button id="callButton" class="btn btn-success">Call</button>
             <button id="answerCallButton" class="btn btn-info hidden-first">Answer Call</button>
             <button id="rejectCallButton" class="btn btn-warning hidden-first">Reject Call</button>
             <button id="endCallButton" class="btn btn-danger hidden-first">End Call</button>
         </div>
     </div>
 </div>
+@code {
+    private string token = "eyJjdHkiOiJzdHJpbmdlZS1hcGk7dj0xIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJqdGkiOiJTSy4wLjZoSHpGNDlFTHlQMDlUc0Q4VTAwbENERlhEMTdQeS0xNzI1NTEyMjgwIiwiaXNzIjoiU0suMC42aEh6RjQ5RUx5UDA5VHNEOFUwMGxDREZYRDE3UHkiLCJleHAiOjE3MjU1OTg2ODAsInVzZXJJZCI6ImN1c3RvbWVyIn0.BmHiRqlSgIk6L1YGjHIEuyqlOYUwRBZmbBuZAePvJW0";
+    private string callerId = "customer";
+    private string calleeId = "manager";
+    private async Task SetupCall()
+    {
+        await Js.InvokeVoidAsync("setupCall", token, callerId, calleeId);
+    }
+    private async Task setupVideo()
+    {
+        await Js.InvokeVoidAsync("setupVideo", "answerCallButton", "callButton", "remoteVideo", "localVideo");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await SetupCall();
+            await setupVideo();
+        }
+    }
+}

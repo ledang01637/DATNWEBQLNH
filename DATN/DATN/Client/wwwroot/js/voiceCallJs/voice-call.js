@@ -138,24 +138,22 @@ function setupCall(token, callerId, calleeId) {
     });
 };
 
-// videoControls.js
-
-function setupCallEvents(localVideoId, remoteVideoId, answerButtonId, callButtonId) {
-    var localVideo = document.getElementById(localVideoId);
-    var remoteVideo = document.getElementById(remoteVideoId);
+function setupVideo(answerButtonId, callButtonId, remoteVideo, localVideo) {
+    var localVideo = document.getElementById(localVideo);
+    var remoteVideo = document.getElementById(remoteVideo);
     var answerButton = document.getElementById(answerButtonId);
     var callButton = document.getElementById(callButtonId);
 
     answerButton.addEventListener('click', function () {
-        localVideo.muted = false;
+        remoteVideo.muted = false;
         localVideo.play();
-        remoteVideo.play(); // Ensure remote video is also played
+        remoteVideo.play();
     });
 
     callButton.addEventListener('click', function () {
-        localVideo.muted = false;
+        remoteVideo.muted = false;
         localVideo.play();
-        remoteVideo.play(); // Ensure remote video is also played
+        remoteVideo.play();
     });
 }
 
