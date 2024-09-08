@@ -1,0 +1,66 @@
+﻿.layout-rain {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #000;
+    overflow: hidden;
+}
+
+.bubbles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+    .bubbles span {
+        position: absolute;
+        width: 2px;
+        height: 100px;
+        background-color: #f7f7f7;
+        border-radius: 50%;
+        opacity: 0.8;
+        box-shadow: 0 0 10px rgb(255, 255, 255), 0 0 30px rgba(31, 244, 23, 0.3);
+        animation: animate 1.5s linear infinite;
+    }
+
+.shipper {
+    width: 80px;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    animation: shipper 5s infinite linear;
+}
+
+.divider {
+    top: 59%;
+    position: absolute;
+    width: 100%;
+    border: 0;
+    border-top: 2px solid #787070;
+    margin-top: 10px;
+}
+
+@keyframes shipper {
+    0% {
+        left: -150px;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes animate {
+    0% {
+        transform: translateY(-100px) scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(100vh) scale(0.5);
+        opacity: 0;
+    }
+}
