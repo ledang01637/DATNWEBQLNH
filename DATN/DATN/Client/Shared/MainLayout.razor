@@ -1,13 +1,82 @@
 ﻿@inherits LayoutComponentBase
 
+    <style>
+      .sidebar {
+        min-height: 100vh;
+        background-color: #333;
+        color: white;
+      }
 
-<div class="container-fluid row">
-    <div class="col-md-2 bg-dark">
-        <NavMenu />
-    </div>
-    <div class="col-md-10">
-        @Body
-    </div>
+      .sidebar .nav-link {
+        color: white;
+      }
 
+      .sidebar .nav-link.active {
+        background-color: #f96332;
+      }
+
+      .main-content {
+        background-color: #eceaea;
+        min-height: 100vh;
+      }
+
+      .header {
+        background-color: #ddd;
+        padding: 10px 20px;
+      }
+
+      .profile-icon {
+        width: 100px;
+        height: 100px;
+        background-color: #d1cdcd;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+      }
+
+      .profile-info div {
+        background-color: #d1cdcd;
+        height: 30px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+      }
+    </style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-0">
+            <div class="text-center py-3">
+                <h2>Restaurant</h2>
+            </div>
+            <NavMenu />
+
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <!-- Header -->
+            <div class="header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="https://via.placeholder.com/40"
+                         alt="Avatar"
+                         class="rounded-circle me-2" />
+                    <span>Hello, Boss</span>
+                </div>
+                <div>
+                    <i class="fas fa-comments me-3"></i>
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="container mt-4">
+                <div class="container-fluid">
+                    @Body
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-

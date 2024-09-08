@@ -1,0 +1,192 @@
+﻿@page "/information"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+@if (isLoaded)
+{
+    <div class="container-fluid col-md-12 row m-auto" style="height: 700px">
+        <div class="col-md-12 bg-body-secondary">
+            <div class="col-md-12 p-1">
+                <h2>HỒ SƠ CỦA TÔI</h2>
+                <h6>Quản lý thông tin hồ sơ để bảo mật tài khoản</h6>
+            </div>
+            <hr class="border-3 bg-dark" />
+            <div class="col-md-12 row">
+                <div class="col-md-4 border-end">
+                    <div class="bg-danger rounded-pill p-4 mt-5 m-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-person-fill rounded-pill" viewBox="0 0 16 16">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    @foreach (var account in listAccount)
+                    {
+                        var connectEmployee = listEmployee.Find(c => c.AccountId == account.AccountId);
+                        if (connectEmployee != null)
+                        {
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control border border-secondary p-4" id="name" value="@connectEmployee.EmployeeName" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control border border-secondary p-4" id="email" value="@connectEmployee.Email" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control border border-secondary p-4" id="phone" value="@connectEmployee.PhoneNumber" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Địa chỉ</label>
+                                    <input type="text" class="form-control border border-secondary p-4" id="address" value="@connectEmployee.Address" readonly />
+                                </div>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
+    private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
+    private List<DATN.Shared.Account> filter = new List<DATN.Shared.Account>();
+    private bool isLoaded = false;
+    private string errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        await Load(); // Load all accounts
+        isLoaded = true;
+    }
+
+    private async Task Load()
+    {
+        try
+        {
+            // Retrieve all accounts
+            listAccount = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
+            listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
+            filter = listAccount;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading accounts: {ex.Message}";
+        }
+    }
+
+    private async Task LoadById(int id)
+    {
+        try
+        {
+            // Retrieve account by ID
+            var account = await httpClient.GetFromJsonAsync<DATN.Shared.Account>($"api/Account/GetAccount/{id}");
+            if (account != null)
+            {
+                // If you want to filter by ID or use the account elsewhere
+                listAccount = new List<DATN.Shared.Account> { account };
+                filter = listAccount;
+            }
+            else
+            {
+                errorMessage = $"Account with ID {id} not found.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading account by ID: {ex.Message}";
+        }
+    }
+
+
+}
+
+@* 
+<style>
+    .profile-card {
+        width: 700px; /* Tăng chiều rộng */
+        height: 400px; /* Tăng chiều cao */
+        border-radius: 10px;
+        border: 1px solid #007bff;
+        background-color: #d6d4d4;
+        padding: 20px; /* Tăng padding để tạo khoảng cách */
+    }
+
+    .profile-img {
+        width: 150px; /* Tăng kích thước ảnh đại diện */
+        height: 150px;
+        border-radius: 50%;
+        background-color: #b2a9a9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .profile-img img {
+            width: 80px; /* Tăng kích thước hình bên trong */
+            height: 80px;
+        }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 30px; /* Tăng khoảng cách giữa ảnh và form */
+    }
+
+        .profile-info .form-control {
+            height: 50px; /* Tăng chiều cao của input */
+            margin-bottom: 15px; /* Tăng khoảng cách giữa các trường */
+            border-radius: 25px; /* Làm input bo tròn hơn */
+            font-size: 1.1rem; /* Tăng kích thước chữ */
+        }
+</style>
+
+
+<div class="container-fluid col-md-12 row">
+    <div class="col-md-6 mt-5 d-flex justify-content-center">
+        <form class="profile-card d-flex">
+            <div class="profile-img">
+                <img src="https://via.placeholder.com/60" alt="Avatar">
+            </div>
+            <div class="profile-info flex-grow-1">
+                <input type="text" class="form-control" placeholder="Họ và tên">
+                <input type="text" class="form-control" placeholder="Chức Vụ">
+                <input type="text" class="form-control" placeholder="Email">
+                <input type="text" class="form-control" placeholder="Ngày tạo">
+                <input type="email" class="form-control" placeholder="Số điện thoại">
+                <input type="text" class="form-control" placeholder="Địa chỉ">
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-6 mt-5 d-flex justify-content-center">
+        <form class="profile-card d-flex">
+            <div class="profile-img">
+                <img src="https://via.placeholder.com/60" alt="Avatar">
+            </div>
+            <div class="profile-info flex-grow-1">
+                <input type="text" class="form-control" placeholder="Name">
+                <input type="email" class="form-control" placeholder="Email">
+                <input type="text" class="form-control" placeholder="Phone">
+                <input type="text" class="form-control" placeholder="Address">
+                <input type="text" class="form-control" placeholder="Address">
+                <input type="text" class="form-control" placeholder="Address">
+            </div>
+        </form>
+    </div>
+</div>
+
+ *@

@@ -37,21 +37,41 @@ namespace DATN.Client.Pages
             }
         }
 
-        private async Task DeleteCategory(int categoryId)
+        private async Task HideProd(int categoryId)
         {
             try
             {
                 var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
                 if (category != null)
                 {
-                    await httpClient.DeleteAsync($"api/Category/{categoryId}");
+                    category.IsDelete = true;
+                    await httpClient.PutAsJsonAsync($"api/Category/EditCategory/{categoryId}", category);
                     await LoadCategories();
                     StateHasChanged();
                 }
             }
             catch (Exception ex)
             {
-                errorMessage = $"Error deleting category: {ex.Message}";
+                Console.WriteLine($"Error hiding caterory: {ex.Message}");
+            }
+        }
+
+        private async Task RestoreProd(int categoryId)
+        {
+            try
+            {
+                var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
+                if (category != null)
+                {
+                    category.IsDelete = false;
+                    await httpClient.PutAsJsonAsync($"api/Category/EditCategory/{categoryId}", category);
+                    await LoadCategories();
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
             }
         }
 
@@ -75,3 +95,22 @@ namespace DATN.Client.Pages
 
     }
 }
+
+
+//private async Task DeleteCategory(int categoryId)
+//{
+//    try
+//    {
+//        var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
+//        if (category != null)
+//        {
+//            await httpClient.DeleteAsync($"api/Category/{categoryId}");
+//            await LoadCategories();
+//            StateHasChanged();
+//        }
+//    }
+//    catch (Exception ex)
+//    {
+//        errorMessage = $"Error deleting category: {ex.Message}";
+//    }
+//}

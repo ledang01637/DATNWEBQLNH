@@ -18,7 +18,7 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("GetEmployee")]
-        public List<Employee> GetEmployee()
+        public List<Employee> GetEmployees()
         {
             return _EmployeeService.GetEmployee();
         }
