@@ -1,11 +1,15 @@
+using DATN.Server.Data;
+using DATN.Server.Service;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System;
 
 namespace DATN.Server
 {
@@ -25,6 +29,33 @@ namespace DATN.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddScoped<AccountService>();
+            services.AddScoped<CategoryService>();
+            services.AddScoped<CustomerService>();
+            services.AddScoped<CustomerVoucherService>();
+            services.AddScoped<EmployeeService>();
+            services.AddScoped<EmployeeShifteService>();
+            services.AddScoped<FloorService>();
+            services.AddScoped<MenuItemService>();
+            services.AddScoped<MenuService>();
+            services.AddScoped<OrderItemService>();
+            services.AddScoped<OrderService>();
+            services.AddScoped<ProductService>();
+            services.AddScoped<ReservationService>();
+            services.AddScoped<RewardPointeService>();
+            services.AddScoped<RoleAccountService>();
+            services.AddScoped<RoleService>();
+            services.AddScoped<ShifteService>();
+            services.AddScoped<TableService>();
+            services.AddScoped<UnitService>();
+            services.AddScoped<VoucherService>();
+
+            services.AddDbContext<AppDBContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
+            );
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,8 +76,10 @@ namespace DATN.Server
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {
