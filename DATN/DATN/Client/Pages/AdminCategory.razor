@@ -4,6 +4,20 @@
 @inject NavigationManager Navigation
 
 
+<style>
+    .product-table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+        .product-table-container table {
+            width: 100%;
+        }
+
+    .search-bar, .filter-bar {
+        margin-bottom: 20px;
+    }
+</style>
 
 @if (isLoaded)
 {
@@ -18,8 +32,8 @@
             <thead>
                 <tr>
                     <th>Tên danh mục</th>
-                    <th>CustomerId</th>
-                    <th>Dishs</th>
+                    <th>Ghi chú</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -28,10 +42,16 @@
                     <tr>
                         <td>@cate.CategoryName</td>
                         <td>@cate.CategoryDescription</td>
-                        <td>@cate.IsDelete</td>
-                        <td>
-                            <button class="btn btn-primary" @onclick="() => EditCategory(cate.CategoryId)">Sửa</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteCategory(cate.CategoryId)">Ẩn</button>
+                        <td class="text-center">
+                            @if (!cate.IsDelete)
+                            {
+                                <button class="btn btn-primary" @onclick="() => EditCategory(cate.CategoryId)">Sửa</button>
+                                <button class="btn btn-danger" @onclick="() => HideProd(cate.CategoryId)">Ẩn</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-warning" @onclick="() => RestoreProd(cate.CategoryId)">Khôi phục</button>
+                            }
                         </td>
                     </tr>
                 }
