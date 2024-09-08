@@ -1,0 +1,51 @@
+﻿@page "/adminaccount"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+
+
+@if (isLoaded)
+{
+    <button class="btn btn-success" @onclick="() => CreateAccount()">Thêm</button>
+    <hr />
+    <h4>Quản lý tài khoản</h4>
+    <div class="search-bar">
+        <input type="text" class="form-control" placeholder="Tìm kiếm tài khoản..." @oninput="FilterAccount" />
+    </div>
+    <div class="product-table-container">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Kiểu tài khoản</th>
+                    <th>Phân quyền</th>
+                    <th>active</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var account in filter)
+                {
+                    <tr>
+                        <td>@account.AccountType</td>
+                        <td>@account.RoleAccounts</td>
+                        <td>@account.IsActive</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Sửa</button>
+                            <button class="btn btn-danger" @onclick="() => DeleteAccount(account.AccountId)">Ẩn</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+

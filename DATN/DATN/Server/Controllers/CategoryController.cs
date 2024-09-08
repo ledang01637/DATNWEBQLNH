@@ -34,7 +34,7 @@ namespace DATN.Server.Controllers
             });
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetCategoryById/{id}")]
         public ActionResult<Category> GetId(int id)
         {
             if (id == 0)
@@ -58,7 +58,7 @@ namespace DATN.Server.Controllers
             return Ok(deletedCategory);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("EditCategory/{id}")]
         public IActionResult Update(int id, [FromBody] Category updatedCategory)
         {
             var updatedLoai = _CategoryService.UpdateCategory(id, updatedCategory);
