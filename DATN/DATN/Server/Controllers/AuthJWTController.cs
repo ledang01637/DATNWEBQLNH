@@ -9,6 +9,8 @@ using System.Security.Claims;
 using System.Text;
 using System;
 using System.Linq;
+using DATN.Server.Data;
+using System.Security.Cryptography;
 
 namespace DATN.Server.Controllers
 {
@@ -17,14 +19,13 @@ namespace DATN.Server.Controllers
     public class AuthJWTController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        //private readonly AppDBContext _appDBContext;    
-        private User userLogin = new User();
+        private readonly AppDBContext _appDBContext;
 
-        public AuthJWTController(IConfiguration configuration/* AppDBContext appDBContext,*/)
+        public AuthJWTController(IConfiguration configuration, AppDBContext appDBContext)
         {
             _configuration = configuration;
-            //_appDBContext = appDBContext;
-            
+            _appDBContext = appDBContext;
+
         }
 
         [HttpPost("AuthUser")]
@@ -34,23 +35,32 @@ namespace DATN.Server.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var isSuccess = ValidateUser(loginModel.Email, loginModel.Password);
+            var isSuccess = ValidateUser(loginModel.Username, loginModel.Password);
 
-            //var successLogin = _appDBContext.User
-            //    .FirstOrDefault(x => x.Email == loginModel.Email && isSuccess);
-            var successLogin = liststaticuser.Users
-                .FirstOrDefault(x => x.Email == loginModel.Email && isSuccess);
+            var successLogin = _appDBContext.Accounts
+                .FirstOrDefault(x => x.UserName == loginModel.Username && isSuccess);
 
-            if (successLogin != null)
+            if(successLogin != null)
             {
-                var token = GenerateJwtToken(successLogin);
-                return Ok(new LoginRespone
+                var roleAccount = _appDBContext.RoleAccounts.FirstOrDefault(a => a.Roleid == 3 && a.AccountId == successLogin.AccountId);
+                if (successLogin != null && roleAccount != null)
                 {
-                    SuccsessFull = true,
-                    Token = token
-                });
-            }
-            else
+                    var token = GenerateJwtToken(successLogin, roleAccount);
+                    return Ok(new LoginRespone
+                    {
+                        SuccsessFull = true,
+                        Token = token
+                    });
+                }
+                else
+                {
+                    return Ok(new LoginRespone
+                    {
+                        SuccsessFull = false,
+                        Error = "Tài khoản hoặc mật khẩu không chính xác."
+                    });
+                }
+            }else
             {
                 return Ok(new LoginRespone
                 {
@@ -62,9 +72,9 @@ namespace DATN.Server.Controllers
 
         
 
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(Account account,RoleAccount roleAccount)
         {
-            var jwt = _configuration.GetSection("Jwt").Get<Jwt>();
+            var jwt = _configuration.GetSection("Jwt").Get<JWT>();
 
             var claims = new[]
             {
@@ -72,10 +82,12 @@ namespace DATN.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                 
-                new Claim("Email", user.Email),
-                
-                new Claim("RoleId", user.RoleId.ToString()),
-                new Claim(ClaimTypes.Role, user.RoleId.ToString())
+                new Claim("Username", account.UserName),
+                new Claim("AccountType", account.AccountType),
+                new Claim("CreateDate", account.CreateDate.ToString()),
+                new Claim("UpdateDate", account.UpdateDate.ToString()),
+                new Claim(ClaimTypes.Role, roleAccount.Roleid.ToString())
+
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -91,8 +103,13 @@ namespace DATN.Server.Controllers
         }
         public bool ValidateUser(string username, string password)
         {
-            //var user = _appDBContext.User.FirstOrDefault(u => u.Email == username);
-            var user = liststaticuser.Users.FirstOrDefault(x => x.Email == username && x.Password == password); 
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashedBytes = sha1.ComputeHash(passwordBytes);
+                password = Convert.ToBase64String(hashedBytes);
+            }
+            var user = _appDBContext.Accounts.FirstOrDefault(u => u.UserName.Equals(username) && u.Password.Equals(password));
             if (user == null)
                 return false;
             else
