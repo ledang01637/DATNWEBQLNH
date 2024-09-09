@@ -12,7 +12,7 @@ namespace DATN.Shared
         [Key]
         public int CategoryId { get; set; }
         public string CategoryName { get; set; }
-        public string? CategoryDescription { get; set; }
+        public string CategoryDescription { get; set; }
         public bool IsDelete { get; set; }
 
         public ICollection<Product> Products { get; set; }
