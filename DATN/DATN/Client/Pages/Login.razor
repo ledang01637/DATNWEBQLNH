@@ -49,8 +49,8 @@
            
 
             <div class="mb-3">
-                <InputText class="form-control" placeholder="Email" @bind-Value="loginUser.Email" />
-                <ValidationMessage For="@(() => loginUser.Email)" />
+                <InputText class="form-control" placeholder="Username" @bind-Value="loginUser.Username" />
+                <ValidationMessage For="@(() => loginUser.Username)" />
             </div>
             <div class="mb-3">
                 <InputText type="password" class="form-control" placeholder="Mật khẩu" @bind-Value="loginUser.Password" />
@@ -65,7 +65,7 @@
             <div class="alert alert-danger mt-3">Email hoặc mật khẩu không chính xác.</div>
         }
     </div>
-
+@* 
     @if (loggedInUser != null)
     {
         <div class="mt-4 login-card">
@@ -83,35 +83,8 @@
                 <button type="submit" class="btn btn-primary-custom">Đổi mật khẩu</button>
             </EditForm>         
         </div>
-    }
+    } *@
     
-
-    <div class="mt-4">
-        <h5 class="text-center">Dữ liệu người dùng</h5>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Tên người dùng</th>
-                    <th>Email</th>
-                    <th>Ngày tạo</th>
-                    <th>Mật khẩu</th>
-                    <th>Kiểu tài khoản</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Users)
-                {
-                    <tr>
-                        <td>@user.Username</td>
-                        <td>@user.Email</td>
-                        <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
-                        <td>@user.Password</td>
-                        <td>@user.AccountType</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
 
     <!-- Modal thông báo thành công -->
     <div class="modal fade" tabindex="-1" role="dialog" id="successModal">
@@ -127,7 +100,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function showModal(modalId) {
             var modal = new bootstrap.Modal(document.getElementById(modalId));
@@ -161,7 +133,3 @@
         }
     </script>
 </body>
-@code{
-    
-    private PasswordChangeModel passwordChangeModel = new PasswordChangeModel();
-}

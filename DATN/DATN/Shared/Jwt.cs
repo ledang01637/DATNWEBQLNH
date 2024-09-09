@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DATN.Shared
 {
-    public class Jwt
+    public class JWT
     {
         public string Key { get; set; }
         public string Issuer { get; set; }
