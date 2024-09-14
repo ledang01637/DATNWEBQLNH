@@ -1,12 +1,11 @@
 ﻿@page "/customer"
-@inject IJSRuntime Js
+@inject IJSRuntime JS
+@inject LocalStorageService _localStorageService
 <style>
     #video-container {
         position: relative;
         margin: auto;
         width: 640px;
-        height: 360px;
-        background-color: #000;
     }
 
     #localVideo {
@@ -73,25 +72,3 @@
         </div>
     </div>
 </div>
-@code {
-    private string token = "eyJjdHkiOiJzdHJpbmdlZS1hcGk7dj0xIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJqdGkiOiJTSy4wLjZoSHpGNDlFTHlQMDlUc0Q4VTAwbENERlhEMTdQeS0xNzI1NTEyMjgwIiwiaXNzIjoiU0suMC42aEh6RjQ5RUx5UDA5VHNEOFUwMGxDREZYRDE3UHkiLCJleHAiOjE3MjU1OTg2ODAsInVzZXJJZCI6ImN1c3RvbWVyIn0.BmHiRqlSgIk6L1YGjHIEuyqlOYUwRBZmbBuZAePvJW0";
-    private string callerId = "customer";
-    private string calleeId = "manager";
-    private async Task SetupCall()
-    {
-        await Js.InvokeVoidAsync("setupCall", token, callerId, calleeId);
-    }
-    private async Task setupVideo()
-    {
-        await Js.InvokeVoidAsync("setupVideo", "answerCallButton", "callButton", "remoteVideo", "localVideo");
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await SetupCall();
-            await setupVideo();
-        }
-    }
-}

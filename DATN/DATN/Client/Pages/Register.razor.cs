@@ -57,6 +57,7 @@ namespace DATN.Client.Pages
                 account.CreateDate = DateTime.Now;
                 account.IsActive = true;
                 account.AccountType = "Customer";
+                account.UserName = account.UserName.ToLower();
 
                 var response = await httpClient.PostAsJsonAsync("api/Account/AddAccount", account);
                 if (response.IsSuccessStatusCode)
