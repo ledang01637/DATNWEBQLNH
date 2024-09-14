@@ -34,10 +34,10 @@
             text: "Chúc mừng bạn đã đăng ký thành công",
             icon: "success",
         });
-    } else if (status === "AddOrder") {
+    } else if (status === "NotLogin") {
         Swal.fire({
-            title: "Đặt hàng thành công",
-            icon: "success",
+            title: "Vui lòng đăng nhập",
+            icon: "error",
         });
     } else if (status === "success") {
         Swal.fire({
@@ -79,4 +79,8 @@
             icon: "error",
         });
     }
+}
+function showModal(modalId) {
+    var modal = new bootstrap.Modal(document.getElementById(modalId));
+    modal.show();
 }

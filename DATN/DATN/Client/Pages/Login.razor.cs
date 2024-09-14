@@ -5,6 +5,9 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DATN.Shared;
 using System.Net.Http;
+using System.Text.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 
 
 
@@ -17,28 +20,70 @@ namespace DATN.Client.Pages
         private bool loginFailed = false;
         private string currentPassword = string.Empty;
         private string confirmNewPassword = string.Empty;
+        private string Token = "";
 
-
-        private async Task HandleValidSubmit()
+        private async Task HandleLogin()
         {
             var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
-
             if (response.IsSuccessStatusCode)
             {
-                // Đăng nhập thành công
-                loginFailed = false;
-                await JS.InvokeVoidAsync("showAlert", "True");
+                try
+                {
+                    var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
+                    if (loginResponse != null && loginResponse.SuccsessFull)
+                    {
+                        Token = loginResponse.Token;
+                        var handler = new JwtSecurityTokenHandler();
+                        var jsonToken = handler.ReadToken(Token) as JwtSecurityToken;
+                        var Username = jsonToken.Claims.FirstOrDefault(c => c.Type == "Username")?.Value;
+                        var isActive = jsonToken.Claims.FirstOrDefault(c => c.Type == "IsActive")?.Value;
+                        var roleId = jsonToken.Claims.FirstOrDefault(c => c.Type == "RoleId")?.Value;
+                        bool isActiveBool = false;
 
+                        if (!string.IsNullOrEmpty(isActive))
+                        {
+                            bool.TryParse(isActive, out isActiveBool);
+                        }
+
+                        if (!isActiveBool)
+                        {
+                            await JS.InvokeVoidAsync("showAlert", "Block");
+                            await Task.Delay(1000);
+                            Navigation.NavigateTo("/");
+                            return;
+                        }
+                        var expiryTime = DateTime.Now.AddMinutes(30).ToString("o");
+                        await _localStorageService.SetItemAsync("authToken", Token);
+                        await _localStorageService.SetItemAsync("userName", Username);
+                        await _localStorageService.SetItemAsync("expiryTime", expiryTime);
+                        await JS.InvokeVoidAsync("showAlert", "True");
+                        if (int.Parse(roleId) == 3)
+                        {
+                            Navigation.NavigateTo("/customer", true);
+                        }
+                        else
+                        {
+                            Navigation.NavigateTo("/manager", true);
+                        }
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "False");
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    var query = $"[C#] fix error: {ex.Message}";
+                    await JS.InvokeVoidAsync("openChatGPT", query);
+                    Token = $"JSON parse error: {ex.Message}";
+                }
             }
             else
             {
-                // Đăng nhập thất bại
-                loginFailed = true;
-                await JS.InvokeVoidAsync("showAlert", "False");
+                Token = "Server error or invalid request.";
             }
         }
 
-        
 
 
         private async Task HandlePasswordChange()

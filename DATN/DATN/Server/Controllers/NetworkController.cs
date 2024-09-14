@@ -20,7 +20,7 @@ namespace DATN.Server.Controllers
             {
                 return Ok(ipAddress);
             }
-            return NotFound("Wi-Fi IP Address not found.");
+            return Ok("Wi-Fi IP Address not found.");
         }
     }
 }
