@@ -1,0 +1,19 @@
+﻿@page "/logout"
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService;
+
+<h3>Logouting...</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+
+        await _localStorageService.RemoveItemAsync("authToken");
+        await _localStorageService.RemoveItemAsync("expiryTime");
+        await _localStorageService.RemoveItemAsync("userName");
+        await _localStorageService.RemoveItemAsync("userRoleId");
+
+        Navigation.NavigateTo("/login", true);
+    }
+}
