@@ -85,7 +85,6 @@ namespace DATN.Client.Pages
         }
 
 
-
         private async Task HandlePasswordChange()
         {
             //if (loggedInUser == null)
