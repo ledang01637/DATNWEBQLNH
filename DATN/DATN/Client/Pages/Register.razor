@@ -51,6 +51,13 @@
             <InputText type="password" class="form-control" placeholder="Mật khẩu" @bind-Value="account.Password" />
             <ValidationMessage For="@(() => account.Password)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
         </div>
+        <div class="mb-4 position-relative">
+            <InputSelect class="form-control" placeholder="Quyền" @bind-Value="account.AccountType">
+                <option value="Employee">Employee</option>
+                <option value="Customer">Customer</option>
+            </InputSelect>
+
+        </div>
         <button type="submit" class="btn btn-primary-custom">Tôi đang rất đói!</button>
     </EditForm>
 </div>
