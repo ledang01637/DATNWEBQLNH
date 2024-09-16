@@ -11,6 +11,9 @@ using System;
 using System.Linq;
 using DATN.Server.Data;
 using System.Security.Cryptography;
+using System.Security.Policy;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace DATN.Server.Controllers
 {
@@ -50,7 +53,7 @@ namespace DATN.Server.Controllers
                 });
             }
 
-            if(successLogin != null && !successLogin.UserName.Equals("Customer"))
+            if (successLogin != null && !successLogin.UserName.Equals("Customer"))
             {
                 var roles = _appDBContext.Roles.ToList();
                 var roleAccount = _appDBContext.RoleAccounts
@@ -75,7 +78,8 @@ namespace DATN.Server.Controllers
                         Error = "Lỗi quyền truy cập"
                     });
                 }
-            }else
+            }
+            else
             {
                 return Ok(new LoginRespone
                 {
@@ -85,9 +89,9 @@ namespace DATN.Server.Controllers
             }
         }
 
-        
 
-        private string GenerateJwtToken(Account account,RoleAccount roleAccount)
+
+        private string GenerateJwtToken(Account account, RoleAccount roleAccount)
         {
             var jwt = _configuration.GetSection("Jwt").Get<JWT>();
 
@@ -96,12 +100,11 @@ namespace DATN.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, jwt.Subject),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                
+
                 new Claim("Username", account.UserName),
                 new Claim("AccountType", account.AccountType),
                 new Claim("CreateDate", account.CreateDate.ToString()),
                 new Claim("UpdateDate", account.UpdateDate.ToString()),
-                new Claim("IsActive", account.IsActive.ToString()),
 
                 new Claim("RoleId", roleAccount.Roleid.ToString()),
                 new Claim(ClaimTypes.Role, roleAccount.Roleid.ToString())
@@ -146,7 +149,66 @@ namespace DATN.Server.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        //JWT table
+        [HttpPost]
+        [Route("GenerateQrToken")]
+        public IActionResult GenerateQrToken(QR qr)
+        {
+            var token = GenerateJwtTokenV3(qr.NumberTable);
+            return Ok(new LoginRespone
+            {
+                Token = token
+            });
+        }
 
+        private string GenerateJwtTokenV3(int numberTable)
+        {
+            var jwt = _configuration.GetSection("Jwt").Get<JWT>();
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, jwt.Subject),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+
+                new Claim("tableNumber", numberTable.ToString()),
+                new Claim(ClaimTypes.Role, "Customer")
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                jwt.Issuer,
+                jwt.Audience,
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(60),
+                signingCredentials: signIn
+            );
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
+        //[HttpPost("TableInfo")]
+        //public async Task<IActionResult> TableInfo(QRResponse Token)
+        //{
+        //    var handler = new JwtSecurityTokenHandler();
+        //    var jwtToken = handler.ReadToken(Token.Token) as JwtSecurityToken;
+
+        //    var numberTableClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == "tableNumber")?.Value;
+
+        //    if (numberTableClaim != null)
+        //    {
+        //        var tableInfo = await _appDBContext.Tables.FirstOrDefaultAsync(a => a.TableNumber == int.Parse(numberTableClaim));
+        //        if (tableInfo != null)
+        //        {
+        //            return Ok(tableInfo);
+        //        }
+        //    }
+
+        //    return BadRequest("Invalid token or table number.");
+        //}
+
+        //
         public bool ValidateUser(string username, string password)
         {
             using (SHA1 sha1 = SHA1.Create())
@@ -161,7 +223,7 @@ namespace DATN.Server.Controllers
             else
             {
                 return true;
-            }  
+            }
         }
 
     }
