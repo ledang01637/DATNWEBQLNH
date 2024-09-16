@@ -67,12 +67,12 @@
             title: "Cập nhật thông tin thành công",
             icon: "success",
         });
-    } else if (status === "ProductSuccess") {
+    } else if (status === "TableSuccess") {
         Swal.fire({
             title: "Thành công",
             icon: "success",
         });
-    } else if (status === "ProductFail") {
+    } else if (status === "TableFail") {
         Swal.fire({
             title: "Thất bại",
             text: "Sản phẩm đã tồn tại",
