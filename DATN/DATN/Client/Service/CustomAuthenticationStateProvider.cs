@@ -44,5 +44,6 @@ namespace DATN.Client.Service
             var roleClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
             return Task.FromResult(roleClaim?.Value ?? string.Empty);
         }
+
     }
 }

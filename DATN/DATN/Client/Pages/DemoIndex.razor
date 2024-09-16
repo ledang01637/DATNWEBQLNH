@@ -1,0 +1,18 @@
+﻿@page "/demoIndex"
+@inject NavigationManager Navigation
+@inject HttpClient httpClient
+
+
+<h3>Thông tin bàn</h3
+
+@if (table != null)
+{
+    <h3>Số bàn: @table.TableNumber</h3>
+    <h3>Trạng thái: @table.Status</h3>
+    <h3>Sức chứa: @table.SeatingCapacity</h3>
+    <h3>Vị trí: @table.Position</h3>
+}
+else
+{
+    <p>Không có số bàn hợp lệ.</p>
+}

@@ -1,0 +1,56 @@
+﻿@page "/genQR"
+@inject IJSRuntime JS
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+<h3>GenerateQR</h3>
+
+<EditForm Model="@qrModel">
+    <DataAnnotationsValidator />
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="tableNumber" class="form-label">URL:</label>
+            <InputText @bind-Value="qrModel.Url" class="form-control" min="1" id="tableNumber" name="tableNumber" />
+        </div>
+        <div class="form-group">
+            <label for="numberTable" class="form-label">Số bàn</label>
+            <InputSelect class="form-control" @bind-Value="qrModel.NumberTable" id="numberTable" name="numberTable">
+                @{
+                    <option value="1" disabled selected>Chọn số bàn</option>
+                    foreach(var item in tables)
+                    {
+                        <option value="@item.TableNumber">@item.TableNumber</option>
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => qrModel.NumberTable)" />
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" @onclick="GenerateQrCode" class="btn btn-success">Tạo</button>
+    </div>
+</EditForm>
+
+<div class="mb-3">
+    <div id="qrcode"></div>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <td>TableNumber</td>
+            <td>Position</td>
+            <td>Trạng thái</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var table in tables)
+        {
+            <tr>
+                <td>@table.TableNumber</td>
+                <td>@table.Position</td>
+                <td>@table.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
