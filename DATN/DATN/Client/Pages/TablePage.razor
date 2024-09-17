@@ -18,6 +18,7 @@
 
     .grid-item {
         cursor: move;
+        height: auto;
     }
 
     .floor {
@@ -31,7 +32,8 @@
     }
 
 </style>
-@* <div class="container my-4">
+
+<div class="container my-4">
     <h1 class="text-center">Floor Management</h1>
     <div class="btn-create mb-2">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateModel">Thêm mới bàn</button>
@@ -45,7 +47,7 @@
     {
         @foreach (var floor in floors)
         {
-            <div class="mb-2">
+            <div class="floor">
                 <h3>Floor @floor.NumberFloor</h3>
                 <div id="sortable-floor-@floor.FloorId" class="sortable">
                     @foreach (var table in tables.Where(t => t.FloorId == floor.FloorId))
@@ -63,13 +65,15 @@
                                         </div>
                                     </div>
                                     <button class="btn text-primary content-btn content-btn-edit"
-                                            @onclick="() => LoadTableForEdit(table.TableId)">
+                                            @onclick="() => LoadTableForEdit(table.TableId)"
+                                            data-bs-toggle="modal" data-bs-target="#UpdateModel">
                                         <i class="far fa-edit"></i>
                                     </button>
-                                    <button class="btn text-danger content-btn content-btn-trash" 
+                                    <button class="btn text-danger content-btn content-btn-trash"
                                             @onclick="() => LoadTableForEdit(table.TableId)"
-                                            data-bs-toggle="modal" data-bs-target="#DeleteModel">
-                                            <i class="fas fa-trash"></i></button>
+                                            data-bs-toggle="modal" data-bs-target="#ConfirmDeleteModal">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -78,71 +82,10 @@
             </div>
         }
     }
-    <EditForm Model="@tableModel" OnValidSubmit="UpdateTable">
-        <DataAnnotationsValidator />
-        <div class="modal-body">
-            <div class="form-group">
-                <label for="tableNumber" class="form-label">Số bàn:</label>
-                <InputNumber class="form-control" min="1" @bind-Value="tableModel.TableNumber" id="tableNumber" name="tableNumber" />
-                <ValidationMessage For="@(() => tableModel.TableNumber)" />
-            </div>
-            <div class="form-group">
-                <label for="raw" class="form-label">Chọn hàng</label>
-                <InputSelect class="form-control" @onchange="OnRawChange" @bind-Value="row" id="raw" name="raw">
-                    <option value="" disabled selected>Chọn hàng</option>
-                    @for (int i = 0; i < rowCount; i++)
-                    {
-                        <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="form-group">
-                <label for="column" class="form-label">Chọn cột</label>
-                <InputSelect class="form-control" @onchange="OnColumnChange" @bind-Value="column" id="column" name="column">
-                    <option value="" disabled selected>Chọn cột</option>
-                    @for (int i = 0; i <= 5; i++)
-                    {
-                        <option value="Cột @(i + 1)">Cột @(i + 1)</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="form-group">
-                <label for="Status" class="form-label">Trạng thái</label>
-                <InputSelect class="form-control" @bind-Value="tableModel.Status" id="Status" name="Status">
-                    @{
-                        <option value="" disabled selected>Chọn trạng thái</option>
-                        <option value="Bàn trống">Bàn trống</option>
-                        <option value="Đã đặt">Đã đặt</option>
-                        <option value="Đang dùng">Đang dùng</option>
+</div>
 
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => tableModel.FloorId)" />
-            </div>
-            <div class="form-group">
-                <label for="seatingCapacity" class="form-label">Sức chứa</label>
-                <InputNumber class="form-control" min="1" @bind-Value="tableModel.SeatingCapacity" id="seatingCapacity" name="seatingCapacity" />
-                <ValidationMessage For="@(() => tableModel.SeatingCapacity)" />
-            </div>
-            <div class="form-group">
-                <label for="FloorId" class="form-label">Số tầng:</label>
-                <InputSelect @onchange="OnFloorChanged" class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
-                    @{
-                        <option value="" disabled selected>Chọn tầng</option>
-                        foreach (var floor in floors)
-                        {
-                            <option value="@floor.FloorId">@floor.NumberFloor</option>
-                        }
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => tableModel.FloorId)" />
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Cập nhật</button>
-        </div>
-    </EditForm>
-</div> *@
+
+
 
 
 @* AddTable *@
@@ -162,11 +105,17 @@
                     </div>
                     <div class="form-group">
                         <label for="raw" class="form-label">Chọn hàng</label>
-                        <InputSelect class="form-control" @onchange="OnRawChange" @bind-Value="row" id="row" name="row">
+                        <InputSelect class="form-control" @onchange="OnRawChange" @bind-Value="row" id="raw" name="raw">
                             <option value="" disabled selected>Chọn hàng</option>
-                            @for (int i = 0; i < rowCount; i++)
-                            {
-                                <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
+                            @{
+                                if (tables.Count() % 6 == 0)
+                                {
+                                    rowCount += 1;
+                                }
+                                for (int i = 0; i < rowCount; i++)
+                                {
+                                    <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
+                                }
                             }
                         </InputSelect>
                     </div>
@@ -216,7 +165,76 @@
                 <h5 class="modal-title" id="UpdateModelLabel">Sửa sản phẩm</h5>
                 <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
+            <EditForm Model="@tableModel" OnValidSubmit="UpdateTable">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="tableNumber" class="form-label">Số bàn:</label>
+                        <InputNumber class="form-control" min="1" @bind-Value="tableModel.TableNumber" id="tableNumber" name="tableNumber" />
+                        <ValidationMessage For="@(() => tableModel.TableNumber)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="raw" class="form-label">Chọn hàng</label>
+                        <InputSelect class="form-control" @onchange="OnRawChange" @bind-Value="row" id="raw" name="raw">
+                            <option value="" disabled selected>Chọn hàng</option>
+                            @{
+                                if (tables.Count() % 6 == 0)
+                                {
+                                    rowCount += 1;  
+                                }
+                                for (int i = 0; i < rowCount; i++)
+                                {
+                                    <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
+                                }
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label for="column" class="form-label">Chọn cột</label>
+                        <InputSelect class="form-control" @onchange="OnColumnChange" @bind-Value="column" id="column" name="column">
+                            <option value="" disabled selected>Chọn cột</option>
+                            @for (int i = 0; i <= 5; i++)
+                            {
+                                <option value="Cột @(i + 1)">Cột @(i + 1)</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label for="Status" class="form-label">Trạng thái</label>
+                        <InputSelect class="form-control" @bind-Value="tableModel.Status" id="Status" name="Status">
+                            @{
+                                <option value="" disabled selected>Chọn trạng thái</option>
+                                <option value="Bàn trống">Bàn trống</option>
+                                <option value="Đã đặt">Đã đặt</option>
+                                <option value="Đang dùng">Đang dùng</option>
+
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => tableModel.FloorId)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="seatingCapacity" class="form-label">Sức chứa</label>
+                        <InputNumber class="form-control" min="1" @bind-Value="tableModel.SeatingCapacity" id="seatingCapacity" name="seatingCapacity" />
+                        <ValidationMessage For="@(() => tableModel.SeatingCapacity)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="FloorId" class="form-label">Số tầng:</label>
+                        <InputSelect @onchange="OnFloorChanged" class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
+                            @{
+                                <option value="" disabled selected>Chọn tầng</option>
+                                foreach (var floor in floors)
+                                {
+                                    <option value="@floor.FloorId">@floor.NumberFloor</option>
+                                }
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => tableModel.FloorId)" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Cập nhật</button>
+                </div>
+            </EditForm>
         </div> 
     </div>
 </div>
@@ -229,7 +247,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Bạn có chắc chắn muốn xóa sản phẩm này không?
+                Bạn có chắc chắn muốn xóa cái bàn này không?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>

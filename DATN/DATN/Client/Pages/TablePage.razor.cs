@@ -32,6 +32,7 @@ namespace DATN.Client.Pages
                 tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
                 if(tables.Count > 0)
                 {
+                    tables = tables.Where(a => a.IsDeleted.Equals(false)).ToList();
                     rowCount = (int)Math.Ceiling((double)tables.Count / 6);
                 }
                 floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
@@ -62,6 +63,7 @@ namespace DATN.Client.Pages
                 {
                     await JS.InvokeVoidAsync("showAlert", "TableSuccess");
                     await LoadAll();
+                    StateHasChanged();
                 }
                 else
                 {
@@ -117,6 +119,7 @@ namespace DATN.Client.Pages
         {
             try
             {
+                await JS.InvokeVoidAsync("closeModal", "ConfirmDeleteModal");
                 tableModel.IsDeleted = true;
                 tableModel.Position = $"{row} - {column}";
                 var response = await httpClient.PutAsJsonAsync($"api/Table/{selectTableId}", tableModel);
