@@ -25,10 +25,16 @@ namespace DATN.Client.Service
             if (inCart != null)
             {
                 inCart.Quantity += quantity;
+                await SaveCartAsync(cart);
+            }
+            else
+            {
+                item.Quantity = quantity;
+                cart.Add(item);
+                await SaveCartAsync(cart);
             }
 
-            cart.Add(item);
-            await SaveCartAsync(cart);
+            
         }
         public async Task RemoveItemFromCartAsync(Cart item)
         {

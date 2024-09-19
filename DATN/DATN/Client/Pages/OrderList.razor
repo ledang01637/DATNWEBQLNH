@@ -19,75 +19,45 @@
 </nav>
 <div class="container mt-4">
     <h4 style="text-align: center;">Danh sách gọi món</h4>
-    <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
-        <div class="row">
-            <div class="col-3">
-                <img src="images/hinhanh/menu_photo_2.jpeg" class="img-fluid rounded" alt="Chicken Burger">
-            </div>
-            <div class="col-7">
-                <div class="card-body p-2">
-                    <h5 class="card-title mb-1">Chicken Burger</h5>
-                    <p class="text-muted mb-1">Burger Factory LTD</p>
-                    <p class="price text-danger mb-1">120.000 VND</p>
-                    <p class="mb-0">Số lượng: 2</p>
+    @if(cartItems == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        @foreach(var item in cartItems)
+        {
+            <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
+                <div class="row">
+                    <div class="col-3">
+                        <img src="images/hinhanh/menu_photo_2.jpeg" class="img-fluid rounded" alt="Chicken Burger">
+                    </div>
+                    <div class="col-7">
+                        <div class="card-body p-2">
+                            <h5 class="card-title mb-1">@item.ProductName</h5>
+                            <p class="text-muted mb-1">Burger Factory LTD</p>
+                            <p class="price text-danger mb-1">@item.Price.ToString("###,0##") VND</p>
+                            <p class="mb-0">Số lượng: @item.Quantity</p>
+                        </div>
+                    </div>
+                    <div class="col-2 d-flex align-items-center">
+                        <a @onclick="() => RemoveFromCart(item)" class="w-100 h-25 btn-warning rounded d-flex justify-content-center align-items-center">
+                            <i class="fa-solid fa-trash" style="color:#ed1f1f"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="col-2 d-flex align-items-center">
-                <a href="#" class="w-100 h-25 btn-warning rounded d-flex justify-content-center align-items-center">
-                    <i class="fa-solid fa-trash" style="color:#ed1f1f"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
-        <div class="row">
-            <div class="col-3">
-                <img src="images/hinhanh/menu_photo_2.jpeg" class="img-fluid rounded" alt="Chicken Burger">
-            </div>
-            <div class="col-7">
-                <div class="card-body p-2">
-                    <h5 class="card-title mb-1">Chicken Burger</h5>
-                    <p class="text-muted mb-1">Burger Factory LTD</p>
-                    <p class="price text-danger mb-1">120.000 VND</p>
-                    <p class="mb-0">Số lượng: 2</p>
-                </div>
-            </div>
-            <div class="col-2 d-flex align-items-center">
-                <a href="#" class="w-100 h-25 btn-warning rounded d-flex justify-content-center align-items-center">
-                    <i class="fa-solid fa-trash" style="color:#ed1f1f"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
-        <div class="row">
-            <div class="col-3">
-                <img src="images/hinhanh/menu_photo_2.jpeg" class="img-fluid rounded" alt="Chicken Burger">
-            </div>
-            <div class="col-7">
-                <div class="card-body p-2">
-                    <h5 class="card-title mb-1">Chicken Burger</h5>
-                    <p class="text-muted mb-1">Burger Factory LTD</p>
-                    <p class="price text-danger mb-1">120.000 VND</p>
-                    <p class="mb-0">Số lượng: 2</p>
-                </div>
-            </div>
-            <div class="col-2 d-flex align-items-center">
-                <a href="#" class="w-100 h-25 btn-warning rounded d-flex justify-content-center align-items-center">
-                    <i class="fa-solid fa-trash" style="color:#ed1f1f"></i>
-                </a>
-            </div>
-        </div>
-    </div>
+        }
+        
+    }
+ 
 
     <div class="total-section">
         <div class="d-flex justify-content-between">
             <p class="mb-0">Tổng tiền</p>
-            <p class="mb-0"><strong>120.000 VND</strong></p>
+            <p class="mb-0"><strong>@Total.ToString("###,0##") VND</strong></p>
         </div>
-        <button type="button" class="btn btn-warning w-100 mt-2">
+        <button @onclick="Order" type="button" class="btn btn-warning w-100 mt-2">
             Gọi món ăn
         </button>
     </div>

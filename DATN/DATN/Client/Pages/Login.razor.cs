@@ -47,7 +47,7 @@ namespace DATN.Client.Pages
 
                         if (!isActiveBool)
                         {
-                            await JS.InvokeVoidAsync("showAlert", "Block");
+                            await JS.InvokeVoidAsync("showAlert", "warning","Tài khoản bị khóa","Vui lòng liên hệ Admin");
                             await Task.Delay(1000);
                             Navigation.NavigateTo("/");
                             return;
@@ -56,7 +56,7 @@ namespace DATN.Client.Pages
                         await _localStorageService.SetItemAsync("authToken", Token);
                         await _localStorageService.SetItemAsync("userName", Username);
                         await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                        await JS.InvokeVoidAsync("showAlert", "True");
+                        await JS.InvokeVoidAsync("showAlert", "success","Đăng nhập thành công","");
                         if (int.Parse(roleId) == 3)
                         {
                             Navigation.NavigateTo("/customer", true);

@@ -15,6 +15,21 @@ function checkTokenExpiry() {
     }
 }
 
+function checkCartExpiry() {
+    const token = localStorage.getItem('historyOrder');
+    const expiryTime = localStorage.getItem('cartExpiryTime');
+
+    if (!token || !expiryTime) {
+        return;
+    }
+
+    const currentTime = new Date().toISOString();
+    if (new Date(currentTime) > new Date(expiryTime)) {
+        localStorage.removeItem('historyOrder');
+        localStorage.removeItem('cartExpiryTime');
+    }
+}
+
 function checkTokenExpiry() {
     const token = localStorage.getItem('authToken');
     const expiryTime = localStorage.getItem('expiryTime');

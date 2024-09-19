@@ -50,7 +50,7 @@ namespace DATN.Client.Pages
                 var existingTable = tables.FirstOrDefault(r => r.TableNumber == tableModel.TableNumber);
                 if (existingTable != null)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "TableFail");
+                    await JS.InvokeVoidAsync("showAlert", "error","Lỗi","Số bàn đã tồn tại");
                     await Task.Delay(1000);
                     return;
                 }
@@ -61,7 +61,7 @@ namespace DATN.Client.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "TableSuccess");
+                    await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
                     await LoadAll();
                     StateHasChanged();
                 }

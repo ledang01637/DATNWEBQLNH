@@ -1,9 +1,11 @@
 ﻿@page "/demoIndex"
+@using DATN.Client.Service
 @inject NavigationManager Navigation
 @inject HttpClient httpClient
+@inject CartService _cartService
 
 
-<h3>Thông tin bàn</h3
+<h3>Thông tin bàn</h3>
 
 @if (table != null)
 {
@@ -16,18 +18,30 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <td>Ảnh</td>
+                <td>ID</td>
                 <td>Tên</td>
                 <td>Giá</td>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>Ảnh</td>
-                <td>Tên</td>
-                <td>Giá</td>
-            </tr>
-        </tbody>
+        @if(products == null)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            @foreach(var item in products)
+            {
+                <tbody>
+                    <tr>
+                        <td>@item.ProductId</td>
+                        <td>@item.ProductName</td>
+                        <td>@item.Price</td>
+                        <button class="btn btn-outline-light" @onclick="() => AddToCart(item)" >Mua</button>
+                    </tr>
+                </tbody>
+            }
+        }
+
     </table>
 }
 else

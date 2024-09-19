@@ -45,7 +45,7 @@ namespace DATN.Client.Pages
                 if (exitsUsername != null)
                 {
 
-                    await JS.InvokeVoidAsync("showAlert", "Username đã tồn tại");
+                    await JS.InvokeVoidAsync("showAlert", "error","Username đã tồn tại","");
                     return;
                 }
                 using (SHA1 sha1 = SHA1.Create())
@@ -74,7 +74,7 @@ namespace DATN.Client.Pages
 
                         if(responseRoleAccount != null)
                         {
-                            await JS.InvokeVoidAsync("showAlert", "Register");
+                            await JS.InvokeVoidAsync("showAlert", "success","Đăng ký thành công","");
                         }
                     }
                 }
