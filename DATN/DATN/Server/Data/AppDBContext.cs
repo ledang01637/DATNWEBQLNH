@@ -9,6 +9,9 @@ namespace DATN.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Order>().Property(c => c.TotalAmount).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<OrderItem>().Property(d => d.Price).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Product>().Property(f => f.Price).HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<Account>().HasKey(b => b.AccountId);
             modelBuilder.Entity<Menu>().HasKey(c => c.MenuId);
