@@ -13,7 +13,9 @@ namespace DATN.Client.Pages
 {
     public partial class AdminAccount
     {
-        private List<DATN.Shared.Account> list = new List<DATN.Shared.Account>();
+        private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
+        private List<DATN.Shared.Customer> listCustomer = new List<DATN.Shared.Customer>();
+        private List<DATN.Shared.RewardPointe> listRewardPointe = new List<DATN.Shared.RewardPointe>();
         private List<DATN.Shared.Account> filter = new List<DATN.Shared.Account>();
         private bool isLoaded = false;
         private string errorMessage;
@@ -28,8 +30,10 @@ namespace DATN.Client.Pages
         {
             try
             {
-                list = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
-                filter = list;
+                listAccount = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
+                listCustomer = await httpClient.GetFromJsonAsync<List<DATN.Shared.Customer>>("api/Customer/GetCustomer");
+                listRewardPointe = await httpClient.GetFromJsonAsync<List<DATN.Shared.RewardPointe>>("api/RewardPointe/GetRewardPointe");
+                filter = listAccount;
             }
             catch (Exception ex)
             {
@@ -41,7 +45,7 @@ namespace DATN.Client.Pages
         {
             try
             {
-                var account = list.FirstOrDefault(p => p.AccountId == accountId);
+                var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
                 if (account != null)
                 {
                     await httpClient.DeleteAsync($"api/Account/{accountId}");
@@ -69,8 +73,8 @@ namespace DATN.Client.Pages
         {
             var searchTerm = e.Value.ToString().ToLower();
             filter = string.IsNullOrWhiteSpace(searchTerm)
-                ? list
-                : list.Where(p => p.AccountType.ToLower().Contains(searchTerm)).ToList();
+                ? listAccount
+                : listAccount.Where(p => p.AccountType.ToLower().Contains(searchTerm)).ToList();
         }
 
     }

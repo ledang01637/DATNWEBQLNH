@@ -99,20 +99,3 @@ namespace DATN.Client.Pages
 }
 
 
-//private async Task DeleteCategory(int categoryId)
-//{
-//    try
-//    {
-//        var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
-//        if (category != null)
-//        {
-//            await httpClient.DeleteAsync($"api/Category/{categoryId}");
-//            await LoadCategories();
-//            StateHasChanged();
-//        }
-//    }
-//    catch (Exception ex)
-//    {
-//        errorMessage = $"Error deleting category: {ex.Message}";
-//    }
-//}
