@@ -50,10 +50,5 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("generateQrCode", urlCode);
             }
         }
-
-        private void OnNumberChange(ChangeEventArgs e)
-        {
-            qrModel.NumberTable = int.Parse(e.Value.ToString());
-        }
     }
 }

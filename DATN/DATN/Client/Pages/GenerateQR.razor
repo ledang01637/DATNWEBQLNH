@@ -15,7 +15,7 @@
             <label for="numberTable" class="form-label">Số bàn</label>
             <InputSelect class="form-control" @bind-Value="qrModel.NumberTable" id="numberTable" name="numberTable">
                 @{
-                    <option value="1" disabled selected>Chọn số bàn</option>
+                    <option value="0" disabled selected>Chọn số bàn</option>
                     foreach(var item in tables)
                     {
                         <option value="@item.TableNumber">@item.TableNumber</option>
