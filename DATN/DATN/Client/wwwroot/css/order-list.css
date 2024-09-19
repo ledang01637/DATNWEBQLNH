@@ -1,0 +1,80 @@
+﻿body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    position: relative;
+    border: none;
+}
+
+.card-body {
+    padding: 0.75rem;
+}
+
+.total-section {
+    padding: 10px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.navbar {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.user-icon img {
+    border-radius: 50%;
+}
+
+.fixed-bottom {
+    padding: 10px 0;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+}
+
+    .quantity-control input {
+        margin: 0 5px;
+        text-align: center;
+    }
+
+.amount-setting {
+    border-radius: 7px;
+    position: relative;
+    margin: 55px 0 15px 0;
+    display: flex;
+    padding: 5.4px 7.3px 6.8px 6.9px;
+    width: 20px;
+    height: 15px;
+    box-sizing: border-box;
+    left: 3%;
+}
+
+.rectangle-copy {
+    border-radius: 5px;
+    background: #FF6600;
+    position: absolute;
+    left: 100%;
+    top: -5px;
+    translate: -50% 0;
+    width: 30.1px;
+    height: 30.1px;
+}
+
+.trash-02 {
+    position: relative;
+    display: flex;
+    width: 30px;
+    height: 30px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
+    width: 16px;
+    height: 18px;
+}

@@ -1,0 +1,85 @@
+﻿@page "/food-ordered"
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<nav class="navbar navbar-light bg-white">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="user-icon">
+            <img src="images/hinhanh/ellipse_431_iphone_13_mini_1.jpeg" alt="User" class="rounded-circle" width="50" height="50">
+        </div>
+    </div>
+</nav>
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="d-flex">
+        <img src="images/vectors/vector_531_x2.svg" alt="Back" class="img-fluid" style="height: 30px; margin: 50%;" />
+    </div>
+    <h2 class="text-dark danh-sach-da-goi text-center">Danh sách đã gọi</h2>
+</div>
+<div class="card my-3 p-3">
+    <div class="d-flex justify-content-between">
+        <div class="d-flex">
+            <div class="rounded"
+                 style="width: 100px; height: 70px; background-image: url('images/hinhanh/rectangle_6.png'); background-size: cover;"></div>
+            <div class="ms-3">
+                <p class="mb-0" style="font-family: 'Poppins'; font-weight: 700;">23/8/2024</p>
+                <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">120.000 VND</p>
+                <p class="text-success" style="font-family: 'Roboto', sans-serif; font-weight: 500;">Đã thực hiện</p>
+
+            </div>
+        </div>
+        <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+            <img src="/images/vectors/icons8-tick-30.png" alt="Tick" style="width: 20px; height: 14.7px;" />
+        </div>
+    </div>
+</div>
+<!--SAN PHAM THU 2-->
+<div class="card my-3 p-3">
+    <div class="d-flex justify-content-between">
+        <div class="d-flex">
+            <div class="rounded"
+                 style="width: 100px; height: 70px; background-image: url('images/hinhanh/rectangle_6.png'); background-size: cover;"></div>
+            <div class="ms-3">
+                <p class="mb-0" style="font-family: 'Poppins'; font-weight: 700;">23/8/2024</p>
+                <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">120.000 VND</p>
+                <p class="text-success" style="font-family: 'Roboto', sans-serif; font-weight: 500;">Đã thực hiện</p>
+
+            </div>
+        </div>
+        <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+            <img src="/images/vectors/icons8-tick-30.png" alt="Tick" style="width: 20px; height: 14.7px;" />
+        </div>
+    </div>
+</div>
+<!-- SAN PHAM THU 3 -->
+<div class="card my-3 p-3">
+    <div class="d-flex justify-content-between">
+        <div class="d-flex">
+            <div class="rounded"
+                 style="width: 100px; height: 70px; background-image: url('images/hinhanh/rectangle_6.png'); background-size: cover;"></div>
+            <div class="ms-3">
+                <p class="mb-0" style="font-family: 'Poppins'; font-weight: 700;">23/8/2024</p>
+                <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">120.000 VND</p>
+                <p class="text-success" style="font-family: 'Roboto', sans-serif; font-weight: 500;">Đã thực hiện</p>
+
+            </div>
+        </div>
+        <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+            <img src="/images/vectors/icons8-tick-30.png" alt="Tick" style="width: 20px; height: 14.7px;" />
+        </div>
+    </div>
+</div>
+
+<div class="pay">
+    <button type="button" class="btn btn-warning w-100 mt-2">Thanh toán</button>
+</div>
+<nav class="navbar navbar-light bg-light fixed-bottom">
+    <div class="container-fluid justify-content-around">
+        <a href="#" class="nav-link"> <img src="images/vectors/icons8-home.svg" alt=""><i class="bi bi-house"></i></a>
+        <a href="#" class="nav-link"> <img src="images/vectors/shopping_list_18_x2.svg"><i class="bi bi-card-list"></i></a>
+        <a href="#" class="nav-link"> <img src="images/vectors/rectangle_19_x2.svg" alt=""><i class="bi bi-bookmark"></i></a>
+        <a href="#" class="nav-link"> <img src="images/vectors/icons8-user-30.png"><i class="bi bi-person"></i></a>
+    </div>
+</nav>
