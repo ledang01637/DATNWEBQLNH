@@ -1,0 +1,152 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.container-custom {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center; /* Centers content horizontally */
+    min-height: 100vh; /* Ensures that the content takes at least full screen height */
+    padding-bottom: 80px; /* Adjust for the navbar height */
+    overflow-y: auto; /* Enables scrolling if content overflows the screen */
+    text-align: center; /* Center-align the text content */
+}
+
+.profile-section {
+    margin-top: 20px;
+}
+
+.points {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+
+    width: 100%;
+    text-align: right; /* Align points to the right */
+}
+
+.profile-img img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s ease; /* Add transition for hover effect */
+}
+
+    .profile-img img:hover {
+        transform: scale(1.1); /* Slight zoom on hover */
+    }
+
+.user-info {
+    margin-top: 10px;
+}
+
+    .user-info h2 {
+        font-size: 20px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .user-info p {
+        font-size: 14px;
+        color: #666;
+    }
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 400px; /* Limits the width of the menu items */
+}
+
+    .menu-list li {
+        border-bottom: 1px solid #eee;
+        margin: 10px 0;
+    }
+
+        .menu-list li a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+            .menu-list li a:hover {
+                background-color: #f0f0f0; /* Light background change on hover */
+                color: #000; /* Darken text color on hover */
+            }
+
+            .menu-list li a span {
+                font-size: 20px;
+                color: #888;
+            }
+
+.logout-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 12px 24px; /* Bigger padding for a more prominent button */
+    background-color: #ff6666; /* Add a more vibrant color */
+    color: #fff; /* White text color for contrast */
+    border-radius: 25px; /* Rounded corners for a sleek look */
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px; /* Larger text size */
+    font-weight: 600; /* Bolder text */
+    width: 90%;
+    max-width: 300px; /* Ensures the button width is well-sized */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for a subtle lift effect */
+}
+
+    .logout-btn:hover {
+        background-color: #ff4d4d; /* Darker shade on hover */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Increase shadow depth on hover */
+        transform: translateY(-2px); /* Slightly lift the button */
+        color: #fff; /* Maintain white text */
+    }
+
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 400px;
+    z-index: 10;
+}
+
+/* Navbar items */
+.nav-item {
+    flex: 1;
+    text-align: center;
+}
+
+    .nav-item .icon {
+        font-size: 24px;
+        transition: color 0.3s ease;
+    }
+
+    .nav-item:hover .icon {
+        color: #ff6600; /* Change icon color on hover */
+    }
