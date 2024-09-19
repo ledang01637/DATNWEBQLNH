@@ -64,3 +64,28 @@
         opacity: 0;
     }
 }
+
+@media (max-width: 768px) {
+    .shipper {
+        width: 60px;
+    }
+
+    .divider {
+        top: 60%;
+    }
+}
+
+@media (max-width: 480px) {
+    .shipper {
+        width: 50px;
+    }
+
+    .divider {
+        top: 55%;
+    }
+
+    .bubbles span {
+        height: 80px;
+        width: 1px;
+    }
+}

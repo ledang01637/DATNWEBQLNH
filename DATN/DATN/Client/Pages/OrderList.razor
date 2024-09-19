@@ -1,4 +1,11 @@
 ﻿@page "/order-list"
+@using DATN.Client.Service
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject CartService _cartService
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <nav class="navbar navbar-light bg-white">
     <div class="container-fluid">
@@ -74,6 +81,7 @@
             </div>
         </div>
     </div>
+
     <div class="total-section">
         <div class="d-flex justify-content-between">
             <p class="mb-0">Tổng tiền</p>
