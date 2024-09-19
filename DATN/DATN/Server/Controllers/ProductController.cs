@@ -31,9 +31,9 @@ namespace DATN.Server.Controllers
                 ProductName = Product.ProductName,
                 Price = Product.Price,
                 CategoryId = Product.CategoryId,
-                IsDelete = Product.IsDelete,
                 ProductDescripntion = Product.ProductDescripntion,
                 ProductImage = Product.ProductImage,
+                IsDelete = Product.IsDelete,
 
             });
         }

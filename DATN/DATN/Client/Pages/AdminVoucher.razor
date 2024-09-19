@@ -1,0 +1,77 @@
+﻿@page "/adminvoucher"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+
+<style>
+    .product-table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+        .product-table-container table {
+            width: 100%;
+        }
+
+    .search-bar, .filter-bar {
+        margin-bottom: 20px;
+    }
+</style>
+
+@if (isLoaded)
+{
+    <button class="btn btn-success" @onclick="() => CreateVoucher()">Thêm</button>
+    <hr />
+    <h4>Voucher</h4>
+    <div class="search-bar">
+        <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="Filter" />
+    </div>
+    <div class="product-table-container">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>VoucherCode</th>
+                    <th>PointRequired</th>
+                    <th>DiscountValue</th>
+                    <th>ExpriationDate</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in filter)
+                {
+                    if (item != null)
+                    {
+                        <tr>
+                            <td>@item.VoucherCode</td>
+                            <td>@item.PointRequired</td>
+                            <td>@item.DiscountValue</td>
+                            <td>@item.ExpriationDate</td>
+                            <td class="text-center">
+                                @if (!item.IsActive)
+                                {
+                                    <button class="btn btn-primary" @onclick="() => EditVoucher(item.VoucherId)">Sửa</button>
+                                    <button class="btn btn-danger" @onclick="() => HideVoucher(item.VoucherId)">Ẩn</button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-warning" @onclick="() => RestoreVoucher(item.VoucherId)">Khôi phục</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+

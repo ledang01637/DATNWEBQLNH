@@ -57,12 +57,12 @@
                                 <td class="text-center">
                                     @if (!prod.IsDelete)
                                     {
-                                        <button class="btn btn-primary" @onclick="() => EditProduct(prod.CategoryId)">Sửa</button>
-                                        <button class="btn btn-danger" @onclick="() => HideProd(prod.CategoryId)">Ẩn</button>
+                                        <button class="btn btn-primary" @onclick="() => EditProduct(prod.ProductId)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="() => HideProd(prod.ProductId)">Ẩn</button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-warning" @onclick="() => RestoreProd(prod.CategoryId)">Khôi phục</button>
+                                        <button class="btn btn-warning" @onclick="() => RestoreProd(prod.ProductId)">Khôi phục</button>
                                     }
                                 </td>
                             </tr>
