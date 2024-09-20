@@ -41,7 +41,7 @@
 
     @if (tables == null || floors == null)
     {
-        <p>Loading...</p>
+        <p class="text-dark">Loading...</p>
     }
     else
     {
@@ -58,7 +58,7 @@
                              style="grid-column: @(GetColumnFromPosition(table.Position)); grid-row: @(GetRowFromPosition(table.Position));">
                             <div class="card table-card">
                                 <div class="card-body text-center position-relative">
-                                    <img src="/img/png/table.png" width="auto" height="50px" alt="Table Image">
+                                    <img src="/images/png/table.png" width="auto" height="50px" alt="Table Image">
                                     <div class="position-absolute top-0 end-0 fw-bold m-1">
                                         <div class="card" style="width: 25px; height: 25px;">
                                             @table.TableNumber
@@ -104,14 +104,10 @@
                         <ValidationMessage For="@(() => tableModel.TableNumber)" />
                     </div>
                     <div class="form-group">
-                        <label for="raw" class="form-label">Chọn hàng</label>
-                        <InputSelect class="form-control" @onchange="OnRawChange" @bind-Value="row" id="raw" name="raw">
-                            <option value="" disabled selected>Chọn hàng</option>
+                        <label for="row" class="form-label">Chọn hàng</label>
+                        <InputSelect class="form-control" @bind-Value="row" id="row" name="row">
+                            <option value="0" disabled selected>Chọn hàng</option>
                             @{
-                                if (tables.Count() % 6 == 0)
-                                {
-                                    rowCount += 1;
-                                }
                                 for (int i = 0; i < rowCount; i++)
                                 {
                                     <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
@@ -121,8 +117,8 @@
                     </div>
                     <div class="form-group">
                         <label for="column" class="form-label">Chọn cột</label>
-                        <InputSelect class="form-control" @onchange="OnColumnChange" @bind-Value="column" id="column" name="column">
-                            <option value="" disabled selected>Chọn cột</option>
+                        <InputSelect class="form-control" @bind-Value="column" id="column" name="column">
+                            <option value="0" disabled selected>Chọn cột</option>
                             @for (int i = 0; i <= 5; i++)
                             {
                                 <option value="Cột @(i + 1)">Cột @(i + 1)</option>
@@ -137,7 +133,7 @@
                     </div>
                     <div class="form-group">
                         <label for="FloorId" class="form-label">Số tầng:</label>
-                        <InputSelect @onchange="OnFloorChanged" class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
+                        <InputSelect class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
                             @{
                                 <option value="" disabled selected>Chọn tầng</option>
                                 foreach (var floor in floors)
@@ -175,13 +171,9 @@
                     </div>
                     <div class="form-group">
                         <label for="raw" class="form-label">Chọn hàng</label>
-                        <InputSelect class="form-control" @onchange="OnRawChange" @bind-Value="row" id="raw" name="raw">
+                        <InputSelect class="form-control" @bind-Value="row" id="raw" name="raw">
                             <option value="" disabled selected>Chọn hàng</option>
                             @{
-                                if (tables.Count() % 6 == 0)
-                                {
-                                    rowCount += 1;  
-                                }
                                 for (int i = 0; i < rowCount; i++)
                                 {
                                     <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
@@ -191,7 +183,7 @@
                     </div>
                     <div class="form-group">
                         <label for="column" class="form-label">Chọn cột</label>
-                        <InputSelect class="form-control" @onchange="OnColumnChange" @bind-Value="column" id="column" name="column">
+                        <InputSelect class="form-control" @bind-Value="column" id="column" name="column">
                             <option value="" disabled selected>Chọn cột</option>
                             @for (int i = 0; i <= 5; i++)
                             {
@@ -219,7 +211,7 @@
                     </div>
                     <div class="form-group">
                         <label for="FloorId" class="form-label">Số tầng:</label>
-                        <InputSelect @onchange="OnFloorChanged" class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
+                        <InputSelect class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
                             @{
                                 <option value="" disabled selected>Chọn tầng</option>
                                 foreach (var floor in floors)

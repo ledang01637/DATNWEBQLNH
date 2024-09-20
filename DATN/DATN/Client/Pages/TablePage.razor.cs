@@ -16,13 +16,14 @@ namespace DATN.Client.Pages
         private List<Table> tables = new List<Table>();
         private List<Floor> floors = new List<Floor>();
         private int selectTableId;
-        private int rowCount = 0;
         private bool isMoveTable = false;
-        public string row { get; set; }
-        public string column { get; set; }
+        private int rowCount { get; set; }
+        private string row { get; set; }
+        private string column { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
+            Console.WriteLine("a" + rowCount);
             await LoadAll();
         }
         private async Task LoadAll()
@@ -33,7 +34,7 @@ namespace DATN.Client.Pages
                 if(tables.Count > 0)
                 {
                     tables = tables.Where(a => a.IsDeleted.Equals(false)).ToList();
-                    rowCount = (int)Math.Ceiling((double)tables.Count / 6);
+                    CalculateRowCount();
                 }
                 floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
             }
@@ -41,6 +42,16 @@ namespace DATN.Client.Pages
             {
                 var query = $"[C#] fix error: {ex.Message}";
                 await JS.InvokeVoidAsync("openChatGPT", query);
+            }
+        }
+        private void CalculateRowCount()
+        {
+            rowCount = (int)Math.Ceiling((double)tables.Count / 6);
+
+            if (tables.Count() % 6 == 0)
+            {
+                rowCount += 1;
+                Console.WriteLine("rowCount" + rowCount);
             }
         }
         private async Task AddTable()
@@ -63,7 +74,6 @@ namespace DATN.Client.Pages
                 {
                     await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
                     await LoadAll();
-                    StateHasChanged();
                 }
                 else
                 {
@@ -87,7 +97,6 @@ namespace DATN.Client.Pages
             column = parts[1].Trim();
             isMoveTable = true;
             await JS.InvokeVoidAsync("MoveTable");
-            StateHasChanged();
         }
         private async Task UpdateTable()
         {
@@ -99,7 +108,7 @@ namespace DATN.Client.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "TableSuccess");
+                    await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
                     isMoveTable = false;
                     await LoadAll();
                 }
@@ -126,7 +135,7 @@ namespace DATN.Client.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "TableSuccess");
+                    await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
                     isMoveTable = false;
                     await LoadAll();
                 }
@@ -148,7 +157,11 @@ namespace DATN.Client.Pages
         }
         private void OnRawChange(ChangeEventArgs e)
         {
-            row = e.Value.ToString();
+            var newRow = e.Value.ToString();
+            if (newRow != row)
+            {
+                row = newRow;
+            }
         }
         private void OnColumnChange(ChangeEventArgs e)
         {
