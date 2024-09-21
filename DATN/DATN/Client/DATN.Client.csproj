@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\css\UserCss\Image\" />
     <Folder Include="wwwroot\img\png\" />
+    <Folder Include="wwwroot\images\products\" />
     <Folder Include="wwwroot\js\lib\" />
   </ItemGroup>
 

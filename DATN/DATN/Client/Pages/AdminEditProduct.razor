@@ -144,7 +144,7 @@
 }
  *@
 
-                @page "/editproduct/{ProductId:int}"
+@page "/editproduct/{ProductId:int}"
 @using DATN.Shared
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
@@ -173,9 +173,10 @@
                             <input id="ProductName" @bind="prod.ProductName" class="form-control" placeholder="Nhập tên món ăn" />
                             <ValidationMessage For="@(() => prod.ProductName)" />
                         </div>
+
                         <div class="form-group">
                             <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
-                            <input id="ProductImage" @bind="prod.ProductImage" class="form-control" />
+                            <InputFile OnChange="HandleFileSelected" />
                             <ValidationMessage For="@(() => prod.ProductImage)" />
                         </div>
 
@@ -285,5 +286,22 @@
         }
 
         StateHasChanged();
+    }
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                var buffer = new byte[file.Size];
+                await file.OpenReadStream().ReadAsync(buffer);
+                prod.ProductImage = buffer;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error uploading file: {ex.Message}";
+        }
     }
 }

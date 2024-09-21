@@ -49,7 +49,7 @@
                         {
                             <tr>
                                 <td>
-                                    <img src="@prod.ProductImage" alt="Alternate Text" width="80px" height="80px" />
+                                    <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)" alt="Alternate Text" width="80px" height="80px" />
                                 </td>
                                 <td>@prod.ProductName</td>
                                 <td>@connectUnit.UnitName</td>

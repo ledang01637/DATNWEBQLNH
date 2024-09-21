@@ -51,7 +51,7 @@
 
                         <div class="form-group">
                             <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
-                            <input type="file" id="ProductImage" @bind="prod.ProductImage" class="form-control" />
+                            <InputFile OnChange="HandleFileSelected" />
                             <ValidationMessage For="@(() => prod.ProductImage)" />
                         </div>
 
@@ -123,8 +123,21 @@
         StateHasChanged();
     }
 
-    private void HandleFileSelected(InputFileChangeEventArgs e)
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
-        selectedFile = e.File;
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                var buffer = new byte[file.Size];
+                await file.OpenReadStream().ReadAsync(buffer);
+                prod.ProductImage = buffer;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error uploading file: {ex.Message}";
+        }
     }
 }

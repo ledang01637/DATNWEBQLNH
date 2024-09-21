@@ -1,7 +1,267 @@
-﻿@page "/a"
+@page "/"
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
-<h1>Hello, world!</h1>
+<div class="container mt-1 foodcustom mb-4">
+    <section class="iphone-13-mini-2-inner">
+        <div class="frame-parent">
+            <div class="frame-wrapper">
+                <div class="frame-group">
+                    <div class="frame-container">
+                        <div class="frame-div">
+                            <div class="line4-31-group3119-31-iphone13-parent">
+                                <div class="line4-31-group3119-31-iphone13"></div>
+                                <div class="line5-31-group3119-31-iphone13"></div>
+                                <div class="line6-31-group3119-31-iphone13"></div>
+                            </div>
+                        </div>
+                        <h1 class="foodgo">Foodgo</h1>
+                        <div class="ellipse4-31-iphone13mini-1-wrapper">
+                            <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="~/images/hinhanh/hambuger.png" />
+                        </div>
+                    </div>
+                    <div class="rectangle-parent">
+                        <div class="frame-child"></div>
+                        <i class="bi bi-search fs-5"></i>
 
-Welcome to your new app.
+                        <input class="frame-item" placeholder="tìm kiếm" type="text" />
+                    </div>
+                </div>
+            </div>
+            <div class="drink-parent">
+                <div class="drink">
+                    <div class="rectangle-group">
+                        <div class="frame-inner"></div>
+                        <span>Ăn nhanh</span>
+                    </div>
+                </div>
+                <div class="drink">
+                    <div class="rectangle-group">
+                        <div class="frame-inner"></div>
+                        <span>Ăn nhanh</span>
+                    </div>
+                </div>
+                <div class="drink">
+                    <div class="rectangle-group">
+                        <div class="frame-inner"></div>
+                        <span>Ăn nhanh</span>
+                    </div>
+                </div>
+                <div class="drink">
+                    <div class="rectangle-group">
+                        <div class="frame-inner"></div>
+                        <span>Ăn nhanh</span>
+                    </div>
+                </div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="thc-n-parent">
+    <div class="container mt-1 foodcustom">
+        <div class="container my-2 ">
+            <div class="row mb-2">
+                <div class="col-6 text-start ">
+                    Thực đơn
+                </div>
+                <div class="col-6 text-end ">
+                    Xem thêm
+                </div>
+            </div>
+            <div id="carouselFade" class="carousel slide">
+                <div class="carousel-inner">
+                    <div class="carousel-item g-3 active">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card text-center shadow-sm overflow-hidden">
+                                    <div class="image-container">
+                                        <img src="~/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="Ăn nhanh">
+                                        <div class="overlay">
+                                            <h5 class="card-title">Ăn nhanh 1</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card text-center shadow-sm overflow-hidden">
+                                    <div class="image-container">
+                                        <img src="~/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="Ăn nhanh">
+                                        <div class="overlay">
+                                            <h5 class="card-title">Ăn nhanh 2</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carousel-item g-3">
+                        <div class="row">
+                            <div class="col-6 custom-menu mx-auto">
+                                <div class="card text-center shadow-sm overflow-hidden">
+                                    <div class="image-container">
+                                        <img src="~/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="Ăn nhanh">
+                                        <div class="overlay">
+                                            <h5 class="card-title">Ăn nhanh</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 custom-menu mx-auto">
+                                <div class="card text-center shadow-sm overflow-hidden">
+                                    <div class="image-container">
+                                        <img src="~/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="Xào">
+                                        <div class="overlay">
+                                            <h5 class="card-title">Xào</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="carousel-item g-3">
+                        <div class="row">
+                            <div class="col-6 custom-menu mx-auto">
+                                <div class="card text-center shadow-sm overflow-hidden">
+                                    <div class="image-container">
+                                        <img src="~/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="Nướng">
+                                        <div class="overlay">
+                                            <h5 class="card-title">Nướng</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 custom-menu mx-auto">
+                                <div class="card text-center shadow-sm overflow-hidden">
+                                    <div class="image-container">
+                                        <img class="card-img-top img-fluid" src="~/images/hinhanh/hambuger.png" alt="Tráng miệng">
+                                        <div class="overlay">
+                                            <h5 class="card-title">Tráng miệng</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselFade" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselFade" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="container mt-1 foodcustom mt-4">
+            <div class="row mb-2">
+                <div class="col-6 text-start ">
+                    Danh Sách
+                </div>
+                <div class="col-6 text-end ">
+                    Xem thêm
+                </div>
+            </div>
+            @if(categories == null)
+            {
+                <p>Loading...</p>
+            }else if (!categories.Any())
+            {
+                <p>Categori Empty...</p>
+            }
+            else
+            {
+                foreach(var c in categories)
+                {
+                    <div class="rectangle-parent8">
+                        <div class="frame-child9"></div>
+                        <img class="rectangle-icon" loading="lazy" alt="" src="~/images/hinhanh/hambuger.png" />
+
+                        <div class="frame-wrapper1">
+                            <div class="frame-parent1">
+                                <div class="sp-wrapper">
+                                    <h2 class="sp1">@c.CategoryName</h2>
+                                </div>
+                                <div class="danh-mc">12 danh mục</div>
+                            </div>
+                        </div>
+                        <!-- <img class="vector-icon" loading="lazy" alt="" src="./public/vector.svg" /> -->
+                    </div>
+                }
+                
+            }
+        </div>
+
+
+        <div class="container mt-1 foodcustom mt-4">
+            <div class="row mb-2">
+                <div class="col-6 text-start ">
+                    Món ăn
+                </div>
+                <div class="col-6 text-end ">
+                    Xem thêm
+                </div>
+            </div>
+            <div class="row row-cols-2 row-cols-lg-2">
+                @if(products == null)
+                {
+                    <p>Loading...</p>
+                }else if (!products.Any())
+                {
+                    <p>Product Empty</p>
+                }
+                else
+                {
+                    @foreach(var p in products)
+                    {
+                        <div class="col-md-3 mb-2">
+                            <div class="menu-item">
+                                <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="Product Image" />
+                                <h3>@p.ProductName</h3>
+                                <p style="display: @(p.ProductDescripntion == null ? "none" : "block")">@p.ProductDescripntion</p>
+                                <p>@p.Price.ToString("###,0##") VND</p>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<footer class="navbar">
+    <div class="navbar-child"></div>
+    <i class="bi bi-house-door-fill fs-5"></i>
+
+
+
+    <i class="bi bi-clipboard2-check-fill fs-5"></i>
+
+    <i class="bi bi-bookmark-fill fs-5"></i>
+    <i class="bi bi-person-fill fs-5"></i>
+</footer>
+
+
+<script>
+    var shoppingList1Icon = document.getElementById("shoppingList1Icon");
+    if (shoppingList1Icon) {
+        shoppingList1Icon.addEventListener("click", function (e) {
+            // Please sync "iPhone 13 mini - 6" to the project
+        });
+    }
+
+    var user1Icon = document.getElementById("user1Icon");
+    if (user1Icon) {
+        user1Icon.addEventListener("click", function (e) {
+            // Please sync "iPhone 13 mini - 9" to the project
+        });
+    }
+</script>
