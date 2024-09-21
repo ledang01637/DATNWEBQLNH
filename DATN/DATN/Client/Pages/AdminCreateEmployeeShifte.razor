@@ -1,0 +1,114 @@
+﻿@page "/createemployeeshifte"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@employeeshifte" OnValidSubmit="CreateEmployeeShifte" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ShifteDay" class="control-label"><strong>ShifteDay</strong></label>
+                            <input type="date" id="ShifteDay" @bind="employeeshifte.ShifteDay" class="form-control" placeholder="ShifteDay" />
+                            <ValidationMessage For="@(() => employeeshifte.ShifteDay)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="EmployeeId" class="control-label"><strong>EmployeeId</strong></label>
+                            <input id="EmployeeId" @bind="employeeshifte.EmployeeId" class="form-control" placeholder="EmployeeId" />
+                            <ValidationMessage For="@(() => employeeshifte.EmployeeId)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ShifteId" class="control-label"><strong>ShifteId</strong></label>
+                            <input type="ShifteId" id="PhoneNumber" @bind="employeeshifte.ShifteId" class="form-control" placeholder="ShifteId" />
+                            <ValidationMessage For="@(() => employeeshifte.ShifteId)" />
+                        </div>
+
+
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                                <a class="btn btn-secondary mx-2" data-bs-target="#carouselExample" data-bs-slide="prev">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.EmployeeShifte employeeshifte = new DATN.Shared.EmployeeShifte();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = true;
+    }
+
+    private async Task CreateEmployeeShifte()
+    {
+
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/EmployeeShifte/AddEmployeeShifte", employeeshifte);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Thêm thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminemployee");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"error: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+
+
+    }
+
+
+}

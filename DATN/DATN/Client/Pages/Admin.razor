@@ -1,4 +1,4 @@
-﻿@page "/information"
+﻿@page "/information/{accountId:int}"
 @using DATN.Shared
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
@@ -61,6 +61,8 @@ else
 }
 
 @code {
+    [Parameter] public int accountId { get; set; }
+
     private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
     private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
     private List<DATN.Shared.Account> filter = new List<DATN.Shared.Account>();
@@ -87,106 +89,43 @@ else
         }
     }
 
-    private async Task LoadById(int id)
+    private async Task LoadById(int AccountId)
     {
         try
         {
-            // Retrieve account by ID
-            var account = await httpClient.GetFromJsonAsync<DATN.Shared.Account>($"api/Account/GetAccount/{id}");
+            var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
             if (account != null)
             {
-                // If you want to filter by ID or use the account elsewhere
-                listAccount = new List<DATN.Shared.Account> { account };
-                filter = listAccount;
-            }
-            else
-            {
-                errorMessage = $"Account with ID {id} not found.";
+                await httpClient.DeleteAsync($"api/Account/{accountId}");
+                await Load();
+                StateHasChanged();
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error loading account by ID: {ex.Message}";
+            errorMessage = $"Error deleting account: {ex.Message}";
         }
+
+        // try
+        // {
+        //     // Retrieve account by ID
+        //     var account = await httpClient.GetFromJsonAsync<DATN.Shared.Account>($"api/Account/GetAccount/{AccountId}");
+        //     if (account != null)
+        //     {
+        //         // If you want to filter by ID or use the account elsewhere
+        //         listAccount = new List<DATN.Shared.Account> { account };
+        //         filter = listAccount;
+        //     }
+        //     else
+        //     {
+        //         errorMessage = $"Account with ID {AccountId} not found.";
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     errorMessage = $"Error loading account by ID: {ex.Message}";
+        // }
     }
 
 
 }
-
-@* 
-<style>
-    .profile-card {
-        width: 700px; /* Tăng chiều rộng */
-        height: 400px; /* Tăng chiều cao */
-        border-radius: 10px;
-        border: 1px solid #007bff;
-        background-color: #d6d4d4;
-        padding: 20px; /* Tăng padding để tạo khoảng cách */
-    }
-
-    .profile-img {
-        width: 150px; /* Tăng kích thước ảnh đại diện */
-        height: 150px;
-        border-radius: 50%;
-        background-color: #b2a9a9;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-        .profile-img img {
-            width: 80px; /* Tăng kích thước hình bên trong */
-            height: 80px;
-        }
-
-    .profile-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding-left: 30px; /* Tăng khoảng cách giữa ảnh và form */
-    }
-
-        .profile-info .form-control {
-            height: 50px; /* Tăng chiều cao của input */
-            margin-bottom: 15px; /* Tăng khoảng cách giữa các trường */
-            border-radius: 25px; /* Làm input bo tròn hơn */
-            font-size: 1.1rem; /* Tăng kích thước chữ */
-        }
-</style>
-
-
-<div class="container-fluid col-md-12 row">
-    <div class="col-md-6 mt-5 d-flex justify-content-center">
-        <form class="profile-card d-flex">
-            <div class="profile-img">
-                <img src="https://via.placeholder.com/60" alt="Avatar">
-            </div>
-            <div class="profile-info flex-grow-1">
-                <input type="text" class="form-control" placeholder="Họ và tên">
-                <input type="text" class="form-control" placeholder="Chức Vụ">
-                <input type="text" class="form-control" placeholder="Email">
-                <input type="text" class="form-control" placeholder="Ngày tạo">
-                <input type="email" class="form-control" placeholder="Số điện thoại">
-                <input type="text" class="form-control" placeholder="Địa chỉ">
-            </div>
-        </form>
-    </div>
-
-    <div class="col-md-6 mt-5 d-flex justify-content-center">
-        <form class="profile-card d-flex">
-            <div class="profile-img">
-                <img src="https://via.placeholder.com/60" alt="Avatar">
-            </div>
-            <div class="profile-info flex-grow-1">
-                <input type="text" class="form-control" placeholder="Name">
-                <input type="email" class="form-control" placeholder="Email">
-                <input type="text" class="form-control" placeholder="Phone">
-                <input type="text" class="form-control" placeholder="Address">
-                <input type="text" class="form-control" placeholder="Address">
-                <input type="text" class="form-control" placeholder="Address">
-            </div>
-        </form>
-    </div>
-</div>
-
- *@

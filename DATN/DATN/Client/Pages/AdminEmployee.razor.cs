@@ -13,7 +13,9 @@ namespace DATN.Client.Pages
 {
     public partial class AdminEmployee
     {
-        private List<DATN.Shared.Employee> list = new List<DATN.Shared.Employee>();
+        private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
+        private List<DATN.Shared.EmployeeShifte> listEmployeeShifte = new List<DATN.Shared.EmployeeShifte>();
+        private List<DATN.Shared.Shifte> listShifte = new List<DATN.Shared.Shifte>();
         private List<DATN.Shared.Employee> filter = new List<DATN.Shared.Employee>();
         private bool isLoaded = false;
         private string errorMessage;
@@ -28,8 +30,10 @@ namespace DATN.Client.Pages
         {
             try
             {
-                list = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
-                filter = list;
+                listShifte = await httpClient.GetFromJsonAsync<List<DATN.Shared.Shifte>>("api/Shifte/GetShifte");
+                listEmployeeShifte = await httpClient.GetFromJsonAsync<List<DATN.Shared.EmployeeShifte>>("api/EmployeeShifte/GetEmployeeShifte");
+                listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
+                filter = listEmployee;
             }
             catch (Exception ex)
             {
@@ -41,7 +45,7 @@ namespace DATN.Client.Pages
         {
             try
             {
-                var employee = list.FirstOrDefault(p => p.EmployeeId == employeeId);
+                var employee = listEmployee.FirstOrDefault(p => p.EmployeeId == employeeId);
                 if (employee != null)
                 {
                     await httpClient.DeleteAsync($"api/Employee/{employeeId}");
@@ -69,8 +73,8 @@ namespace DATN.Client.Pages
         {
             var searchTerm = e.Value.ToString().ToLower();
             filter = string.IsNullOrWhiteSpace(searchTerm)
-                ? list
-                : list.Where(p => p.EmployeeName.ToLower().Contains(searchTerm)).ToList();
+                ? listEmployee
+                : listEmployee.Where(p => p.EmployeeName.ToLower().Contains(searchTerm)).ToList();
         }
 
     }
