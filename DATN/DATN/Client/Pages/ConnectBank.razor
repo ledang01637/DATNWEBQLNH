@@ -1,10 +1,19 @@
 ﻿@page "/connnectbank"
 <body>
     <div class="container mt-5">
+        <div class="d-flex d-inline-block">
+            <div class="align-items-start">
+                <a href="userinfo" class="link-dark fw-semibold">
+                    <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+                </a>
+            </div>
+            <h4 class="text-center mx-auto mb-4 fw-semibold">Liên kết ngân hàng</h4>
+        </div>
+
         <!-- PayPal option -->
         <div class="d-flex align-items-center justify-content-between payment-option">
             <div class="d-flex align-items-center">
-                <img src="paypal-icon.png" alt="Paypal" class="payment-icon">
+                <img src="/image/paypal.png" alt="Paypal" class="payment-icon">
                 <div class="ms-2">
                     <strong>Paypal</strong>
                     <p class="mb-0 small">ltoh@gmail.com</p>
@@ -16,7 +25,7 @@
         <!-- Credit Card option -->
         <div class="d-flex align-items-center justify-content-between payment-option">
             <div class="d-flex align-items-center">
-                <img src="credit-card-icon.png" alt="Credit Card" class="payment-icon">
+                <img src="/image/MasterCard.png" alt="Credit Card" class="payment-icon">
                 <div class="ms-2">
                     <strong>Credit Card</strong>
                     <p class="mb-0 small">4444 **** **** 6739</p>
@@ -28,7 +37,7 @@
         <!-- Add new payment method -->
         <div class="d-flex align-items-center justify-content-between payment-option">
             <div class="d-flex align-items-center">
-                <img src="add-payment-icon.png" alt="Add new payment method" class="payment-icon">
+                <img src="/image/credit-card.png" alt="Add new payment method" class="payment-icon">
                 <div class="ms-2">
                     <strong>Add new payment method</strong>
                 </div>
@@ -36,4 +45,12 @@
             <a href="#" class="add-icon">+</a>
         </div>
     </div>
+    <nav class="navbar fixed-bottom navbar-light bg-light">
+        <div class="container-fluid justify-content-around">
+            <a href="#" class="nav-link"> <img src="image/vectors/icons8-home.svg" alt=""></a>
+            <a href="#" class="nav-link"> <img src="image/vectors/shopping_list_117_x2.svg"></a>
+            <a href="#" class="nav-link"> <img src="image/vectors/rectangle_16_x2 (1).svg" alt=""></a>
+            <a href="#" class="nav-link"> <img src="image/vectors/icons8-user-30.png"></a>
+        </div>
+    </nav>
 </body>
