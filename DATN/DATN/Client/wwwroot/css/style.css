@@ -166,13 +166,14 @@
     background-color: var(--color-whitesmoke);
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 13px;
-    font-weight: 500;
+    align-items: center;
+    justify-content: center;
+}
+span {
+    text-align: center;
 }
 
-.drink,
+
 .drink {
     flex-direction: column;
     gap: var(--gap-8xs);
@@ -192,7 +193,6 @@
 }
 
 .drink-parent {
-    padding: 0 var(--padding-lg) 0 9px;
     align-self: stretch;
     flex-direction: row;
     justify-content: space-between;
@@ -432,7 +432,6 @@
 .thc-n-parent {
     align-self: stretch;
     flex-direction: column;
-    padding: 0 10px 0 10px;
     box-sizing: border-box;
     gap: var(--gap-xl);
     text-align: left;
@@ -519,76 +518,105 @@
 
 .image-container {
     position: relative;
-    overflow: hidden;
-    /* Ẩn phần ảnh thừa ra khỏi khung */
     width: 100%;
-    height: 200px;
-    background-color: orange;
+    padding-top: 100%; /* Tạo hình vuông */
+    overflow: hidden;
+    border-radius: 15px; /* Bo góc */
 }
 
-.card-img-top {
-    position: absolute;
-    left: -50px;
-    /* Đẩy hình sang bên trái */
-    top: 0;
-    height: 100%;
-    width: auto;
-    object-fit: cover;
-    /* Hình ảnh sẽ giữ tỉ lệ mà vẫn bao phủ toàn bộ khung chứa */
-}
+    .image-container img {
+        position: absolute;
+        bottom: 0; /* Đưa hình ảnh về góc dưới */
+        right: 0; /* Canh phải */
+        width: 70%; /* Tùy chỉnh kích thước ảnh nếu cần */
+        height: 70%; /* Đảm bảo tỷ lệ ảnh hợp lý */
+        object-fit: cover; /* Đảm bảo hình ảnh vừa khung mà không bị biến dạng */
+        border-radius: 15px; /* Bo góc cho ảnh */
+    }
 
 .overlay {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(248, 102, 4, 0.555);
-    /* Tạo nền đen mờ cho chữ */
-    color: white;
+    top: 0; /* Đưa nội dung chữ về góc trên */
+    left: 0; /* Canh trái */
+    color: black;
     padding: 10px;
-    text-align: center;
+    text-align: left; /* Chữ nằm bên trái */
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    width: 100%;
+    font-size: 12px;
 }
 
-.card-title {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #fff;
+.carousel-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 
 .custom-text {
     padding: 0;
 }
 
-@media screen and (max-width: 390px) {
+/* Màn hình lớn hơn như máy tính bảng (iPad) */
+@media screen and (max-width: 768px) {
     .drink-parent {
         justify-content: center;
     }
 
     .foodcustom {
         min-width: 350px;
-        max-width: 844px !important;
+        max-width: 100%; /* Điều chỉnh để vừa với màn hình */
     }
 }
 
-@media screen and (max-width: 280px) {
-    .rectangle-parent9 {
-        gap: var(--gap-mini);
+/* Màn hình điện thoại lớn hơn */
+@media screen and (max-width: 480px) {
+    .drink-parent {
+        justify-content: center;
     }
-}
 
-@media screen and (max-width: 270px) {
+    .foodcustom {
+        min-width: 100%; /* Điều chỉnh cho vừa màn hình điện thoại */
+        max-width: 100%;
+    }
+
+    .rectangle-parent9,
     .rectangle-parent8 {
         gap: var(--gap-mini);
     }
+
+    .navbar-item {
+        width: 100%;
+        height: 20px; /* Điều chỉnh lại chiều cao để phù hợp hơn */
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
-@media screen and (max-width: 269px) {
-    .frame-container {
+/* Màn hình điện thoại phổ biến (320px) */
+@media screen and (max-width: 320px) {
+    .foodcustom {
+        min-width: 100%;
+        max-width: 100%; /* Đảm bảo phần tử vừa với màn hình */
+    }
+
+    .frame-container,
+    .danh-sch-parent {
         flex-wrap: wrap;
     }
 }
 
-@media screen and (max-width: 252px) {
+/* Màn hình rất nhỏ hơn 280px */
+@media screen and (max-width: 280px) {
+    .rectangle-parent9,
+    .rectangle-parent8 {
+        gap: var(--gap-mini);
+    }
+
     .navbar-item {
         width: 100%;
         height: 13.9px;
@@ -598,10 +626,13 @@
         flex-wrap: wrap;
         justify-content: center;
     }
-}
 
-@media screen and (max-width: 212px) {
+    .frame-container {
+        flex-wrap: wrap;
+    }
+
     .danh-sch-parent {
         flex-wrap: wrap;
     }
 }
+
