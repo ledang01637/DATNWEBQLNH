@@ -1,4 +1,5 @@
-﻿using DATN.Shared;
+﻿using DATN.Client.Service;
+using DATN.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using Newtonsoft.Json.Linq;
@@ -54,9 +55,16 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("openChatGPT", query);
             }
         }
-        private string ConvertImageToBase64(byte[] imageData)
+        private async Task AddToCart(Product product)
         {
-            return $"data:image/png;base64,{Convert.ToBase64String(imageData)}";
+            Cart cart = new Cart();
+            cart.ProductId = product.ProductId;
+            cart.ProductName = product.ProductName;
+            cart.Price = product.Price;
+            cart.ProductImage = product.ProductImage;
+
+            await _cartService.AddItemToCartAsync(cart, 1);
+            Navigation.NavigateTo("/order-list");
         }
     }
 }

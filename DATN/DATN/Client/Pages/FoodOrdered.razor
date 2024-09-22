@@ -2,6 +2,7 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 @inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <nav class="navbar navbar-light bg-white">
     <div class="container-fluid">
@@ -52,8 +53,14 @@ else
 }
 
 
-<div class="pay">
-    <button type="button" class="btn btn-warning w-100 mt-2">Thanh toán</button>
+<div class="total-section">
+    <div class="d-flex justify-content-between">
+        <p class="mb-0">Tổng tiền</p>
+        <p class="mb-0"><strong>@Total.ToString("###,0##") VND</strong></p>
+    </div>
+    <button @onclick= "Pay" type="button" class="btn btn-warning w-100 mt-2">
+        Thanh toán
+    </button>
 </div>
 <nav class="navbar navbar-light bg-light fixed-bottom">
     <div class="container-fluid justify-content-around">
