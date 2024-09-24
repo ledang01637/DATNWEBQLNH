@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Components;
 using System.Linq;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace DATN.Client.Pages
+namespace DATN.Client.Pages.AdminManager
 {
     public partial class AdminVoucher
     {
