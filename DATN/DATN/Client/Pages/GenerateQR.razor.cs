@@ -5,12 +5,6 @@ using System.Threading.Tasks;
 using System;
 using System.Net.Http.Json;
 using Microsoft.JSInterop;
-using static System.Net.WebRequestMethods;
-using System.Data.Common;
-using Microsoft.AspNetCore.Components;
-using Newtonsoft.Json.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace DATN.Client.Pages
 {
@@ -39,7 +33,7 @@ namespace DATN.Client.Pages
         private async Task GenerateQrCode()
         {
             var mD5Hash = await GenerateMD5Hash(qrModel.NumberTable.ToString());
-            var urlCode = $"{qrModel.Url}demoIndex/{mD5Hash}";
+            var urlCode = $"{qrModel.Url}demoIndex?n={mD5Hash}";
 
             await _localStorageService.SetItemAsync("ss", urlCode);
             await JS.InvokeVoidAsync("clearQrCode");
