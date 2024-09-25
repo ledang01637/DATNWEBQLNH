@@ -20,49 +20,57 @@
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateEmployee()">Thêm</button>
-    <hr />
-    <h4>Quản lý nhân viên</h4>
-    <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Tìm kiếm nhân viên..." @oninput="FilterEmployee" />
-    </div>
-    <div class="product-table-container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>EmployeeName</th>
-                    <th>Address</th>
-                    <th>PhoneNumber</th>
-                    <th>Email</th>
-                    <th>Position</th>
-                    <th>Hiredate</th>
-                    <th>Salary</th>
-                    <th>IsDelete</th>
-                    <th>AccountId</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var employee in filter)
-                {
-                    <tr>
-                        <td>@employee.EmployeeName</td>
-                        <td>@employee.Address</td>
-                        <td>@employee.PhoneNumber</td>
-                        <td>@employee.Email</td>
-                        <td>@employee.Position</td>
-                        <td>@employee.HireDate</td>
-                        <td>@employee.Salary</td>
-                        <td>@employee.IsDeleted</td>
-                        <td>@employee.AccountId</td>
-                        <td>
-                            <button class="btn btn-primary" @onclick="() => EditEmployee(employee.EmployeeId)">Sửa</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteEmployee(employee.EmployeeId)">Ẩn</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="col-md-12 grid-margin stretch-card p-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Employee</h4>
+                <p class="card-description">
+                    <button class="btn btn-success" @onclick="() => CreateEmployee()">Add new employee</button>
+                </p>
+                <div class="search-bar">
+                    <input type="text" class="form-control" placeholder="Sreach employee..." @oninput="FilterEmployee" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>EmployeeName</th>
+                                <th>Address</th>
+                                <th>PhoneNumber</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Hiredate</th>
+                                <th>Salary</th>
+                                <th>IsDelete</th>
+                                <th>AccountId</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var employee in filter)
+                            {
+                                <tr>
+                                    <td>@employee.EmployeeName</td>
+                                    <td>@employee.Address</td>
+                                    <td>@employee.PhoneNumber</td>
+                                    <td>@employee.Email</td>
+                                    <td>@employee.Position</td>
+                                    <td>@employee.HireDate</td>
+                                    <td>@employee.Salary</td>
+                                    <td>@employee.IsDeleted</td>
+                                    <td>@employee.AccountId</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="() => EditEmployee(employee.EmployeeId)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="() => DeleteEmployee(employee.EmployeeId)">Ẩn</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))

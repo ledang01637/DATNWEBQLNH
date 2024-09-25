@@ -3,43 +3,68 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
+<style>
+    .product-table-container {
+        max-height: 900px;
+        overflow-y: auto;
+    }
 
+        .product-table-container table {
+            width: 100%;
+        }
+
+    .search-bar, .filter-bar {
+        margin-bottom: 20px;
+    }
+</style>
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateAccount()">Thêm</button>
-    <hr />
-    <h4>Quản lý tài khoản</h4>
-    <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Tìm kiếm tài khoản..." @oninput="FilterAccount" />
-    </div>
-    <div class="product-table-container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Kiểu tài khoản</th>
-                    <th>UserName</th>
-                    <th>Phân quyền</th>
-                    <th>active</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var account in filter)
-                {
-                    <tr>
-                        <td>@account.AccountType</td>
-                        <td>@account.UserName</td>
-                        <td>@account.RoleAccounts</td>
-                        <td>@account.IsActive</td>
-                        <td>
-                            <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Sửa</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteAccount(account.AccountId)">Ẩn</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <div class="col-md-12 grid-margin stretch-card p-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Account</h4>
+                <p class="card-description">
+                    <button class="btn btn-success" @onclick="() => CreateAccount()">Add new account</button>
+                </p>
+                <div class="search-bar">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="FilterAccount" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>AccountType</th>
+                                <th>CreateDate</th>
+                                <th>UpdateDate</th>
+                                <th>UserName</th>
+                                <th>Password</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var account in filter)
+                            {
+                                <tr>
+                                    <td>@account.AccountId</td>
+                                    <td>@account.AccountType</td>
+                                    <td>@account.CreateDate</td>
+                                    <td>@account.UpdateDate</td>
+                                    <td>@account.UserName</td>
+                                    <td>@account.Password</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="() => DeleteAccount(account.AccountId)">Ẩn</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))
