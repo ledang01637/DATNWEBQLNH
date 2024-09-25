@@ -15,8 +15,6 @@ namespace DATN.Client.Pages
 {
     public partial class DemoIndex
     {
-
-        private string token;
         private Table table = new Table();
         private List<Table> tables = new List<Table>();
         private List<Product> products = new List<Product>();
@@ -24,16 +22,9 @@ namespace DATN.Client.Pages
         protected override async Task OnInitializedAsync()
         {
             var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("token", out var extractedToken))
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("n", out var extractedMd5))
             {
-                token = extractedToken;
-                var decodedToken = Uri.UnescapeDataString(token);
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadToken(decodedToken) as JwtSecurityToken;
-                tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-                var tableNumber = jsonToken.Claims.FirstOrDefault(c => c.Type == "tableNumber")?.Value;
-                table = tables.FirstOrDefault(a => a.TableNumber == int.Parse(tableNumber));
-                products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+                await ProcessMd5Value(extractedMd5);
             }
         }
         private async Task AddToCart(Product product)
@@ -47,5 +38,30 @@ namespace DATN.Client.Pages
             await _cartService.AddItemToCartAsync(cart,1);
             Navigation.NavigateTo("/order-list");
         }
+        private async Task ProcessMd5Value(string md5)
+        {
+            tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+
+            foreach (var t in tables)
+            {
+                var encodedTableNumber = await GenerateMD5Hash(t.TableNumber.ToString());
+                if (encodedTableNumber == md5)
+                {
+                    table = t;
+                    break;
+                }
+            }
+
+            if (table != null)
+            {
+                products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+            }
+        }
+
+        private async Task<string> GenerateMD5Hash(string input)
+        {
+            return await JS.InvokeAsync<string>("generateMD5Hash", input);
+        }
+
     }
 }
