@@ -51,7 +51,7 @@
 
                         <div class="form-group">
                             <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
-                            <input type="file" id="ProductImage" @bind="prod.ProductImage" class="form-control" />
+                            <input id="ProductImage" @bind="prod.ProductImage" class="form-control" />
                             <ValidationMessage For="@(() => prod.ProductImage)" />
                         </div>
 

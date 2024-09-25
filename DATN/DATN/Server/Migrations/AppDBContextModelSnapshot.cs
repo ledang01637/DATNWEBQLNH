@@ -365,8 +365,8 @@ namespace DATN.Server.Migrations
                     b.Property<string>("ProductDescripntion")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProductImage")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("ProductImage")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ProductName")
                         .HasColumnType("nvarchar(max)");
