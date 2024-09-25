@@ -1,18 +1,16 @@
-﻿using DATN.Client.Service;
-using DATN.Shared;
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+﻿using DATN.Shared;
 using Microsoft.JSInterop;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
+using System.Net.Http;
+using System;
 using System.Threading.Tasks;
+using System.Net.Http.Json;
+using System.Linq;
+using Microsoft.AspNetCore.Components;
 
 namespace DATN.Client.Pages
 {
-    public partial class Index
+    public partial class IndexV2
     {
         private List<Product> products = new List<Product>();
         private List<Menu> menus = new List<Menu>();
@@ -50,8 +48,8 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("openChatGPT", query);
             }
         }
-
-
+   
+        
         private async Task AddToCart(Product product)
         {
             Cart cart = new Cart();

@@ -35,7 +35,6 @@ namespace DATN.Client.Pages
                 table = tables.FirstOrDefault(a => a.TableNumber == int.Parse(tableNumber));
                 products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
             }
-            
         }
         private async Task AddToCart(Product product)
         {
