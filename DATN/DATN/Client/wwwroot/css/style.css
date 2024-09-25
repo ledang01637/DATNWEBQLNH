@@ -1,4 +1,5 @@
-﻿.line4-31-group3119-31-iphone13,
+﻿
+.line4-31-group3119-31-iphone13,
 .line5-31-group3119-31-iphone13,
 .line6-31-group3119-31-iphone13 {
     position: absolute;
@@ -195,11 +196,25 @@ span {
 .drink-parent {
     align-self: stretch;
     flex-direction: row;
-    justify-content: space-between;
     gap: var(--gap-xl);
     text-align: center;
     font-size: var(--font-size-sm);
     color: var(--color-black);
+    overflow-x: auto;
+}
+::-webkit-scrollbar {
+    border-radius: 10px;
+    width: 12px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #FFCCCC;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(#FFCC33,#FF9900);
+    border-radius: 3px;
 }
 
 .frame-parent,
@@ -526,12 +541,11 @@ span {
 
     .image-container img {
         position: absolute;
-        bottom: 0; /* Đưa hình ảnh về góc dưới */
-        right: 0; /* Canh phải */
-        width: 70%; /* Tùy chỉnh kích thước ảnh nếu cần */
-        height: 70%; /* Đảm bảo tỷ lệ ảnh hợp lý */
-        object-fit: cover; /* Đảm bảo hình ảnh vừa khung mà không bị biến dạng */
-        border-radius: 15px; /* Bo góc cho ảnh */
+        bottom: 0;
+        width: 70%;
+        height: 70%;
+        object-fit: cover;
+        border-radius: 15px;
     }
 
 .overlay {
@@ -565,20 +579,21 @@ span {
     }
 
     .foodcustom {
-        min-width: 350px;
+        min-width: 100%;
         max-width: 100%; /* Điều chỉnh để vừa với màn hình */
     }
 }
 
-/* Màn hình điện thoại lớn hơn */
+/* Màn hình điện thoại lớn hơn 480px */
 @media screen and (max-width: 480px) {
     .drink-parent {
         justify-content: center;
     }
 
     .foodcustom {
-        min-width: 100%; /* Điều chỉnh cho vừa màn hình điện thoại */
+        min-width: 100%;
         max-width: 100%;
+        padding: 10px; /* Thêm khoảng cách padding nếu cần */
     }
 
     .rectangle-parent9,
@@ -588,7 +603,7 @@ span {
 
     .navbar-item {
         width: 100%;
-        height: 20px; /* Điều chỉnh lại chiều cao để phù hợp hơn */
+        height: 20px;
     }
 
     .navbar {
@@ -597,16 +612,20 @@ span {
     }
 }
 
-/* Màn hình điện thoại phổ biến (320px) */
+/* Màn hình phổ biến từ 320px đến 480px */
 @media screen and (max-width: 320px) {
     .foodcustom {
         min-width: 100%;
-        max-width: 100%; /* Đảm bảo phần tử vừa với màn hình */
+        max-width: 100%;
     }
 
     .frame-container,
     .danh-sch-parent {
         flex-wrap: wrap;
+    }
+
+    .foodcustom {
+        padding: 10px;
     }
 }
 
@@ -627,12 +646,12 @@ span {
         justify-content: center;
     }
 
-    .frame-container {
-        flex-wrap: wrap;
-    }
-
+    .frame-container,
     .danh-sch-parent {
         flex-wrap: wrap;
     }
-}
 
+    body {
+        font-size: 12px;
+    }
+}

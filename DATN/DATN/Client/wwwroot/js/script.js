@@ -66,3 +66,6 @@ window.cartFunctions = {
         sessionStorage.setItem('cart', cart);
     }
 };
+window.generateMD5Hash = function (input) {
+    return CryptoJS.MD5(input).toString();
+};

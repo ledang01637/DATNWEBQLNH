@@ -9,6 +9,8 @@ using static System.Net.WebRequestMethods;
 using System.Data.Common;
 using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DATN.Client.Pages
 {
@@ -36,19 +38,33 @@ namespace DATN.Client.Pages
         }
         private async Task GenerateQrCode()
         {
+            var mD5Hash = await GenerateMD5Hash(qrModel.NumberTable.ToString());
+            var urlCode = $"{qrModel.Url}demoIndex/{mD5Hash}";
 
-            var response = await httpClient.PostAsJsonAsync("api/AuthJWT/GenerateQrToken", qrModel);
-            var result = await response.Content.ReadFromJsonAsync<QRResponse>();
-
-            if (result != null)
-            {
-                var encodedToken = Uri.EscapeDataString(result.Token);
-                var urlCode = $"{qrModel.Url}demoIndex?token={encodedToken}";
-
-                await _localStorageService.SetItemAsync("ss", urlCode);
-                await JS.InvokeVoidAsync("clearQrCode");
-                await JS.InvokeVoidAsync("generateQrCode", urlCode);
-            }
+            await _localStorageService.SetItemAsync("ss", urlCode);
+            await JS.InvokeVoidAsync("clearQrCode");
+            await JS.InvokeVoidAsync("generateQrCode", urlCode);
         }
+        private async Task<string> GenerateMD5Hash(string input)
+        {
+            return await JS.InvokeAsync<string>("generateMD5Hash", input);
+        }
+
+        //private async Task GenerateQrCodeV1)
+        //{
+
+        //    var response = await httpClient.PostAsJsonAsync("api/AuthJWT/GenerateQrToken", qrModel);
+        //    var result = await response.Content.ReadFromJsonAsync<QRResponse>();
+
+        //    if (result != null)
+        //    {
+        //        var encodedToken = Uri.EscapeDataString(result.Token);
+        //        var urlCode = $"{qrModel.Url}demoIndex?token={encodedToken}";
+
+        //        await _localStorageService.SetItemAsync("ss", urlCode);
+        //        await JS.InvokeVoidAsync("clearQrCode");
+        //        await JS.InvokeVoidAsync("generateQrCode", urlCode);
+        //    }
+        //}
     }
 }
