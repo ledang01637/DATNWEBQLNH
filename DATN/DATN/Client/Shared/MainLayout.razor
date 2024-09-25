@@ -4,15 +4,38 @@
 @inject IJSRuntime JS
 
 <CascadingAuthenticationState>
-    <div class="container-scroller col-md-12" style="max-height: 950px">
-        <!-- partial -->
-        <div class="container-fluid page-body-wrapper">
-            <div class="col-md-12 p-5">
+    @if (String.IsNullOrEmpty(wifiIpAddress))
+    {
+        <div class="layout-rain">
+            <div class="bubbles" id="bubbles">
+                <img src="images/shipper.png" class="shipper" alt="">
+                <hr class="divider">
+            </div>
+        </div>
+    }
+    else if (isAcceptWifi)
+    {
+        <div class="row">
+            @*             <div class="col-md-2 bg-dark">
+        <NavMenu />
+        </div> *@
+            <div class="col-md-12">
                 @Body
             </div>
-            <!-- main-panel ends -->
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="p-2 row">
+            @*             <div class="col-md-2 bg-dark">
+        <NavMenu />
+        </div> *@
+            <div class="col-md-12">
+                @Body
+            </div>
+        </div>
+        @*  <h1>Vui lòng truy cập bằng wifi của quán</h1> *@
+    }
 
 </CascadingAuthenticationState>
 
