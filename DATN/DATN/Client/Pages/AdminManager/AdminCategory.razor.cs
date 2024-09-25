@@ -93,24 +93,25 @@ namespace DATN.Client.Pages.AdminManager
                 : listCategory.Where(p => p.CategoryName.ToLower().Contains(searchTerm)).ToList();
         }
 
+
+        private async Task DeleteCategory(int categoryId)
+        {
+            try
+            {
+                var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
+                if (category != null)
+                {
+                    await httpClient.DeleteAsync($"api/Category/{categoryId}");
+                    await LoadCategories();
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error deleting category: {ex.Message}";
+            }
+        }
+
     }
 }
 
-
-//private async Task DeleteCategory(int categoryId)
-//{
-//    try
-//    {
-//        var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
-//        if (category != null)
-//        {
-//            await httpClient.DeleteAsync($"api/Category/{categoryId}");
-//            await LoadCategories();
-//            StateHasChanged();
-//        }
-//    }
-//    catch (Exception ex)
-//    {
-//        errorMessage = $"Error deleting category: {ex.Message}";
-//    }
-//}
