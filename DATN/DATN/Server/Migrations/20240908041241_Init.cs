@@ -246,7 +246,7 @@ namespace DATN.Server.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     ProductDescripntion = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProductImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductImage = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     IsDelete = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>

@@ -21,14 +21,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="Name" class="control-label"><strong>Tên danh mục</strong></label>
-                            <input id="Name" @bind="cate.CategoryName" class="form-control" placeholder="Nhập Tên" />
+                            <label for="CategoryName" class="control-label"><strong>CategoryName</strong></label>
+                            <input id="CategoryName" @bind="cate.CategoryName" class="form-control" placeholder="CategoryName" />
                             <ValidationMessage For="@(() => cate.CategoryName)" />
                         </div>
 
                         <div class="form-group">
-                            <label for="CustomerId" class="control-label"><strong>CustomerId</strong></label>
-                            <input type="number" id="CustomerId" @bind="cate.CategoryDescription" class="form-control" placeholder="Nhập CustomerId" />
+                            <label for="CategoryDescription" class="control-label"><strong>CategoryDescription</strong></label>
+                            <input id="CategoryDescription" @bind="cate.CategoryDescription" class="form-control" placeholder="CategoryDescription" />
                             <ValidationMessage For="@(() => cate.CategoryDescription)" />
                         </div>
 

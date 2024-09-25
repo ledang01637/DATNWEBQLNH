@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATN.Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20240908041241_Init")]
-    partial class Init
+
+    partial class v3:Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -367,8 +367,8 @@ namespace DATN.Server.Migrations
                     b.Property<string>("ProductDescripntion")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProductImage")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("ProductImage")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ProductName")
                         .HasColumnType("nvarchar(max)");
