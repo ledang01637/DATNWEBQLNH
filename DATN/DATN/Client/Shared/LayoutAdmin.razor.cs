@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DATN.Client.Shared
 {
-    public partial class MainLayout
+    public partial class LayoutAdmin
     {
         private LoginRequest loginRequest = new LoginRequest();
         private string wifiIpAddress;

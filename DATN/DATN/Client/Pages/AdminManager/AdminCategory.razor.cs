@@ -13,8 +13,8 @@ namespace DATN.Client.Pages.AdminManager
 {
     public partial class AdminCategory
     {
-        private List<DATN.Shared.Category> listCategory = new List<DATN.Shared.Category>();
-        private List<DATN.Shared.Category> filteredCategory = new List<DATN.Shared.Category>();
+        private List<Category> listCategory = new List<Category>();
+        private List<Category> filteredCategory = new List<Category>();
         private bool isLoaded = false;
         private string errorMessage;
 
@@ -28,7 +28,7 @@ namespace DATN.Client.Pages.AdminManager
         {
             try
             {
-                listCategory = await httpClient.GetFromJsonAsync<List<DATN.Shared.Category>>("api/Category/GetCategories");
+                listCategory = await httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
                 filteredCategory = listCategory;
             }
             catch (Exception ex)
