@@ -1,5 +1,8 @@
 ﻿@page "/createaccount"
+
 @using DATN.Shared
+@using DATN.Server.Service
+@layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
@@ -116,7 +119,7 @@
 
         StateHasChanged();
 
-        Navigation.NavigateTo("/createcustomer");
+        // Navigation.NavigateTo("/createcustomer");
 
     }
 

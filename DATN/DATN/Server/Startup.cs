@@ -31,6 +31,10 @@ namespace DATN.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
 
+            services.AddDbContext<AppDBContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
+            );
+
             var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
