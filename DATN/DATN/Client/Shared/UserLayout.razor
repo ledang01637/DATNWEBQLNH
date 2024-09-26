@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+@inject LocalStorageService _localStorageService
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+
+<CascadingAuthenticationState>
+
+    @if (String.IsNullOrEmpty(wifiIpAddress))
+    {
+        <div class="layout-rain">
+            <div class="bubbles" id="bubbles">
+                <img src="images/shipper.png" class="shipper" alt="">
+                <hr class="divider">
+            </div>
+        </div>
+    }
+    else if (isAcceptWifi)
+    {
+        <div class="row">
+             <div class="col-md-2 bg-dark">
+                <NavMenu />
+            </div>
+            <div class="col-md-12">
+                @Body
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="p-2 row">
+             <div class="col-md-2 bg-dark">
+                <NavMenu />
+            </div>
+            <div class="col-md-12">
+                @Body
+            </div>
+        </div>
+    }
+
+
+
+</CascadingAuthenticationState>
+
+
