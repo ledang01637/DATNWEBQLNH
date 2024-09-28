@@ -68,7 +68,7 @@ namespace DATN.Client.Pages
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "False");
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản hoặc mật khẩu không đúng! ", "");
                     }
                 }
                 catch (JsonException ex)

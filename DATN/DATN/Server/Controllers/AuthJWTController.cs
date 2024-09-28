@@ -105,6 +105,7 @@ namespace DATN.Server.Controllers
                 new Claim("AccountType", account.AccountType),
                 new Claim("CreateDate", account.CreateDate.ToString()),
                 new Claim("UpdateDate", account.UpdateDate.ToString()),
+                new Claim("IsActive", account.IsActive.ToString()),
 
                 new Claim("RoleId", roleAccount.Roleid.ToString()),
                 new Claim(ClaimTypes.Role, roleAccount.Roleid.ToString())
