@@ -7,25 +7,38 @@
 @inject LocalStorageService _localStorageService
 @inject IJSRuntime JS
 
-<nav class="navbar navbar-light bg-white">
-    <div class="container-fluid">
-        <button class="navbar-toggler" type="button">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="user-icon">
-            <img src="images/hinhanh/ellipse_431_iphone_13_mini_1.jpeg" alt="User" class="rounded-circle" width="50" height="50">
+
+<section class="iphone-13-mini-2-inner">
+    <div class="frame-parent">
+        <div class="frame-wrapper">
+            <div class="frame-group">
+                <div class="frame-container">
+                    <div class="frame-div">
+                        <div class="line4-31-group3119-31-iphone13-parent">
+                            <div class="line4-31-group3119-31-iphone13"></div>
+                            <div class="line5-31-group3119-31-iphone13"></div>
+                            <div class="line6-31-group3119-31-iphone13"></div>
+                        </div>
+                    </div>
+                    <h1 class="foodgo">Foodgo</h1>
+                    <div class="ellipse4-31-iphone13mini-1-wrapper">
+                        <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
-</nav>
+</section>
 <div class="container mt-4">
     <h4 style="text-align: center;">Danh sách gọi món</h4>
-    @if(cartItems == null)
+    @if (cartItems == null)
     {
         <p>Loading...</p>
     }
     else
     {
-        @foreach(var item in cartItems)
+        @foreach (var item in cartItems)
         {
             <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
                 <div class="row">
@@ -48,9 +61,9 @@
                 </div>
             </div>
         }
-        
+
     }
- 
+
 
     <div class="total-section">
         <div class="d-flex justify-content-between">
@@ -64,9 +77,10 @@
 </div>
 <nav class="navbar fixed-bottom navbar-light bg-light">
     <div class="container-fluid justify-content-around">
-        <a href="#" class="nav-link"> <img src="images/vectors/icons8-home.svg" alt=""><i class="bi bi-house"></i></a>
-        <a href="#" class="nav-link"> <img src="images/vectors/shopping_list_117_x2.svg"><i class="bi bi-card-list"></i></a>
-        <a href="#" class="nav-link"> <img src="images/vectors/rectangle_16_x2 (1).svg" alt=""><i class="bi bi-bookmark"></i></a>
-        <a href="#" class="nav-link"> <img src="images/vectors/icons8-user-30.png"><i class="bi bi-person"></i></a>
+        <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
+        <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
+        <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
+        <a href="#" class="nav-link"><i class="bi bi-person"></i></a>
     </div>
 </nav>
+

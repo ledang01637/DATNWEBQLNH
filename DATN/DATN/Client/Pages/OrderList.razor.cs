@@ -13,7 +13,6 @@ namespace DATN.Client.Pages
     {
         private List<Cart> cartItems = new List<Cart>();
         private decimal Total;
-        private decimal Pay;
 
         protected override async Task OnInitializedAsync()
         {
@@ -39,17 +38,6 @@ namespace DATN.Client.Pages
             }
         }
 
-        private async Task ThanhtoanAsync()
-        {
-            if (cartItems.Count() > 0)
-            {
-                Navigation.NavigateTo("/payment");
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("showAlert", "warning","Vui lòng thêm món ăn","");
-            }
-        }
         private void CalculateTotal()
         {
             Total = 0;
@@ -60,12 +48,19 @@ namespace DATN.Client.Pages
         }
         private async Task Order()
         {
-            var expiryTime = DateTime.Now.AddMinutes(30).ToString("o");
-            await _localStorageService.SetCartItemAsync("historyOrder", cartItems);
-            await _localStorageService.SetItemAsync("cartExpiryTime", expiryTime);
-            await JS.InvokeVoidAsync("showAlert", "success","Đặt món thành công","Bạn vui lòng đợi đầu bếp làm nha :3");
-            await Task.Delay(1000);
-            Navigation.NavigateTo("/food-ordered");
+            if (cartItems.Count() > 0)
+            {
+                var expiryTime = DateTime.Now.AddMinutes(30).ToString("o");
+                await _localStorageService.SetCartItemAsync("historyOrder", cartItems);
+                await _localStorageService.SetItemAsync("cartExpiryTime", expiryTime);
+                await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
+                await Task.Delay(1000);
+                Navigation.NavigateTo("/food-ordered");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng thêm món ăn", "");
+            }
         }
     }
 }

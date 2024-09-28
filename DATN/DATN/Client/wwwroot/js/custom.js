@@ -7,12 +7,36 @@
         }
     });
 
+    var currentFilter = '*';
+
     $('.filters_menu li').click(function () {
         $('.filters_menu li').removeClass('active');
         $(this).addClass('active');
-        var data = $(this).attr('data-filter');
-        $grid.isotope({ filter: data });
+        currentFilter = $(this).attr('data-filter');
+
+        filterProducts();
     });
+
+    $('#searchIndex').on('input', function () {
+        filterProducts();
+    });
+
+    function filterProducts() {
+        var searchText = $('#searchIndex').val().toLowerCase();
+
+        $grid.isotope({
+            filter: function () {
+                var $this = $(this);
+
+                var productName = $this.find('h5').text().toLowerCase();
+
+                var isInCategory = $this.is(currentFilter) || currentFilter === '*';
+                var isInSearch = productName.includes(searchText);
+
+                return isInCategory && isInSearch;
+            }
+        });
+    }
 
     // Nice select
     $('select').niceSelect();
