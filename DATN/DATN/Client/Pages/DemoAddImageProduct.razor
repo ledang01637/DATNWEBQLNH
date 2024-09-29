@@ -1,162 +1,33 @@
-﻿@page "/demoAddProd"
-@using DATN.Shared
-@inject HttpClient httpClient
-@inject NavigationManager Navigation
+﻿@page "/invoice-preview"
+@using Microsoft.JSInterop
 
-<div class="row justify-content-center mt-3">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">add Product</h5>
+<h3>Hóa đơn</h3>
+
+<button class="btn btn-primary"
+        data-bs-toggle="modal" data-bs-target="#invoiceModal">
+    Xem trước hóa đơn
+</button>
+
+<div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceModalLabel">Hóa đơn của bạn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="card-body">
-                <EditForm Model="@prod" OnValidSubmit="CreateProd" Context="editFormContext">
-                    <DataAnnotationsValidator />
-                    <div class="text-danger mb-3">
-                        <ValidationSummary />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="UnitId" class="control-label"><strong>Unit</strong></label>
-                        <input id="UnitId" @bind="prod.UnitId" class="form-control" placeholder="UnitId" />
-                        <ValidationMessage For="@(() => prod.UnitId)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="ProductName" class="control-label"><strong>ProductName</strong></label>
-                        <input id="ProductName" @bind="prod.ProductName" class="form-control" placeholder="ProductName" />
-                        <ValidationMessage For="@(() => prod.ProductName)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="Price" class="control-label"><strong>Price</strong></label>
-                        <input type="number" id="Price" @bind="prod.Price" class="form-control" placeholder="Price" />
-                        <ValidationMessage For="@(() => prod.Price)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="CategoryId" class="control-label"><strong>CategoryId</strong></label>
-                        <input id="CategoryId" @bind="prod.CategoryId" class="form-control" placeholder="CategoryId" />
-                        <ValidationMessage For="@(() => prod.CategoryId)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="ProductDescripntion" class="control-label"><strong>Product Description</strong></label>
-                        <textarea id="ProductDescripntion" @bind="prod.ProductDescripntion" class="form-control" placeholder="Enter product description"></textarea>
-                        <ValidationMessage For="@(() => prod.ProductDescripntion)" />
-                    </div>
-
-
-                    <div class="form-group">
-                        <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
-                        <InputFile OnChange="HandleFileSelected" />
-                        <ValidationMessage For="@(() => prod.ProductImage)" />
-                    </div>
-
-
-                    <div class="form-group text-center">
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                            <a href="/admincategory" class="btn btn-secondary mx-2">Quay Về</a>
-                        </div>
-                    </div>
-                </EditForm>
-                @if (!string.IsNullOrEmpty(successMessage))
-                {
-                    <div class="alert alert-success mt-3">
-                        @successMessage
-                    </div>
-                }
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger mt-3">
-                        @errorMessage
-                    </div>
-                }
+            <div class="modal-body">
+                <p>Chi tiết hóa đơn:</p>
+                <p>Sản phẩm: Sản phẩm 1</p>
+                <p>Số lượng: 2</p>
+                <p>Tổng tiền: 30000 VND</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">In hóa đơn</button>
             </div>
         </div>
     </div>
 </div>
 
-
-@if (products != null)
-{
-    <h1>ảnh ở đây</h1>
-    @foreach(var p in products)
-    {
-        <h1>@p.ProductName</h1>
-        <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="Product Image" />
-    }
- 
-}
-
-
-@code {
-    private string errorMessage;
-    private string successMessage;
-    private DATN.Shared.Product prod = new DATN.Shared.Product();
-    private IBrowserFile selectedFile;
-    private bool isLoaded = false;
-    private List<Product> products = new List<Product>();
-
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadProd();
-    }
-
-    private async Task LoadProd()
-    {
-        products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
-        if (products != null)
-        {
-            products = products.Where(a => a.IsDelete == false).ToList();
-        }
-    }
-
-    private async Task CreateProd()
-    {
-        try
-        {
-            var response = await httpClient.PostAsJsonAsync("api/Product/AddProduct", prod);
-
-            if (response.IsSuccessStatusCode)
-            {
-                successMessage = "Thêm thành công!";
-                errorMessage = string.Empty;
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Error : {errorContent}";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
-            successMessage = string.Empty;
-        }
-
-        StateHasChanged();
-    }
-
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
-    {
-        try
-        {
-            var file = e.File;
-            if (file != null)
-            {
-                var buffer = new byte[file.Size];
-                await file.OpenReadStream().ReadAsync(buffer);
-                prod.ProductImage = buffer; 
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error uploading file: {ex.Message}";
-        }
-    }
-
-}

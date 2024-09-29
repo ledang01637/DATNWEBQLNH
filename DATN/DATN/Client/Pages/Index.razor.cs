@@ -19,6 +19,7 @@ namespace DATN.Client.Pages
         private List<Category> categories = new List<Category>();
         private List<MenuItem> menuItems = new List<MenuItem>();
         private string ComboName;
+        private bool isGridView = true;
 
         protected override async Task OnInitializedAsync()
         {
@@ -90,6 +91,14 @@ namespace DATN.Client.Pages
             {
                 products = products.Where(p => p.ProductName.ToLower().Contains(searchTerm)).ToList();
             }
+        }
+        private string GetGridColumnClass()
+        {
+            return isGridView ? "col-sm-6 col-lg-4" : "col-lg-4"; // hoặc tuỳ chỉnh lại col-lg để có nhiều hơn
+        }
+        private void ToggleGridView()
+        {
+            isGridView = !isGridView;
         }
     }
 }

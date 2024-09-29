@@ -48,6 +48,7 @@ namespace DATN.Client.Pages
                 if (encodedTableNumber == md5)
                 {
                     table = t;
+                    await _localStorageService.SetItemAsync("n", table.TableNumber.ToString());
                     break;
                 }
             }

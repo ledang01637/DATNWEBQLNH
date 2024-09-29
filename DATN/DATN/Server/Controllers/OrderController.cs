@@ -17,13 +17,13 @@ namespace DATN.Server.Controllers
             _OrderService = _order;
         }
 
-        [HttpGet("GetUnit")]
+        [HttpGet("GetOrder")]
         public List<Order> GetOrder()
         {
             return _OrderService.GetOrder();
         }
 
-        [HttpPost("AddUnit")]
+        [HttpPost("AddOrder")]
         public Order AddOrder(Order Order)
         {
             return _OrderService.AddOrder(new Order
