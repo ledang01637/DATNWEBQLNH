@@ -1,9 +1,12 @@
 ﻿
+let sortableInstances = {};
 function MoveTable(FloorId,IsSwap) {
     var sortableElement = document.getElementById("floor-" + FloorId);
-
+    if (sortableInstances[FloorId]) {
+        sortableInstances[FloorId].destroy();
+    }
     if (sortableElement) {
-        new Sortable(sortableElement, {
+        sortableInstances[FloorId] =  new Sortable(sortableElement, {
             swap: IsSwap,
             swapClass: 'highlight',
             group: {
@@ -14,13 +17,26 @@ function MoveTable(FloorId,IsSwap) {
             handle: ".grid-item",
             animation: 150, 
             onEnd: function (evt) {
-                if (evt.swapItem) {
-                    console.log(IsSwap);
-                } else {
-                    console.log(IsSwap);
-                }
+                const fromIndex = evt.oldIndex;
+                const toIndex = evt.newIndex;
 
-                updateTablePositions();
+                // Xác định số lượng cột tối đa trong mỗi hàng
+                const maxColumns = 6;
+
+                // Tính cột và hàng của vị trí mới
+                let newColumn = (toIndex % maxColumns) + 1; // Số cột bắt đầu từ 1
+                let newRow = Math.floor(toIndex / maxColumns) + 1; // Hàng bắt đầu từ 1
+
+                // Lấy element đã di chuyển
+                const itemEl = evt.item;
+                const tableId = parseInt(itemEl.getAttribute('data-id'));
+
+                // Tạo vị trí mới theo định dạng "row - column"
+                const newPosition = `Hàng ${newRow} - Cột ${newColumn}`;
+
+                itemEl.setAttribute('data-position', newPosition);
+                console.log(`Table ${tableId} moved from index ${fromIndex} to ${toIndex}, new position: ${newPosition}`);
+                DotNet.invokeMethodAsync('DATN.Client', 'UpdateTablePosition', tableId, newPosition);
             }
         });
     } else {
