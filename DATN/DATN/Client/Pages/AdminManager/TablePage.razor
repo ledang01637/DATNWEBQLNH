@@ -44,7 +44,7 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateModel">Thêm mới bàn</button>
         <button class="btn btn-secondary"@onclick="() => AcctiveMoveTable(false)">Chỉnh sửa vị trí bàn</button>
         <button class="btn btn-secondary" @onclick="() => AcctiveMoveTable(true)">Đổi vị trí bàn</button>
-        <button class="btn btn-secondary"@onclick="SaveTable">Lưu bàn</button>
+        <button class="btn btn-secondary" @onclick="SaveTable">Lưu bàn</button>
     </div>
 
     @if (tables == null || floors == null)
@@ -57,7 +57,7 @@
         {
             <div class="floor">
                 <h3>Floor @floor.NumberFloor</h3>
-                <div id="floor-@floor.FloorId" class="sortable position-relative">
+                <div id="floor-@floor.FloorId" data-floor-id="@floor.NumberFloor" class="sortable position-relative">
                     @foreach (var table in tables.Where(t => t.FloorId == floor.FloorId).OrderBy(t => t.Position))
                     {
                         <div class="m-2 grid-item" 
@@ -83,7 +83,7 @@
                                         <i class="fas fa-trash"></i>
                                     </button>
                                     <div class="card m-1 bg-light text-dark" style="width: 100%; height: 25px;">
-                                        <div>Cột: @GetColumnFromPosition(table.Position); Hàng: @GetRowFromPosition(table.Position)</div>
+                                        <div>Hàng: @GetRowFromPosition(table.Position); Cột: @GetColumnFromPosition(table.Position)</div>
                                     </div>
                                 </div>
                             </div>
@@ -95,9 +95,6 @@
         }
     }
 </div>
-
-
-
 
 
 @* AddTable *@

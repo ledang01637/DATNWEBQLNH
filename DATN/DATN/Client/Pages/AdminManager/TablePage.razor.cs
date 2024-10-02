@@ -15,23 +15,26 @@ namespace DATN.Client.Pages.AdminManager
     {
         private Table tableModel = new Table();
         private List<Table> tables = new List<Table>();
-        private static List<Table> tablesStatic = new List<Table>();
+        private List<Table> tablesChanges = new List<Table>();
         private List<Floor> floors = new List<Floor>();
+        public DotNetObjectReference<TablePage> dotNetObjectReference;
         private int selectTableId;
         private bool isMoveTable = false;
         private int rowCount { get; set; }
         private string row { get; set; }
         private string column { get; set; }
 
+
         protected override async Task OnInitializedAsync()
         {
+            dotNetObjectReference = DotNetObjectReference.Create(this);
             await LoadAll();
         }
         private async Task LoadAll()
         {
             try
             {
-                tables = tablesStatic = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+                tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
                 if (tables.Count > 0)
                 {
                     tables = tables.Where(a => a.IsDeleted.Equals(false)).ToList();
@@ -188,9 +191,7 @@ namespace DATN.Client.Pages.AdminManager
         }
         private async Task GetPosionTable(int FloorId, bool IsSwap)
         {
-
-            await JS.InvokeVoidAsync("MoveTable", FloorId, IsSwap);
-            //await JS.InvokeVoidAsync("updateTablePositions");
+            await JS.InvokeVoidAsync("MoveTable", FloorId, IsSwap,dotNetObjectReference);
         }
         private async Task AcctiveMoveTable(bool _isSwap)
         {
@@ -200,18 +201,36 @@ namespace DATN.Client.Pages.AdminManager
                await GetPosionTable(f.FloorId, _isSwap);
             }
         }
-        private void SaveTable()
+
+        private async Task SaveTable()
         {
+            for (int i = 0; i < tablesChanges.Count; i++)
+            {
+                var tableChange = tablesChanges[i];
+                await httpClient.PutAsJsonAsync($"api/Table/{tableChange.TableId}", tableChange);
+            }
+            tablesChanges.Clear();
             isMoveTable = false;
         }
+
         [JSInvokable("UpdateTablePosition")]
-        public static void UpdateTablePositionAsync(int tableId, string newPosition)
+        public void UpdateTablePosition(int tableId, string newPosition, int newFloorId)
         {
-            var table = tablesStatic.FirstOrDefault(t => t.TableId == tableId);
+            var table = tables.FirstOrDefault(t => t.TableId == tableId);
 
             if (table != null)
             {
                 table.Position = newPosition;
+                tablesChanges.Add(new Table
+                {
+                    TableId = tableId,
+                    Position = newPosition,
+                    FloorId = newFloorId,
+                    TableNumber = table.TableNumber,
+                    SeatingCapacity = table.SeatingCapacity,
+                    IsDeleted = table.IsDeleted,
+                    Status = table.Status
+                });
             }
 
         }
