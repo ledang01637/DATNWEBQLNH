@@ -29,6 +29,11 @@
         display: grid;
         grid-template-columns: repeat(6, 1fr);
         gap: 10px;
+        border: 2px dashed #ccc;
+    }
+    .highlight {
+        background-color: #ffc107;
+        border: 2px solid #ff9800;
     }
 
 </style>
@@ -37,6 +42,9 @@
     <h1 class="text-center">Floor Management</h1>
     <div class="btn-create mb-2">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateModel">Thêm mới bàn</button>
+        <button class="btn btn-secondary"@onclick="() => AcctiveMoveTable(false)">Chỉnh sửa vị trí bàn</button>
+        <button class="btn btn-secondary" @onclick="() => AcctiveMoveTable(true)">Đổi vị trí bàn</button>
+        <button class="btn btn-secondary"@onclick="SaveTable">Lưu bàn</button>
     </div>
 
     @if (tables == null || floors == null)
@@ -49,34 +57,38 @@
         {
             <div class="floor">
                 <h3>Floor @floor.NumberFloor</h3>
-                <div id="sortable-floor-@floor.FloorId" class="sortable">
-                    @foreach (var table in tables.Where(t => t.FloorId == floor.FloorId))
+                <div id="floor-@floor.FloorId" class="sortable position-relative">
+                    @foreach (var table in tables.Where(t => t.FloorId == floor.FloorId).OrderBy(t => t.Position))
                     {
-                        <div class="mt-2 grid-item"
-                             data-id="@table.TableId"
-                             data-position="@table.Position"
-                             style="grid-column: @(GetColumnFromPosition(table.Position)); grid-row: @(GetRowFromPosition(table.Position));">
+                        <div class="m-2 grid-item" 
+                            data-id="@table.TableId" 
+                            data-position="@table.Position"
+                             style="@(isMoveTable ? "col-md-2" : $"grid-column: {GetColumnFromPosition(table.Position)}; grid-row: {GetRowFromPosition(table.Position)};")">
                             <div class="card table-card">
                                 <div class="card-body text-center position-relative">
-                                    <img src="/images/png/table.png" width="auto" height="50px" alt="Table Image">
+                                    <img src="/images/png/table.png" class="img-fluid" alt="Table Image" style="height: 50px;">
                                     <div class="position-absolute top-0 end-0 fw-bold m-1">
-                                        <div class="card" style="width: 25px; height: 25px;">
+                                        <div class="card bg-light text-dark" style="width: 25px; height: 25px;">
                                             @table.TableNumber
                                         </div>
                                     </div>
-                                    <button class="btn text-primary content-btn content-btn-edit"
+                                    <button class="btn btn-outline-primary btn-sm content-btn content-btn-edit"
                                             @onclick="() => LoadTableForEdit(table.TableId)"
                                             data-bs-toggle="modal" data-bs-target="#UpdateModel">
                                         <i class="far fa-edit"></i>
                                     </button>
-                                    <button class="btn text-danger content-btn content-btn-trash"
+                                    <button class="btn btn-outline-danger btn-sm content-btn content-btn-trash"
                                             @onclick="() => LoadTableForEdit(table.TableId)"
                                             data-bs-toggle="modal" data-bs-target="#ConfirmDeleteModal">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                    @* <div class="card m-1 bg-light text-dark" style="width: 100%; height: 25px;">
+                                        <div>Cột: @GetColumnFromPosition(table.Position); Hàng: @GetRowFromPosition(table.Position)</div>
+                                    </div> *@
                                 </div>
                             </div>
                         </div>
+
                     }
                 </div>
             </div>

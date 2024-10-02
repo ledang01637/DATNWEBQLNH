@@ -15,7 +15,7 @@ namespace DATN.Client.Shared
         protected override async Task OnInitializedAsync()
         {
             wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
-            if (wifiIpAddress.Equals("192.168.218.1") || wifiIpAddress.Equals("192.168.1.87"))
+            if (wifiIpAddress.Equals("192.168.218.1"))
             {
                 isAcceptWifi = true;
                 loginRequest.Username = "Customer";

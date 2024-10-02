@@ -240,7 +240,7 @@ span {
     text-align: left;
     font-size: 45px;
     color: var(--color-darkslategray);
-    font-family: var(--font-lobster);
+    font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
 }
 
 .khai-v,

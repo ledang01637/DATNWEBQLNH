@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -30,6 +31,13 @@ namespace DATN.Client.Service
                         new Claim(ClaimTypes.Role, userRole)
                     }, "jwt");
                 }
+                else
+                {
+                    Console.WriteLine("userRole is null");
+                }
+            }else
+            {
+                Console.WriteLine("token is null");
             }
 
             var user = new ClaimsPrincipal(identity);
@@ -44,6 +52,10 @@ namespace DATN.Client.Service
             var roleClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
             return Task.FromResult(roleClaim?.Value ?? string.Empty);
         }
-
+        public async Task Logout()
+        {
+            await _localStorageService.RemoveItemAsync("authToken");
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        }
     }
 }

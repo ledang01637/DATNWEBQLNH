@@ -38,8 +38,11 @@ namespace DATN.Client.Pages
                         var Username = jsonToken.Claims.FirstOrDefault(c => c.Type == "Username")?.Value;
                         var isActive = jsonToken.Claims.FirstOrDefault(c => c.Type == "IsActive")?.Value;
                         var roleId = jsonToken.Claims.FirstOrDefault(c => c.Type == "RoleId")?.Value;
+                        var accountId = jsonToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
                         bool isActiveBool = false;
 
+
+                        Navigation.NavigateTo("/");
                         if (!string.IsNullOrEmpty(isActive))
                         {
                             bool.TryParse(isActive, out isActiveBool);
@@ -56,14 +59,25 @@ namespace DATN.Client.Pages
                         await _localStorageService.SetItemAsync("authToken", Token);
                         await _localStorageService.SetItemAsync("userName", Username);
                         await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                        await JS.InvokeVoidAsync("showAlert", "success","Đăng nhập thành công","");
+                        await _localStorageService.SetItemAsync("AccountId", accountId);
+
+                        //if (customAuthStateProvider != null)
+                        //{
+                        //    await JS.InvokeVoidAsync("showAlert", "success", "Đăng nhập thành công", "");
+                        //}
+                        //else
+                        //{
+                        //    await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản chưa được xác thực", "");
+                        //}
+
+    
                         if (int.Parse(roleId) == 3)
                         {
-                            Navigation.NavigateTo("/customer", true);
+                            Navigation.NavigateTo("/", true);
                         }
                         else
                         {
-                            Navigation.NavigateTo("/manager", true);
+                            Navigation.NavigateTo("/", true);
                         }
                     }
                     else
@@ -98,7 +112,7 @@ namespace DATN.Client.Pages
             //    // Kiểm tra nếu mật khẩu mới không khớp với xác nhận mật khẩu
             //    await JS.InvokeVoidAsync("showAlert", "Mật khẩu xác nhận không khớp");
             //    return;
-            //}        
+            //}
             //// Cập nhật mật khẩu mới
             //loggedInUser.Password = passwordChangeModel.NewPassword;
             //await JS.InvokeVoidAsync("showAlert", "Đổi mật khẩu thành công");

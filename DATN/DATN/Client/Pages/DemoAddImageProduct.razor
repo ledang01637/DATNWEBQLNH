@@ -1,33 +1,18 @@
 ﻿@page "/invoice-preview"
-@using Microsoft.JSInterop
+@inject HttpClient httpClient
+@inject IJSRuntime JS
 
-<h3>Hóa đơn</h3>
+<h3>Xem trước hóa đơn</h3>
 
-<button class="btn btn-primary"
-        data-bs-toggle="modal" data-bs-target="#invoiceModal">
-    Xem trước hóa đơn
-</button>
-
-<div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog" aria-labelledby="invoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="invoiceModalLabel">Hóa đơn của bạn</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Chi tiết hóa đơn:</p>
-                <p>Sản phẩm: Sản phẩm 1</p>
-                <p>Số lượng: 2</p>
-                <p>Tổng tiền: 30000 VND</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">In hóa đơn</button>
-            </div>
-        </div>
-    </div>
+<!-- Nội dung hóa đơn -->
+<div id="invoice-preview" class="border p-3">
+    <h4>Hóa đơn</h4>
+    <p>Sản phẩm: ABC</p>
+    <p>Số lượng: 2</p>
+    <p>Giá: 30,000 VND</p>
+    <p>Tổng cộng: 60,000 VND</p>
 </div>
 
+<!-- Nút in hóa đơn -->
+<button class="btn btn-primary mt-3" @onclick="PrintBill">In hóa đơn</button>
+<button class="btn btn-success mt-3" @onclick="PrintFromBrowser">Xem trước và in từ trình duyệt</button>

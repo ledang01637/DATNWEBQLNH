@@ -1,8 +1,10 @@
-﻿@page "/Login"
+﻿@page "/login"
+@using DATN.Client.Service
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject LocalStorageService _localStorageService
+@* @inject CustomAuthenticationStateProvider authenticationStateProvider *@
 
 <style>
     body {

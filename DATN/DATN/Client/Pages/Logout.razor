@@ -1,6 +1,8 @@
 ﻿@page "/logout"
+@using DATN.Client.Service
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject CustomAuthenticationStateProvider authenticationStateProvider
 @inject LocalStorageService _localStorageService;
 
 <h3>Logouting...</h3>
@@ -8,11 +10,8 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-
-        await _localStorageService.RemoveItemAsync("authToken");
-        await _localStorageService.RemoveItemAsync("expiryTime");
-        await _localStorageService.RemoveItemAsync("userName");
-        await _localStorageService.RemoveItemAsync("userRoleId");
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authenticationStateProvider;
+        await customAuthStateProvider.Logout();
 
         Navigation.NavigateTo("/login", true);
     }

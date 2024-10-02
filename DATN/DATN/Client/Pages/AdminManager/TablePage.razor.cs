@@ -7,13 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components;
+using System.Drawing;
 
-namespace DATN.Client.Pages
+namespace DATN.Client.Pages.AdminManager
 {
     public partial class TablePage
     {
         private Table tableModel = new Table();
         private List<Table> tables = new List<Table>();
+        private static List<Table> tablesStatic = new List<Table>();
         private List<Floor> floors = new List<Floor>();
         private int selectTableId;
         private bool isMoveTable = false;
@@ -23,15 +25,14 @@ namespace DATN.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            Console.WriteLine("a" + rowCount);
             await LoadAll();
         }
         private async Task LoadAll()
         {
             try
             {
-                tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-                if(tables.Count > 0)
+                tables = tablesStatic = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+                if (tables.Count > 0)
                 {
                     tables = tables.Where(a => a.IsDeleted.Equals(false)).ToList();
                     CalculateRowCount();
@@ -61,7 +62,7 @@ namespace DATN.Client.Pages
                 var existingTable = tables.FirstOrDefault(r => r.TableNumber == tableModel.TableNumber);
                 if (existingTable != null)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error","Lỗi","Số bàn đã tồn tại");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Số bàn đã tồn tại");
                     await Task.Delay(1000);
                     return;
                 }
@@ -72,7 +73,7 @@ namespace DATN.Client.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thành công", "");
                     await LoadAll();
                 }
                 else
@@ -108,7 +109,7 @@ namespace DATN.Client.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thành công", "");
                     isMoveTable = false;
                     await LoadAll();
                 }
@@ -135,7 +136,7 @@ namespace DATN.Client.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "success","Thành công","");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thành công", "");
                     isMoveTable = false;
                     await LoadAll();
                 }
@@ -184,6 +185,35 @@ namespace DATN.Client.Pages
             }
             var parts = position.Split('-');
             return int.Parse(parts[1].Trim().Replace("Cột", "").Trim());
+        }
+        private async Task GetPosionTable(int FloorId, bool IsSwap)
+        {
+
+            await JS.InvokeVoidAsync("MoveTable", FloorId, IsSwap);
+            //await JS.InvokeVoidAsync("updateTablePositions");
+        }
+        private async Task AcctiveMoveTable(bool _isSwap)
+        {
+            isMoveTable = true;
+            foreach (var f in floors)
+            {
+               await GetPosionTable(f.FloorId, _isSwap);
+            }
+        }
+        private void SaveTable()
+        {
+            isMoveTable = false;
+        }
+        [JSInvokable("UpdateTablePosition")]
+        public static void UpdateTablePositionAsync(int tableId, string newPosition)
+        {
+            var table = tablesStatic.FirstOrDefault(t => t.TableId == tableId);
+
+            if (table != null)
+            {
+                table.Position = newPosition;
+            }
+
         }
     }
 }

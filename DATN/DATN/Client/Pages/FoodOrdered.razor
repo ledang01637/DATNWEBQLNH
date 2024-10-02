@@ -65,8 +65,15 @@
     <div class="total-section">
         <div class="d-flex justify-content-between">
             <p class="mb-0">Tổng tiền</p>
-            <p class="mb-0"><strong>@Total.ToString("###,0##") VND</strong></p>
+            <p class="mb-0"><strong>@Total.ToString("N0") VND</strong></p>
         </div>
+        @{
+            foreach (var cv in customerVouchers)
+            {
+                <label>Chọn voucher: @cv.VoucherId</label>
+                <a @onclick="() =>UseVoucher(cv.VoucherId)">Mã số voucher là @cv.VoucherId</a>
+            }
+        }
         <button @onclick="Pay" type="button" class="btn btn-warning w-100 mt-2">
             Thanh toán
         </button>

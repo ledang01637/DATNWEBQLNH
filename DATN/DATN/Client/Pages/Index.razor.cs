@@ -94,7 +94,7 @@ namespace DATN.Client.Pages
         }
         private string GetGridColumnClass()
         {
-            return isGridView ? "col-sm-6 col-lg-4" : "col-lg-4"; // hoặc tuỳ chỉnh lại col-lg để có nhiều hơn
+            return isGridView ? "col-sm-6 col-lg-4" : "col-lg-4";
         }
         private void ToggleGridView()
         {

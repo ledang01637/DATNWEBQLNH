@@ -102,6 +102,7 @@ namespace DATN.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
 
                 new Claim("Username", account.UserName),
+                new Claim("AccountId", account.AccountId.ToString()),
                 new Claim("AccountType", account.AccountType),
                 new Claim("CreateDate", account.CreateDate.ToString()),
                 new Claim("UpdateDate", account.UpdateDate.ToString()),
