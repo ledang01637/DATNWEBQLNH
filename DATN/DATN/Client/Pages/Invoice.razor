@@ -1,5 +1,6 @@
-﻿@page "/demoinvoice-preview"
+﻿@page "/invoice-preview"
 @inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
 @inject IJSRuntime JS
 
 
@@ -17,10 +18,10 @@
             <div class="col-md-6">
                 <strong>TIỆN NGHI NHÀ BẾP CỦA CHÚNG TÔI</strong>
             </div>
-@*             <div class="col-md-6 text-end">
-                Điện thoại Khách hàng: +84 912 345 678<br>
-                Địa chỉ Khách hàng: 123 Đường ABC, Thành phố DEF
-            </div> *@
+            <div class="col-md-6 text-end">
+                Số bàn: @numberTable<br>
+                Thời gian: @DateTime.Now
+            </div>
         </div>
     </div>
 
@@ -36,22 +37,39 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td><img src="https://via.placeholder.com/50" alt="Bánh nhung đỏ"></td>
-                <td>Bánh nhung đỏ</td>
-                <td>1</td>
-                <td>200.000đ</td>
-                <td>200.000đ</td>
-            </tr>
+            @if(carts == null)
+            {
+                <p>Vui lòng thêm sản phẩm</p>
+            }
+            else
+            {
+                foreach(var c in carts)
+                {
+                    <tr>
+                        <td><img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="Product"></td>
+                        <td>@c.ProductName</td>
+                        <td>@c.Quantity</td>
+                        <td>@c.Price.ToString("N0") VND</td>
+                        <td>@Total.ToString("N0") VND</td>
+                    </tr>
+                }
+            }
         </tbody>
     </table>
 
     <!-- Total Section -->
-    <div class="total-section-bill">
-        Tổng tiền đơn hàng: 800.000đ<br>
-        Thuế (0%): 0đ<br>
-        <strong>Tổng tiền thanh toán: 800.000đ</strong>
-    </div>
+    @{
+        var TotalTax = Total * Tax;
+        var TotalServiceFee = Total * ServiceFee;
+        var TotalAmount = Total + TotalTax + TotalServiceFee;
+        <div class="total-section-bill text-end">
+            Tổng tiền đơn hàng: @Total.ToString("N0") VND<br>
+            Thuế VAT (10%): @TotalTax.ToString("N0") VND<br>
+            Phí dịch vụ (5%):  @TotalServiceFee.ToString("N0") VND<br>
+            <strong>Tổng tiền thanh toán: @TotalAmount.ToString("N0") VND </strong>
+        </div>
+    }
+
 
     <!-- Footer Section: Bank Information and Contact Information -->
     <div class="footer-section">
@@ -68,6 +86,7 @@
             Địa chỉ: 3/2 Hưng Lợi, Ninh Kiều, Cần Thơ
         </div>
     </div>
+    <footer class="mt-2" style="text-align: center;"><b>Xin cảm ơn và hẹn gặp lại.</b></footer>
 </div>
 
 <!-- Nút in hóa đơn -->

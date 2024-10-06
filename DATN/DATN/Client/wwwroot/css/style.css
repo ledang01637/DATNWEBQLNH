@@ -45,6 +45,7 @@
     font-family: inherit;
     display: inline-block;
     min-width: 129px;
+    font-family: 'Dancing Script', cursive;
 }
 
 .ellipse4-31-iphone13mini-1-icon {
@@ -105,7 +106,6 @@
     justify-content: flex-start;
     padding: 1px 0 0;
     box-sizing: border-box;
-    font-family: var(--font-roboto);
     font-weight: 500;
     font-size: var(--font-size-lg);
     color: var(--color-darkslategray);
@@ -140,7 +140,7 @@
 .frame-wrapper {
     align-self: stretch;
     flex-direction: row;
-    padding: 0 var(--padding-lg) 0 9px;
+/*    padding: 0 var(--padding-lg) 0 9px;*/
     box-sizing: border-box;
 }
 
@@ -240,7 +240,6 @@ span {
     text-align: left;
     font-size: 45px;
     color: var(--color-darkslategray);
-    font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
 }
 
 .khai-v,
@@ -524,12 +523,6 @@ span {
         color: gray;
         font-size: 16px;
     }
-
-.foodcustom {
-    /* min-width: 390px;
-  max-width: 844px !important; */
-    font-family: var(--font-lobster);
-}
 
 .image-container {
     position: relative;

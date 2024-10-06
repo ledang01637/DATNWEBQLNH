@@ -1,0 +1,93 @@
+﻿body {
+/*    font-family: Arial, sans-serif;*/
+    margin: 0;
+    padding: 0;
+}
+
+.invoice-container {
+    border: 2px solid green;
+    padding: 20px;
+    margin: 20px auto;
+    width: 210mm; /* Width of A4 paper */
+    height: auto; /* Let the height adjust automatically */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+.invoice-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+    .invoice-header h1 {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .invoice-header h2 {
+        font-size: 20px;
+        margin: 0;
+    }
+
+    .invoice-header h4 {
+        color: green;
+    }
+
+.invoice-details {
+    margin-bottom: 20px;
+}
+
+    .invoice-details .row div {
+        padding: 5px 0;
+    }
+
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+total-section-bill {
+    text-align: right;
+}
+
+    .total-section-bill strong {
+        font-size: 20px;
+    }
+
+.footer-section {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+    .footer-section div {
+        width: 48%;
+    }
+
+    .footer-section strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+/* Setup for print */
+@media print {
+    body, html {
+        width: 210mm;
+        height: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    .invoice-container {
+        margin: 0;
+        width: 100%;
+        height: auto;
+        border: none; /* Remove borders for printing */
+        padding: 10mm;
+    }
+}

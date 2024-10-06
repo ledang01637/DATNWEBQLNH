@@ -107,7 +107,7 @@ namespace DATN.Client.Pages
                     rewardPointe = new RewardPointe()
                     {
                         CustomerId = customer.CustomerId,
-                        RewardPoint = int.Parse(_order.TotalAmount.ToString()),
+                        RewardPoint = (int)(_order.TotalAmount / 100000),
                         UpdateDate = DateTime.Now,
                         IsDeleted = false,
                         OrderId = _order.OrderId,

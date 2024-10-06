@@ -10,8 +10,6 @@ namespace DATN.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Customer>().Property(c => c.TotalRewardPoint).HasColumnType("decimal(18,2)");
-            modelBuilder.Entity<RewardPointe>().Property(c => c.RewardPoint).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Employee>().Property(d => d.Salary).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Menu>().Property(f => f.PriceCombo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Order>().Property(f => f.TotalAmount).HasColumnType("decimal(18,2)");

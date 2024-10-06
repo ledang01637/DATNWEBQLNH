@@ -6,6 +6,7 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace DATN.Client.Pages
         private List<Menu> menus = new List<Menu>();
         private List<Category> categories = new List<Category>();
         private List<MenuItem> menuItems = new List<MenuItem>();
+        private List<Account> accounts = new List<Account>();
+        private LoginRequest loginUser = new LoginRequest();
         private string ComboName;
         private bool isGridView = true;
 
@@ -41,7 +44,24 @@ namespace DATN.Client.Pages
                     categories = categories.Where(a => a.IsDelete == false).ToList();
                 }
                 menus = await httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
-
+                accounts = await httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
+                if(accounts != null)
+                {
+                    loginUser.Username = "No Account";
+                    loginUser.Password = "123456";
+                    var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
+                        if (loginResponse != null && loginResponse.SuccsessFull)
+                        {
+                            var handler = new JwtSecurityTokenHandler();
+                            var jsonToken = handler.ReadToken(loginResponse.Token) as JwtSecurityToken;
+                            var accountId = jsonToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
+                            await _localStorageService.SetItemAsync("AccountId", accountId);
+                        }
+                    }
+                }
                 StateHasChanged();
 
             }

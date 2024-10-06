@@ -41,7 +41,6 @@ namespace DATN.Client.Pages
                         var accountId = jsonToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
                         bool isActiveBool = false;
 
-
                         Navigation.NavigateTo("/");
                         if (!string.IsNullOrEmpty(isActive))
                         {

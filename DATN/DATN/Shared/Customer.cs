@@ -17,7 +17,7 @@ namespace DATN.Shared
         public string Email { get; set; }
         public bool IsDeleted { get; set; }
         public int AccountId { get; set; }
-        public decimal TotalRewardPoint { get; set; }
+        public int TotalRewardPoint { get; set; }
 
         public Account Accounts { get; set; }
         public ICollection<Order> Orders { get; set; }

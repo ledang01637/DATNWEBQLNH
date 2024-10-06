@@ -69,6 +69,7 @@ namespace DATN.Client.Pages.AdminManager
                     await Task.Delay(1000);
                     return;
                 }
+                Console.Write("a", tableModel);
                 tableModel.IsDeleted = false;
                 tableModel.Status = "Bàn trống";
                 tableModel.Position = $"{row} - {column}";

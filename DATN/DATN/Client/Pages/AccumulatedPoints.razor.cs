@@ -14,7 +14,7 @@ namespace DATN.Client.Pages
         private Customer customer = new Customer();
         private CustomerVoucher customerVoucher = new CustomerVoucher();
         private List<Voucher> vouchers = new List<Voucher>();
-        private decimal rewardPoint = 0;
+        private int rewardPoint = 0;
         protected override async Task OnInitializedAsync()
         {
             await Load();
@@ -36,7 +36,7 @@ namespace DATN.Client.Pages
             }
             
         }
-        private async Task RedeemPoints(decimal point, int voucherId)
+        private async Task RedeemPoints(int point, int voucherId)
         {
             customer.TotalRewardPoint -= point;
             rewardPoint = customer.TotalRewardPoint;
