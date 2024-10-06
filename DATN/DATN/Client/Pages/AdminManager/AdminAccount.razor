@@ -58,8 +58,17 @@
                                     <td>@account.UserName</td>
                                     <td>@account.Password</td>
                                     <td>
-                                        <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Sửa</button>
-                                        <button class="btn btn-danger" @onclick="() => DeleteAccount(account.AccountId)">Ẩn</button>
+                                        @if (account.IsActive)
+                                        {
+                                            <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Edit</button>
+                                            <button class="btn btn-danger" @onclick="() => HideAccount(account.AccountId)">Hide</button>
+                                            <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Update</button>
+                                            <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Default</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-warning" @onclick="() => RestoreAccount(account.AccountId)">Restore</button>
+                                        }
                                     </td>
                                 </tr>
                             }

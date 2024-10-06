@@ -41,23 +41,81 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
-        private async Task DeleteAccount(int accountId)
+        private async Task HideAccount(int accountId)
         {
             try
             {
                 var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
                 if (account != null)
                 {
-                    await httpClient.DeleteAsync($"api/Account/{accountId}");
+                    account.IsActive = false;
+                    await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
                     await Load();
                     StateHasChanged();
                 }
             }
             catch (Exception ex)
             {
-                errorMessage = $"Error deleting account: {ex.Message}";
+                Console.WriteLine($"Error hiding voucher: {ex.Message}");
             }
         }
+
+        private async Task RestoreAccount(int accountId)
+        {
+            try
+            {
+                var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
+                if (account != null)
+                {
+                    account.IsActive = true;
+                    await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
+                    await Load();
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
+            }
+        }
+
+        private async Task UpdateAccount(int accountId)
+        {
+            try
+            {
+                var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
+                if (account != null)
+                {
+                    account.AccountType = "Employee";
+                    await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
+                    await Load();
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
+            }
+        }
+        private async Task DefaultAccount(int accountId)
+        {
+            try
+            {
+                var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
+                if (account != null)
+                {
+                    account.AccountType = "Customer";
+                    await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
+                    await Load();
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
+            }
+        }
+
 
         private void EditAccount(int accountId)
         {
@@ -74,7 +132,7 @@ namespace DATN.Client.Pages.AdminManager
             var searchTerm = e.Value.ToString().ToLower();
             filter = string.IsNullOrWhiteSpace(searchTerm)
                 ? listAccount
-                : listAccount.Where(p => p.AccountType.ToLower().Contains(searchTerm)).ToList();
+                : listAccount.Where(p => p.AccountType.ToLower().Contains(searchTerm) || p.UserName.ToLower().Contains(searchTerm)).ToList();
         }
 
     }

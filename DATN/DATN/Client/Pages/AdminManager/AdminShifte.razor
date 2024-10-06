@@ -1,9 +1,8 @@
-﻿@page "/adminunit"
+﻿@page "/adminshifte"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
-
 
 <style>
     .product-table-container {
@@ -25,34 +24,43 @@
     <div class="col-md-12 grid-margin stretch-card p-5">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Unit</h4>
+                <h4 class="card-title">Account</h4>
                 <p class="card-description">
-                    <button class="btn btn-success" @onclick="() => CreateUnit()">Add new unit</button>
+                    <button class="btn btn-success" @onclick="() => CreateShifte()">Add new shifte</button>
                 </p>
                 <div class="search-bar">
-                    <input type="text" class="form-control" placeholder="Searching unit..." @oninput="Filter" />
+                    <input type="text" class="form-control" placeholder="Searching shifte..." @oninput="Filter" />
                 </div>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>UnitName</th>
-                                <th>UnitDescription</th>
+                                <th>Shifte_Name</th>
+                                <th>StartTime</th>
+                                <th>EndTime</th>
                                 <th></th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            @foreach (var unit in filter)
+                            @foreach (var item in filter)
                             {
-                                if (unit != null)
+                                if (item != null)
                                 {
                                     <tr>
-                                        <td>@unit.UnitName</td>
-                                        <td>@unit.UnitDescription</td>
+                                        <td>@item.Shifte_Name</td>
+                                        <td>@item.StartTime</td>
+                                        <td>@item.EndTime</td>
                                         <td class="text-center">
-                                            <button class="btn btn-primary" @onclick="() => EditUnit(unit.UnitId)">Sửa</button>
-                                            <button class="btn btn-danger" @onclick="() => DeleteUnit(unit.UnitId)">Xóa</button>
+                                            @if (!item.IsDeleted)
+                                            {
+                                                <button class="btn btn-primary" @onclick="() => EditShifte(item.Shifte_Id)">Sửa</button>
+                                                <button class="btn btn-danger" @onclick="() => HideShifte(item.Shifte_Id)">Ẩn</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-warning" @onclick="() => RestoreShifte(item.Shifte_Id)">Khôi phục</button>
+                                            }
                                         </td>
                                     </tr>
                                 }
