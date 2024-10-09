@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace DATN.Client.Pages
 {
-    
+
     public partial class Login
     {
         private LoginRequest loginUser = new LoginRequest();
@@ -47,7 +47,7 @@ namespace DATN.Client.Pages
 
                         if (!isActiveBool)
                         {
-                            await JS.InvokeVoidAsync("showAlert", "warning","Tài khoản bị khóa","Vui lòng liên hệ Admin");
+                            await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản bị khóa", "Vui lòng liên hệ Admin");
                             await Task.Delay(1000);
                             Navigation.NavigateTo("/");
                             return;
@@ -56,14 +56,14 @@ namespace DATN.Client.Pages
                         await _localStorageService.SetItemAsync("authToken", Token);
                         await _localStorageService.SetItemAsync("userName", Username);
                         await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                        await JS.InvokeVoidAsync("showAlert", "success","Đăng nhập thành công","");
+                        await JS.InvokeVoidAsync("showAlert", "success", "Đăng nhập thành công", "");
                         if (int.Parse(roleId) == 3)
                         {
                             Navigation.NavigateTo("/customer", true);
                         }
                         else
                         {
-                            Navigation.NavigateTo("/manager", true);
+                            Navigation.NavigateTo("/adminaccount", true);
                         }
                     }
                     else
@@ -105,3 +105,4 @@ namespace DATN.Client.Pages
         }
     }
 }
+

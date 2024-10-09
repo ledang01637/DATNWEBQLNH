@@ -1,3 +1,4 @@
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -14,7 +15,7 @@
                         <span class="count bg-success"></span>
                     </div>
                     <div class="profile-name">
-                        <h5 class="mb-0 font-weight-normal">Henry Klein</h5>
+                        <h5 class="mb-0 font-weight-normal">@Username</h5>
                         <span>Gold Member</span>
                     </div>
                 </div>
@@ -125,35 +126,21 @@
         </li>
 
         <li class="nav-item menu-items">
-            <NavLink class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+            <NavLink class="nav-link" href="adminmenu">
                 <span class="menu-icon">
-                    <i class="mdi mdi-laptop"></i>
+                    <i class="mdi mdi-speedometer"></i>
                 </span>
                 <span class="menu-title">Menu</span>
-                <i class="menu-arrow"></i>
             </NavLink>
-            <div class="collapse" id="ui-basic">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="adminmenu">Menu</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="adminmenuitem">Menu Item</a></li>
-                </ul>
-            </div>
         </li>
 
         <li class="nav-item menu-items">
-            <NavLink class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+            <NavLink class="nav-link" href="adminorder">
                 <span class="menu-icon">
-                    <i class="mdi mdi-laptop"></i>
+                    <i class="mdi mdi-speedometer"></i>
                 </span>
                 <span class="menu-title">Order</span>
-                <i class="menu-arrow"></i>
             </NavLink>
-            <div class="collapse" id="ui-basic">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="adminorder">Order</a></li>
-                    <li class="nav-item"> <a class="nav-link" href="adminorderitem">Order Item</a></li>
-                </ul>
-            </div>
         </li>
 
         <li class="nav-item menu-items">
@@ -207,6 +194,8 @@
                 <span class="menu-title">Icons</span>
             </a>
         </li>
+
+
         <li class="nav-item menu-items">
             <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
                 <span class="menu-icon">
@@ -237,6 +226,22 @@
 </nav>
 
 @code {
+    [Parameter]
+    private string Username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            Username = user.Identity.Name;  // Lấy tên người dùng đã đăng nhập
+        }
+    }
+}
+
+@* @code {
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -245,4 +250,6 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
-}
+
+
+} *@
