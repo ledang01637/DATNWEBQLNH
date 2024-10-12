@@ -14,7 +14,7 @@ namespace DATN.Client.Pages
     {
         private string token;
         private string from;
-        private string to = "danglh";
+        private string to = "Manager";
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -27,6 +27,11 @@ namespace DATN.Client.Pages
                     return;
                 }
                 from = GetTableNumberFromToken(token);
+                if(from == null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                    return;
+                }
                 await SetupCall(token, from, to);
                 await setupVideo();
             }
@@ -71,8 +76,8 @@ namespace DATN.Client.Pages
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
-            var tableNumberClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == "tableNumber");
-            return tableNumberClaim?.Value;
+            var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
+            return userId?.Value;
         }
     }
 }

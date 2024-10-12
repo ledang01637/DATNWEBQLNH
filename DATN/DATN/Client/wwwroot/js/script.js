@@ -47,7 +47,6 @@ function showModal(modalId) {
     }
 }
 function closeModal(modalId) {
-    console.log('ab');
     $('#'+modalId).modal('hide');
 }
 
@@ -70,111 +69,62 @@ window.generateMD5Hash = function (input) {
 
 
 //Call
-function selectCall(callButtonId, expandButtonId, callStaffBtnId, closeBtnId) {
-
+function initCallButton(callButtonId, expandButtonId, closeBtnId) {
     const callButton = document.getElementById(callButtonId);
     const expandButtons = document.getElementById(expandButtonId);
+    const closeButton = document.getElementById(closeBtnId);
+
+    let shiftX, shiftY, isDragging = false;
     let isExpanded = false;
 
-    callButton.addEventListener('click', function () {
-        if (isExpanded) {
-            expandButtons.style.display = 'none';
-        } else {
-            expandButtons.style.display = 'flex';
-        }
-        isExpanded = !isExpanded;
-    });
+    // Chức năng mở rộng thu nhỏ
+    callButton.addEventListener('click', toggleExpand);
 
-    document.getElementById(closeBtnId).addEventListener('click', function () {
+    closeButton.addEventListener('click', function () {
         expandButtons.style.display = 'none';
         isExpanded = false;
     });
-}
 
-function initDrag(callButtonId, expandButtonId, callStaffBtnId, closeBtnId) {
-    const callButton = document.getElementById(callButtonId);
-    const expandButtons = document.getElementById(expandButtonId);
-    let shiftX, shiftY;
-    let isDragging = false;
-    let initialX, initialY;
-
-    function moveAt(pageX, pageY) {
-
-        let newX = pageX - shiftX;
-        let newY = pageY - shiftY - window.scrollY;
-
-        const buttonRect = callButton.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-
-        if (newX < 0) {
-            newX = 0;
-        }
-
-        if (newX + buttonRect.width > viewportWidth) {
-            newX = viewportWidth - buttonRect.width;
-        }
-
-        if (newY < 0) {
-            newY = 0;
-        }
-
-        if (newY + buttonRect.height > viewportHeight) {
-            newY = viewportHeight - buttonRect.height;
-        }
-
-        callButton.style.left = newX + 'px';
-        callButton.style.top = newY + 'px';
-        expandButtons.style.left = newX + 'px';
-        expandButtons.style.top = (newY + buttonRect.height + 10) + 'px';
-    }
-
+    // Sự kiện kéo nút gọi
     callButton.onmousedown = function (event) {
         event.preventDefault();
         isDragging = false;
         shiftX = event.clientX - callButton.getBoundingClientRect().left;
         shiftY = event.clientY - callButton.getBoundingClientRect().top;
-        initialX = event.clientX;
-        initialY = event.clientY;
 
         document.addEventListener('mousemove', onMouseMove);
-        document.onmouseup = function (event) {
+        document.onmouseup = function () {
             document.removeEventListener('mousemove', onMouseMove);
             document.onmouseup = null;
 
-            if (!isDragging) {
-
-                selectCall(callButtonId, expandButtonId, callStaffBtnId, closeBtnId);
-            }
+            //if (!isDragging) {
+            //    toggleExpand();
+            //}
         };
     };
 
     function onMouseMove(event) {
-        isDragging = true;
+        isDragging = true; // Đánh dấu rằng đang kéo
         moveAt(event.pageX, event.pageY);
     }
 
-    // Drag for touch devices
+    // Sự kiện kéo cho thiết bị cảm ứng
     callButton.addEventListener('touchstart', function (event) {
         event.preventDefault();
-
         const touch = event.touches[0];
         shiftX = touch.clientX - callButton.getBoundingClientRect().left;
         shiftY = touch.clientY - callButton.getBoundingClientRect().top;
-        initialX = touch.clientX;
-        initialY = touch.clientY;
 
         document.addEventListener('touchmove', onTouchMove);
         document.addEventListener('touchend', function (event) {
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', null);
 
-            const deltaX = Math.abs(initialX - event.changedTouches[0].clientX);
-            const deltaY = Math.abs(initialY - event.changedTouches[0].clientY);
+            const deltaX = Math.abs(touch.clientX - event.changedTouches[0].clientX);
+            const deltaY = Math.abs(touch.clientY - event.changedTouches[0].clientY);
 
             if (deltaX < 5 && deltaY < 5) {
-                selectCall(callButtonId, expandButtonId, callStaffBtnId, closeBtnId);
+                toggleExpand();
             }
         });
     });
@@ -184,10 +134,30 @@ function initDrag(callButtonId, expandButtonId, callStaffBtnId, closeBtnId) {
         moveAt(touch.pageX, touch.pageY);
     }
 
+    function moveAt(pageX, pageY) {
+        const buttonRect = callButton.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let newX = Math.min(Math.max(pageX - shiftX, 0), viewportWidth - buttonRect.width);
+        let newY = Math.min(Math.max(pageY - shiftY - window.scrollY, 0), viewportHeight - buttonRect.height);
+
+        callButton.style.left = newX + 'px';
+        callButton.style.top = newY + 'px';
+        expandButtons.style.left = newX + 'px';
+        expandButtons.style.top = (newY + buttonRect.height + 10) + 'px';
+    }
+
+    function toggleExpand() {
+        isExpanded = !isExpanded;
+        expandButtons.style.display = isExpanded ? 'flex' : 'none';
+    }
+
     callButton.ondragstart = function () {
         return false;
     };
 }
+
 
 
 

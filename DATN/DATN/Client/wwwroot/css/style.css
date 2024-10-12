@@ -589,6 +589,7 @@ span {
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
     z-index: 1000;
+    pointer-events: auto;
 }
 
     .call-button:hover {

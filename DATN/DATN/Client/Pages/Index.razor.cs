@@ -76,7 +76,7 @@ namespace DATN.Client.Pages
                         await JS.InvokeVoidAsync("showLog", "Tài khoản mật khẩu không chính xác");
                     }
                 }
-                await JS.InvokeVoidAsync("initDrag", "callButtonIndex", "expandButtons", "callStaffBtn", "closeBtn");
+                await JS.InvokeVoidAsync("initCallButton", "callButtonIndex", "expandButtons", "closeBtn");
                 StateHasChanged();
 
             }

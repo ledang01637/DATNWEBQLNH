@@ -9,7 +9,9 @@
     #video-container {
         position: relative;
         margin: auto;
-        width: 640px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
     }
 
     #localVideo {
@@ -19,17 +21,21 @@
         width: 120px;
         height: 90px;
         z-index: 10;
-    }
-
-    video {
-        display: none;
-        opacity: 0;
+        display: block;
+        opacity: 1;
     }
 
     #remoteVideo {
         width: 100%;
         height: 100%;
+        display: block;
+        opacity: 1;
     }
+
+    video {
+        display: none;
+    }
+
 
     #action-buttons {
         margin: auto;
@@ -51,7 +57,7 @@
         font-size: 10px !important;
     }
 
-    #btn-end, #btn-answer {
+    #btn-end, #btn-answer, #btn-call, #btn-reject {
         width: 50px;
         height: 50px;
     }
@@ -64,6 +70,12 @@
 
     #btn-answer{
         background-color: #28a745;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    #btn-reject {
+        background-color: #242242;
         color: white;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
     }
@@ -82,19 +94,34 @@
         cursor: pointer;
     }
 
+    #btn-reject:hover {
+        background-color: #643421;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        cursor: pointer;
+    }
+
+    #particles-js {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
 
 </style>
 
+<div id="particles-js"></div>
 <div class="box" id="call-box">
-    <div id="particles-js"></div>
     <div class="caller-info">
-        <div class="caller-name text-center">Bàn số: 10</div>
+        <div id="caller-name" class="caller-name text-center"></div>
     </div>
     <div id="video-container">
         <video id="localVideo" autoplay muted></video>
-        <video id="remoteVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
     </div>
-    <div class="call-message text-center">Đang gọi đến</div>
+    <div id="call-message" class="call-message text-center"></div>
     <div class="call-actions" id="call-actions">
         <button class="btn-action btn-end" id="btn-end">
             <i class="bi bi-telephone-x-fill" style="font-size: 10px;"></i>
@@ -108,7 +135,7 @@
             <i class="bi bi-telephone-down-fill" style="font-size: 10px;"></i>
             <span style="font-size: 10px">Gác máy</span>
         </button>
-        <button class="btn-action btn-reject" id="btn-call" style="display: none">
+        <button class="btn-action btn-reject" id="btn-call" hidden>
             <i class="bi bi-telephone-down-fill" style="font-size: 10px;"></i>
             <span style="font-size: 10px">Gọi</span>
         </button>

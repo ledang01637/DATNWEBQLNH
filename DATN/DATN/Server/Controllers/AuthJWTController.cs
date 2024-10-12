@@ -169,12 +169,25 @@ namespace DATN.Server.Controllers
         [Route("ManagerToken")]
         public IActionResult ManagerToken([FromBody] LoginRequest loginModel)
         {
-            var token = AccessTokenStringee(loginModel.Username);
-            return Ok(new QRResponse
+
+
+            var isSuccess = ValidateUser(loginModel.Username, loginModel.Password);
+
+            var successLogin = _appDBContext.Accounts
+                .FirstOrDefault(x => x.UserName == loginModel.Username && isSuccess);
+
+            if (successLogin != null)
             {
-                IsSuccessFull = true,
-                Token = token
-            });
+                var token = AccessTokenStringee(successLogin.AccountType);
+
+                return Ok(new QRResponse
+                {
+                    IsSuccessFull = true,
+                    Token = token
+                });
+            }
+            return BadRequest("Account Not Valid");
+
         }
 
         private string AccessTokenStringee(string userId)

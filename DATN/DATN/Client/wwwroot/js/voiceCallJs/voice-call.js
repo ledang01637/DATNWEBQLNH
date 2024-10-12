@@ -1,5 +1,4 @@
-﻿
-function layout() {
+﻿function layout() {
     particlesJS("particles-js", {
         "particles": {
             "number": {
@@ -54,10 +53,10 @@ function layout() {
         "retina_detect": true
     });
 }
-function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton) {
+function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId) {
     call1.on('addremotestream', function (stream) {
         console.log('addremotestream');
-        var remoteVideoElement = remoteVideo.get(0);
+        var remoteVideoElement = remoteVideo[0];
         if (remoteVideoElement) {
             remoteVideoElement.srcObject = stream;
             remoteVideo.show();
@@ -66,7 +65,7 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
 
     call1.on('addlocalstream', function (stream) {
         console.log('addlocalstream');
-        var localVideoElement = localVideo.get(0);
+        var localVideoElement = localVideo[0];
         if (localVideoElement) {
             localVideoElement.srcObject = stream;
             localVideo.show();
@@ -79,16 +78,20 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
             console.log("state code :" + state.code);
         } else if (state.code === 4 || state.code === 5 || state.code === 6) {
             console.log("state code :" + state.code);
-            callButton.show();
-            endCallButton.hide();
-            rejectCallButton.hide();
-            answerCallButton.hide();
-            var localVideoElement = localVideo.get(0);
-            var remoteVideoElement = remoteVideo.get(0);
+
+            var localVideoElement = localVideo[0];
+            var remoteVideoElement = remoteVideo[0];
+
             if (localVideoElement) localVideoElement.srcObject = null;
             if (remoteVideoElement) remoteVideoElement.srcObject = null;
+
             localVideo.hide();
             remoteVideo.hide();
+
+            var callboxElement = callboxId[0];
+            console.log(callboxId[0]);
+            callboxElement.style.display = "none";
+
             $('#incoming-call-notice').hide();
         }
     });
@@ -118,7 +121,12 @@ function setupCall(token, callerId, calleeId, isCall) {
     var currentCall = null;
 
     var client = new StringeeClient();
+
     client.connect(token);
+
+    client.on('otherdeviceauthen', (data) => {
+        console.log('Another device authenticated:', data);
+    });
 
     client.on('connect', function () {
         console.log('+++ connected!');
@@ -134,9 +142,11 @@ function setupCall(token, callerId, calleeId, isCall) {
 
     // MAKE CALL
     if (isCall) {
+
+
         currentCall = new StringeeCall(client, callerId, calleeId, false);
 
-        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton);
+        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId);
 
         currentCall.makeCall(function (res) {
             console.log('+++ call callback: ', res);
@@ -148,16 +158,24 @@ function setupCall(token, callerId, calleeId, isCall) {
 
     // RECEIVE CALL
     client.on('incomingcall', function (incomingcall) {
+
         $('#incoming-call-notice').show();
         currentCall = incomingcall;
-        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton);
-        if (callboxId != undefined || callboxId != null) {
-            callboxId.style.display = "block";
+        const callerId = incomingcall.fromNumber;
+
+        $('#caller-name').text(`Cuộc gọi từ bàn số: ${callerId}`);
+
+        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId);
+
+        if (callboxId != undefined && callboxId != null) {
+            var callboxElement = callboxId[0];
+
+            callboxElement.style.display = "block";
+        } else {
+            console.log("callboxId is not found");
         }
-        //callButton.hide();
-        //answerCallButton.show();
-        //rejectCallButton.show();
     });
+
 
     // Event handler for buttons
     answerCallButton.on('click', function () {
@@ -186,20 +204,19 @@ function setupCall(token, callerId, calleeId, isCall) {
             });
         }
 
-        callButton.show();
-        $(this).hide();
-        answerCallButton.hide();
     });
 
     endCallButton.on('click', function () {
         if (currentCall != null) {
             currentCall.hangup(function (res) {
                 console.log('+++ hangup: ', res);
+                var callboxElement = callboxId[0];
+                callboxElement.style.display = "none";
             });
         }
 
-        callButton.show();
-        endCallButton.hide();
+        //callButton.show();
+        //endCallButton.hide();
         $('#incoming-call-notice').hide();
     });
 
@@ -210,21 +227,21 @@ function setupCall(token, callerId, calleeId, isCall) {
 };
 
 function setupVideo(answerButtonId, callButtonId, remoteVideo, localVideo) {
-    var localVideo = document.getElementById(localVideo);
-    var remoteVideo = document.getElementById(remoteVideo);
+    var localVideo = $('#localVideo');
+    var remoteVideo = $('#remoteVideo');
     var answerButton = document.getElementById(answerButtonId);
     var callButton = document.getElementById(callButtonId);
 
     answerButton.addEventListener('click', function () {
-        remoteVideo.muted = false;
-        localVideo.play();
-        remoteVideo.play();
+        remoteVideo[0].muted = false;
+        localVideo[0].play();
+        remoteVideo[0].play();
     });
 
     callButton.addEventListener('click', function () {
-        remoteVideo.muted = false;
-        localVideo.play();
-        remoteVideo.play();
+        remoteVideo[0].muted = false;
+        localVideo[0].play();
+        remoteVideo[0].play();
     });
 }
 

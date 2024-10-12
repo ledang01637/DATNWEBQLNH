@@ -12,7 +12,7 @@ namespace DATN.Client.Pages.AdminManager
     public partial class ManagerEmployeeTable
     {
         private string token;
-        private string from = "danglh";
+        private string from;
         private string to;
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -20,7 +20,7 @@ namespace DATN.Client.Pages.AdminManager
             if (firstRender)
             {
                 token = await _localStorageService.GetItemAsync("m");
-                to = GetTableNumberFromToken(token);
+                from = GetTableNumberFromToken(token);
                 await SetupCall(token, from, to);
                 await setupVideo();
             }
@@ -43,7 +43,8 @@ namespace DATN.Client.Pages.AdminManager
                     {
                         if (token != null)
                         {
-                            await JS.InvokeVoidAsync("setupCall", token, from, to);
+                            bool isCall = false;
+                            await JS.InvokeVoidAsync("setupCall", token, from, to, isCall);
                             await JS.InvokeVoidAsync("layout");
                         }
                         else
@@ -74,8 +75,8 @@ namespace DATN.Client.Pages.AdminManager
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
-            var tableNumberClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == "tableNumber");
-            return tableNumberClaim?.Value;
+            var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
+            return userId?.Value;
         }
 
     }

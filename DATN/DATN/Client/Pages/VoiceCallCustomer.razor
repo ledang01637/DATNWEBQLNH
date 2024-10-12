@@ -8,7 +8,9 @@
     #video-container {
         position: relative;
         margin: auto;
-        width: 640px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
     }
 
     #localVideo {
@@ -18,16 +20,20 @@
         width: 120px;
         height: 90px;
         z-index: 10;
+        display: block;
+        opacity: 1;
+    }
+
+    #remoteVideo {
+        width: 100%;
+        height: 100%;
+        display: block;
+        opacity: 1;
     }
 
     video {
         display: none;
-        opacity: 0;
-    }
-    #remoteVideo {
-        width: 100%;
-        height: 100%;
-    }
+    } 
 
     #action-buttons {
         margin: auto;
@@ -50,9 +56,9 @@
         </div>
         <div id="video-container">
             <video id="localVideo" autoplay muted></video>
-            <video id="remoteVideo" autoplay muted></video>
+            <video id="remoteVideo" autoplay></video>
         </div>
-        <div class="call-message" id="call-message">Đang gọi đến...</div>
+        <div class="call-message" id="call-message">Đang gọi nhân viên...</div>
         <div class="call-actions" id="call-actions">
             <button class="btn-action btn-reject" id="btn-end" @onclick="EndCall">
                 <i class="bi bi-telephone-x-fill" style="font-size: 24px;"></i>
@@ -62,11 +68,11 @@
                 <i class="bi bi-telephone-fill" style="font-size: 24px;"></i>
                 <span>Nhận</span>
             </button>
-            <button class="btn-action btn-reject" id="btn-reject">
+            <button class="btn-action btn-reject" id="btn-reject" hidden>
                 <i class="bi bi-telephone-down-fill" style="font-size: 24px;"></i>
                 <span>Gác máy</span>
             </button>
-            <button class="btn-action btn-reject" id="btn-call" style="display: none">
+            <button class="btn-action btn-reject" id="btn-call" hidden>
                 <i class="bi bi-telephone-down-fill" style="font-size: 24px;"></i>
                 <span>Gọi</span>
             </button>
