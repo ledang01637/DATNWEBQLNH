@@ -53,7 +53,7 @@
         "retina_detect": true
     });
 }
-function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId) {
+function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId, dotNetObjectReference) {
     call1.on('addremotestream', function (stream) {
         console.log('addremotestream');
         var remoteVideoElement = remoteVideo[0];
@@ -89,10 +89,11 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
             remoteVideo.hide();
 
             var callboxElement = callboxId[0];
-            console.log(callboxId[0]);
             callboxElement.style.display = "none";
-
             $('#incoming-call-notice').hide();
+
+            endCallFromJs(dotNetObjectReference);
+
         }
     });
 
@@ -105,7 +106,8 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
     });
 }
 
-function setupCall(token, callerId, calleeId, isCall) {
+function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
+    console.log(dotNetObjectReference);
     var callButton = $('#btn-call');
     var answerCallButton = $('#btn-answer');
     var endCallButton = $('#btn-end');
@@ -146,7 +148,7 @@ function setupCall(token, callerId, calleeId, isCall) {
 
         currentCall = new StringeeCall(client, callerId, calleeId, false);
 
-        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId);
+        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId, dotNetObjectReference);
 
         currentCall.makeCall(function (res) {
             console.log('+++ call callback: ', res);
@@ -163,14 +165,18 @@ function setupCall(token, callerId, calleeId, isCall) {
         currentCall = incomingcall;
         const callerId = incomingcall.fromNumber;
 
-        $('#caller-name').text(`Cuộc gọi từ bàn số: ${callerId}`);
+        $('#caller-name').text(`Cuộc gọi từ bàn: ${callerId}`);
 
-        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId);
+        settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId, dotNetObjectReference);
 
         if (callboxId != undefined && callboxId != null) {
             var callboxElement = callboxId[0];
-
             callboxElement.style.display = "block";
+            answerCallButton.show();
+            console.log(answerCallButton.show());
+            rejectCallButton.show();
+            endCallButton.hide();
+            callButton.hide();
         } else {
             console.log("callboxId is not found");
         }
@@ -180,24 +186,19 @@ function setupCall(token, callerId, calleeId, isCall) {
     // Event handler for buttons
     answerCallButton.on('click', function () {
         $(this).hide();
-        rejectCallButton.hide();
         endCallButton.show();
-        callButton.hide();
+        rejectCallButton.hide();
         if (currentCall != null) {
             currentCall.answer(function (res) {
                 console.log('+++ answering call: ', res);
                 callMessage.textContent = 'Đang nghe...';
-                callActions.innerHTML = `
-                <button class="btn-action btn-end" id="btn-end">
-                    <i class="bi bi-telephone-down-fill" style="font-size: 24px;"></i>
-                    <span>Kết thúc</span>
-                </button>
-            `;
             });
         }
     });
 
     rejectCallButton.on('click', function () {
+        $(this).hide();
+        callButton.show();
         if (currentCall != null) {
             currentCall.reject(function (res) {
                 console.log('+++ reject call: ', res);
@@ -207,6 +208,9 @@ function setupCall(token, callerId, calleeId, isCall) {
     });
 
     endCallButton.on('click', function () {
+        $(this).hide();
+        callButton.show();
+
         if (currentCall != null) {
             currentCall.hangup(function (res) {
                 console.log('+++ hangup: ', res);
@@ -214,9 +218,6 @@ function setupCall(token, callerId, calleeId, isCall) {
                 callboxElement.style.display = "none";
             });
         }
-
-        //callButton.show();
-        //endCallButton.hide();
         $('#incoming-call-notice').hide();
     });
 
@@ -245,7 +246,25 @@ function setupVideo(answerButtonId, callButtonId, remoteVideo, localVideo) {
     });
 }
 
-// Khởi tạo Particles.js
+function endCallFromJs(dotNetHelper) {
+    dotNetHelper.invokeMethodAsync('EndCall');
+    $('#btn-answer').hide();
+}
+
+function callButtonManager(isClose) {
+    var callBox = $('#call-box').get(0);
+    callBox.style.display = 'block';
+    if (isClose) {
+        callBox.style.display = 'none';
+    }
+    $('#caller-name').text(`Nhập tên bạn muốn gọi: `);
+    $('#btn-call').show();
+    $('#toNumber').prop('hidden', false);
+    $('#btn-end').hide();
+    $('#btn-reject').hide();
+    $('#btn-answer').hide();
+    
+}
 
 
 

@@ -1,4 +1,5 @@
-﻿using DATN.Shared;
+﻿using DATN.Client.Pages.AdminManager;
+using DATN.Shared;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,27 +16,27 @@ namespace DATN.Client.Pages
         private string token;
         private string from;
         private string to = "Manager";
+        public DotNetObjectReference<VoiceCallCustomer> dotNetObjectReference;
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+        protected override async Task OnInitializedAsync()
         {
-            if (firstRender)
+            dotNetObjectReference = DotNetObjectReference.Create(this);
+            token = await _localStorageService.GetItemAsync("n");
+            if (token == null)
             {
-                token = await _localStorageService.GetItemAsync("n");
-                if (token == null)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
-                    return;
-                }
-                from = GetTableNumberFromToken(token);
-                if(from == null)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "From is null");
-                    return;
-                }
-                await SetupCall(token, from, to);
-                await setupVideo();
+                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                return;
             }
+            from = GetTableNumberFromToken(token);
+            if (from == null)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                return;
+            }
+            await SetupCall(token, from, to);
+            await setupVideo();
         }
+
         private async Task SetupCall(string token, string from, string to)
         {
             try
@@ -52,7 +53,7 @@ namespace DATN.Client.Pages
                     else
                     {
                         bool isCall = true;
-                        await JS.InvokeVoidAsync("setupCall", token, from, to, isCall);
+                        await JS.InvokeVoidAsync("setupCall", token, from, to, isCall, dotNetObjectReference);
                         await JS.InvokeVoidAsync("layout");
                     }
                 }
@@ -68,7 +69,9 @@ namespace DATN.Client.Pages
         {
             await JS.InvokeVoidAsync("setupVideo", "btn-answer", "btn-call", "remoteVideo", "localVideo");
         }
-        private void EndCall()
+
+        [JSInvokable("EndCall")]
+        public void EndCall()
         {
             Navigation.NavigateTo("/");
         }

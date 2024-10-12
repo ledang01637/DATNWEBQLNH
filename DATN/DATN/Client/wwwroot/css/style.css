@@ -623,6 +623,14 @@ span {
             transform: scale(1.1);
         }
 
+#scrollToTopBtn {
+    z-index: 9999;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    line-height: 50px;
+}
+
 
 @media screen and (max-width: 768px) {
     .drink-parent {
@@ -632,6 +640,14 @@ span {
     .foodcustom {
         min-width: 100%;
         max-width: 100%;
+    }
+    #scrollToTopBtn {
+        bottom: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        line-height: 40px;
     }
 }
 

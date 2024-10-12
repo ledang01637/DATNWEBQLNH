@@ -14,9 +14,11 @@ namespace DATN.Client.Pages.AdminManager
         private string token;
         private string from;
         private string to;
+        public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+            dotNetObjectReference = DotNetObjectReference.Create(this);
             if (firstRender)
             {
                 token = await _localStorageService.GetItemAsync("m");
@@ -44,7 +46,7 @@ namespace DATN.Client.Pages.AdminManager
                         if (token != null)
                         {
                             bool isCall = false;
-                            await JS.InvokeVoidAsync("setupCall", token, from, to, isCall);
+                            await JS.InvokeVoidAsync("setupCall", token, from, to, isCall, dotNetObjectReference);
                             await JS.InvokeVoidAsync("layout");
                         }
                         else
@@ -67,9 +69,11 @@ namespace DATN.Client.Pages.AdminManager
         {
             await JS.InvokeVoidAsync("setupVideo", "btn-answer", "btn-call", "remoteVideo", "localVideo");
         }
-        private void EndCall()
+
+        [JSInvokable("EndCall")]
+        public void EndCall()
         {
-            Navigation.NavigateTo("/");
+            
         }
         private string GetTableNumberFromToken(string token)
         {
@@ -77,6 +81,11 @@ namespace DATN.Client.Pages.AdminManager
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return userId?.Value;
+        }
+
+        private async void CallButton(bool isClose)
+        {
+            await JS.InvokeVoidAsync("callButtonManager", isClose);
         }
 
     }

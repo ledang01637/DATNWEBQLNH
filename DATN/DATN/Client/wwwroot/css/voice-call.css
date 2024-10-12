@@ -36,18 +36,18 @@
 }
 
 .caller-info {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .caller-name {
-    font-size: 28px;
+    font-size: 15px;
     font-weight: bold;
     color: #ffffff;
 }
 
 .caller-number {
     color: #dddddd;
-    font-size: 18px;
+    font-size: 15px;
 }
 
 .call-message {

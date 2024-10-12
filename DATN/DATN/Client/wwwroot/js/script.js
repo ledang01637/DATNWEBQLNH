@@ -67,6 +67,34 @@ window.generateMD5Hash = function (input) {
     return CryptoJS.MD5(input).toString();
 };
 
+//Scroll
+function initScrollToTop() {
+    let scrollToTopBtn = document.getElementById("scrollToTopBtn");
+    let isVisible = false;
+
+    function checkScroll() {
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        if (scrollTop > 100 && !isVisible) {
+            scrollToTopBtn.style.display = "block";
+            isVisible = true;
+        } else if (scrollTop <= 100 && isVisible) {
+            scrollToTopBtn.style.display = "none";
+            isVisible = false;
+        }
+    }
+
+    window.addEventListener('scroll', function () {
+        requestAnimationFrame(checkScroll);
+    });
+}
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
 
 //Call
 function initCallButton(callButtonId, expandButtonId, closeBtnId) {

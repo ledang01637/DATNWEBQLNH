@@ -35,40 +35,50 @@ namespace DATN.Client.Pages
             await LoadAll();
             await JS.InvokeVoidAsync("initializeIsotope");
         }
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await JS.InvokeVoidAsync("initScrollToTop");
+            }
+        }
         private async Task LoadAll()
         {
             try
             {
-                products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
-                if (products != null)
-                {
-                    products = products.Where(a => a.IsDelete == false).ToList();
-                }
-                categories = await httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
-                if (categories != null)
-                {
-                    categories = categories.Where(a => a.IsDelete == false).ToList();
-                }
-                menus = await httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
-                accounts = await httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
-                if(accounts != null)
+                var productTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+                var categoryTask = httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
+                var menuTask = httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
+                var accountTask = httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
+
+                await Task.WhenAll(productTask, categoryTask, menuTask, accountTask);
+
+                products = (await productTask)?.Where(p => !p.IsDelete).ToList() ?? new List<Product>();
+                categories = (await categoryTask)?.Where(c => !c.IsDelete).ToList() ?? new List<Category>();
+                menus = await menuTask ?? new List<Menu>();
+                accounts = await accountTask ?? new List<Account>();
+
+                if (accounts != null)
                 {
                     loginUser.Username = "no account";
                     loginUser.Password = "123456";
+
                     var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
                     if (response.IsSuccessStatusCode)
                     {
                         var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
-                        if (loginResponse != null && loginResponse.SuccsessFull)
+                        if (loginResponse?.SuccsessFull == true)
                         {
                             var handler = new JwtSecurityTokenHandler();
                             var jsonToken = handler.ReadToken(loginResponse.Token) as JwtSecurityToken;
-                            var accountId = jsonToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
+                            var accountId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
 
                             var expiryTime = DateTime.Now.AddMinutes(45).ToString("o");
-                            await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                            await _localStorageService.SetItemAsync("AccountId", accountId);
-                            await _localStorageService.SetItemAsync("authToken", loginResponse.Token);
+                            await Task.WhenAll(
+                                _localStorageService.SetItemAsync("expiryTime", expiryTime),
+                                _localStorageService.SetItemAsync("AccountId", accountId),
+                                _localStorageService.SetItemAsync("authToken", loginResponse.Token)
+                            );
                         }
                     }
                     else
@@ -76,9 +86,9 @@ namespace DATN.Client.Pages
                         await JS.InvokeVoidAsync("showLog", "Tài khoản mật khẩu không chính xác");
                     }
                 }
+
                 await JS.InvokeVoidAsync("initCallButton", "callButtonIndex", "expandButtons", "closeBtn");
                 StateHasChanged();
-
             }
             catch (Exception ex)
             {
@@ -87,153 +97,115 @@ namespace DATN.Client.Pages
             }
         }
 
-        private async Task AddToCart(Product product)
+        private async Task LoadCombo(int MenuId)
         {
-            if (carts != null)
+            if (MenuId <= 0) return;
+
+            isProcessing = true;
+
+            var selectedMenu = menus.FirstOrDefault(a => a.MenuId == MenuId);
+            ComboName = selectedMenu?.MenuName ?? "No Combo";
+
+            menuItems = (await httpClient.GetFromJsonAsync<List<MenuItem>>("api/MenuItem/GetMenuItem"))
+                                        .Where(item => item.MenuId == MenuId)
+                                        .ToList();
+
+            var productIds = menuItems.Select(item => item.ProductId).ToHashSet();
+
+            await LoadAll();
+
+            var prods = products.Where(p => productIds.Contains(p.ProductId)).ToList();
+            if (prods.Any())
             {
-                var existingCart = carts.FirstOrDefault(c => c.ProductId == product.ProductId);
-
-                if (existingCart != null)
+                foreach (var product in prods)
                 {
-                    existingCart.Quantity += 1;
+                    await AddToCart(product);
                 }
-                else
-                {
-                    Cart newCart = new Cart
-                    {
-                        ProductId = product.ProductId,
-                        ProductName = product.ProductName,
-                        Price = product.Price,
-                        ProductImage = product.ProductImage,
-                        Quantity = 1
-                    };
-                    carts.Add(newCart);
-                }
-
-                TotalQuantity += 1;
-                TotalAmount += product.Price;
-
-                StateHasChanged();
-
-                _ = Task.Run(async () =>
-                {
-                    await _cartService.SaveCartAsync(carts);
-                });
             }
             else
             {
-                await JS.InvokeVoidAsync("showLog", "Cart is null");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Sản phẩm đã hết");
             }
+
+            StateHasChanged();
+            isProcessing = false;
         }
 
+        private async Task AddToCart(Product product)
+        {
+            if (carts == null)
+            {
+                await JS.InvokeVoidAsync("showLog", "Cart is null");
+                return;
+            }
 
+            var existingCart = carts.FirstOrDefault(c => c.ProductId == product.ProductId);
+            if (existingCart != null)
+            {
+                existingCart.Quantity += 1;
+            }
+            else
+            {
+                Cart newCart = new Cart
+                {
+                    ProductId = product.ProductId,
+                    ProductName = product.ProductName,
+                    Price = product.Price,
+                    ProductImage = product.ProductImage,
+                    Quantity = 1
+                };
+                carts.Add(newCart);
+            }
+
+            await UpdateCartTotals(product.Price, 1);
+            _ = _cartService.SaveCartAsync(carts);
+        }
 
         private async Task UpdateCartTotals()
         {
-            TotalQuantity = 0;
-            TotalAmount = 0;
-
-            carts = await _cartService.GetCartAsync();
-            if(carts != null && carts.Count() > 0)
-            {
-                foreach (var c in carts)
-                {
-                    TotalQuantity += c.Quantity;
-                    TotalAmount += (c.Price * c.Quantity);
-                }
-            }
-            await Task.Delay(1000);
-            StateHasChanged();
-
-        }
-
-        private async Task IncreaseQuantity(int ProId)
-        {
-
-            var cartItem = carts.FirstOrDefault(c => c.ProductId == ProId);
-            if (cartItem != null)
-            {
-                cartItem.Quantity += 1;
-                TotalQuantity += 1;
-                TotalAmount += cartItem.Price;
-                await _cartService.SaveCartAsync(carts);
-                StateHasChanged();
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("showLog", "Cart is null");
-            }
-            await Task.Delay(1000);
-            isProcessing = false;
+            TotalQuantity = carts.Sum(c => c.Quantity);
+            TotalAmount = carts.Sum(c => c.Price * c.Quantity);
+            await Task.Delay(500);
             StateHasChanged();
         }
 
-        private async Task DecreaseQuantity(int ProId)
+        private async Task UpdateCartTotals(decimal priceChange, int quantityChange)
         {
-            isProcessing = true;
-
-            var cartItem = carts.FirstOrDefault(c => c.ProductId == ProId);
-
-            if (cartItem != null && cartItem.Quantity > 0)
-            {
-                cartItem.Quantity -= 1;
-                TotalQuantity -= 1;
-                TotalAmount -= cartItem.Price;
-
-                if (cartItem.Quantity == 0)
-                {
-                    carts.Remove(cartItem);
-                }
-
-                await _cartService.SaveCartAsync(carts);
-
-                StateHasChanged();
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("showLog", "Cart is null or quantity <= 0");
-            }
+            TotalQuantity += quantityChange;
+            TotalAmount += priceChange * quantityChange;
+            await Task.Delay(500);
             StateHasChanged();
         }
 
-
-
-        private async Task LoadCombo(int MenuId)
+        private async Task ModifyQuantity(int productId, int change)
         {
-            isProcessing = true;
-            if (MenuId > 0)
+            var cartItem = carts.FirstOrDefault(c => c.ProductId == productId);
+            if (cartItem == null)
             {
-                var selectedMenu = menus.FirstOrDefault(a => a.MenuId == MenuId);
-                ComboName = selectedMenu?.MenuName;
-
-                menuItems = await httpClient.GetFromJsonAsync<List<MenuItem>>("api/MenuItem/GetMenuItem");
-
-                menuItems = menuItems.Where(item => item.MenuId == MenuId).ToList();
-
-                var productIds = menuItems.Select(item => item.ProductId).ToHashSet();
-
-                await LoadAll();
-
-                var prods = products.Where(p => productIds.Contains(p.ProductId)).ToList();
-
-                if(prods.Count > 0)
-                {
-                    foreach (var product in prods)
-                    {
-                        await AddToCart(product);
-                    }
-                }
-                else
-                {
-                    await JS.InvokeVoidAsync("showAlert", "warning", "Sản phẩm đã hết");
-                }
-
-
-                StateHasChanged();
+                await JS.InvokeVoidAsync("showLog", "Cart item not found");
+                return;
             }
-            isProcessing = false;
+
+            cartItem.Quantity += change;
+
+            if (cartItem.Quantity <= 0)
+            {
+                carts.Remove(cartItem);
+            }
+
+            await UpdateCartTotals(cartItem.Price, change);
+            await _cartService.SaveCartAsync(carts);
         }
 
+        private async Task IncreaseQuantity(int productId)
+        {
+            await ModifyQuantity(productId, 1);
+        }
+
+        private async Task DecreaseQuantity(int productId)
+        {
+            await ModifyQuantity(productId, -1);
+        }
         private async void NaviOrderList()
         {
             if(!(carts.Count > 0)) 
@@ -246,10 +218,16 @@ namespace DATN.Client.Pages
         }
         private async void NaviCustomer()
         {
-            var token = await _localStorageService.GetItemAsync("n");
+            await _localStorageService.GetItemAsync("n");
             Navigation.NavigateTo("/customer");
 
         }
+
+        private async Task ScrollToTop()
+        {
+            await JS.InvokeVoidAsync("scrollToTop");
+        }
+
         //private string GetGridColumnClass()
         //{
         //    return isGridView ? "col-sm-6 col-lg-4" : "col-lg-4";

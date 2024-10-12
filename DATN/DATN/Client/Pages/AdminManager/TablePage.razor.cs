@@ -235,5 +235,9 @@ namespace DATN.Client.Pages.AdminManager
             }
 
         }
+        public void Dispose()
+        {
+            dotNetObjectReference?.Dispose();
+        }
     }
 }

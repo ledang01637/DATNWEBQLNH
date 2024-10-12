@@ -62,20 +62,26 @@
         height: 50px;
     }
 
-        #btn-end{
+    #btn-end {
         background-color: #dc3545;
         color: white;
         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
-        }
+    }
 
-    #btn-answer{
+    #btn-answer {
         background-color: #28a745;
         color: white;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
     }
 
     #btn-reject {
-        background-color: #242242;
+        background-color: #643421;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    #btn-call {
+        background-color: #45a14f;
         color: white;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
     }
@@ -83,7 +89,7 @@
     #btn-end:hover {
         background-color: #c82333;
         transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6); 
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
         cursor: pointer;
     }
 
@@ -95,10 +101,16 @@
     }
 
     #btn-reject:hover {
-        background-color: #643421;
+        background-color: #593421;
         transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        box-shadow: 0 6px 20px #45a14f;
         cursor: pointer;
+    }
+
+    #btn-call:hover {
+        background-color: #25a14f;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
     }
 
     #particles-js {
@@ -112,11 +124,18 @@
 
 </style>
 
+<button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+
 <div id="particles-js"></div>
-<div class="box" id="call-box">
+
+<div class="box position-relative" id="call-box">
+    <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
+        <i class="far fa-window-close text-danger fs-4"></i>
+    </button>
     <div class="caller-info">
         <div id="caller-name" class="caller-name text-center"></div>
     </div>
+    <input id="toNumber" type="text" @bind-value="to" class="form-control bg-white text-dark" />
     <div id="video-container">
         <video id="localVideo" autoplay muted></video>
         <video id="remoteVideo" autoplay></video>
@@ -133,9 +152,9 @@
         </button>
         <button class="btn-action btn-reject" id="btn-reject">
             <i class="bi bi-telephone-down-fill" style="font-size: 10px;"></i>
-            <span style="font-size: 10px">Gác máy</span>
+            <span style="font-size: 10px">Từ chối</span>
         </button>
-        <button class="btn-action btn-reject" id="btn-call" hidden>
+        <button class="btn-action btn-reject" id="btn-call">
             <i class="bi bi-telephone-down-fill" style="font-size: 10px;"></i>
             <span style="font-size: 10px">Gọi</span>
         </button>

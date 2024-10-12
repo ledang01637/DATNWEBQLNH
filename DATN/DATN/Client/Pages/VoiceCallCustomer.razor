@@ -41,12 +41,16 @@
         margin-top: 20px;
     }
 
+    .caller-name{
+        font-size: 25px !important;
+    }
+
     .hidden-first {
         display: none;
     }
 </style>
 
-<div class="container body-voice-custom">
+<div class="container body-voice-custom rounded">
 
     <div id="particles-js"></div>
 
@@ -64,13 +68,13 @@
                 <i class="bi bi-telephone-x-fill" style="font-size: 24px;"></i>
                 <span>Kết thúc</span>
             </button>
-            <button class="btn-action btn-answer" id="btn-answer">
+            <button class="btn-action btn-answer" id="btn-answer" hidden>
                 <i class="bi bi-telephone-fill" style="font-size: 24px;"></i>
                 <span>Nhận</span>
             </button>
             <button class="btn-action btn-reject" id="btn-reject" hidden>
                 <i class="bi bi-telephone-down-fill" style="font-size: 24px;"></i>
-                <span>Gác máy</span>
+                <span>Từ chối</span>
             </button>
             <button class="btn-action btn-reject" id="btn-call" hidden>
                 <i class="bi bi-telephone-down-fill" style="font-size: 24px;"></i>
