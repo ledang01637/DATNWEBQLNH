@@ -1,6 +1,7 @@
 ﻿@page "/order-list"
 @using DATN.Client.Service
 @using DATN.Shared
+@layout MainLayout
 @inject HttpClient httpClient
 @inject CartService _cartService
 @inject NavigationManager Navigation
@@ -62,6 +63,7 @@
             </div>
         }
 
+
     }
 
 
@@ -75,12 +77,18 @@
         </button>
     </div>
 </div>
-<nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="container-fluid justify-content-around">
-        <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
-        <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
-        <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
-        <a href="#" class="nav-link"><i class="bi bi-person"></i></a>
-    </div>
-</nav>
+
+<button id="callButtonIndex" class="call-button">
+    <i class="fa-solid fa-phone"></i>
+</button>
+
+<!-- Các nút mở rộng -->
+<div class="expand-buttons" id="expandButtons">
+    <button id="callStaffBtn">
+        <i class="fa-solid fa-user"></i>
+    </button>
+    <button id="closeBtn">
+        <i class="fa-solid fa-times"></i>
+    </button>
+</div>
 

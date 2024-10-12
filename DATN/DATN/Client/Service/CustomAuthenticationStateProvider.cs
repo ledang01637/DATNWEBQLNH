@@ -39,7 +39,6 @@ namespace DATN.Client.Service
             {
                 Console.WriteLine("token is null");
             }
-
             var user = new ClaimsPrincipal(identity);
             return new AuthenticationState(user);
         }

@@ -45,6 +45,7 @@ namespace DATN.Client.Pages
             {
                 Total += item.Price * item.Quantity;
             }
+
         }
         private async Task Order()
         {

@@ -1,32 +1,26 @@
-﻿using DATN.Shared;
-using Microsoft.JSInterop;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Http.Json;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System;
+using Microsoft.JSInterop;
+using System.Net.Http.Json;
+using System.Linq;
 
-namespace DATN.Client.Pages
+namespace DATN.Client.Pages.AdminManager
 {
-    public partial class VoiceCallCustomer
+    public partial class ManagerEmployeeTable
     {
         private string token;
-        private string from;
-        private string to = "danglh";
+        private string from = "danglh";
+        private string to;
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
-                token = await _localStorageService.GetItemAsync("n");
-                if (token == null)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
-                    return;
-                }
-                from = GetTableNumberFromToken(token);
+                token = await _localStorageService.GetItemAsync("m");
+                to = GetTableNumberFromToken(token);
                 await SetupCall(token, from, to);
                 await setupVideo();
             }
@@ -35,29 +29,38 @@ namespace DATN.Client.Pages
         {
             try
             {
-                var response = await httpClient.PostAsJsonAsync("api/JwtTokenValidator/ValidateToken/", token);
-                if(response.IsSuccessStatusCode)
+                var response = await httpClient.PostAsJsonAsync("api/JwtTokenValidator/ValidateToken", token);
+                if (response.IsSuccessStatusCode)
                 {
                     var handler = new JwtSecurityTokenHandler();
+                    var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-                    if (handler.ReadToken(token) is not JwtSecurityToken jsonToken)
+                    if (jsonToken == null)
                     {
                         await JS.InvokeVoidAsync("showAlert", "error", "Token is invalid");
                     }
                     else
                     {
-                        bool isCall = true;
-                        await JS.InvokeVoidAsync("setupCall", token, from, to, isCall);
-                        await JS.InvokeVoidAsync("layout");
+                        if (token != null)
+                        {
+                            await JS.InvokeVoidAsync("setupCall", token, from, to);
+                            await JS.InvokeVoidAsync("layout");
+                        }
+                        else
+                        {
+                            await JS.InvokeVoidAsync("showAlert", "warning", "Token is null");
+                        }
                     }
                 }
 
-                
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", ex);
             }
+
+
         }
         private async Task setupVideo()
         {
@@ -67,12 +70,13 @@ namespace DATN.Client.Pages
         {
             Navigation.NavigateTo("/");
         }
-        private static string GetTableNumberFromToken(string token)
+        private string GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
             var tableNumberClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == "tableNumber");
             return tableNumberClaim?.Value;
         }
+
     }
 }

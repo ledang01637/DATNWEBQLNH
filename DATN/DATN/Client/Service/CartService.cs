@@ -57,5 +57,12 @@ namespace DATN.Client.Service
             var cartJson = JsonSerializer.Serialize(cart);
             await _jsRuntime.InvokeVoidAsync("sessionStorage.setItem", CartKey, cartJson);
         }
+
+        public async Task ClearCart()
+        {
+            var cart = await GetCartAsync();
+            cart.Clear();
+        }
+
     }
 }

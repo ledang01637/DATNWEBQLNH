@@ -39,6 +39,27 @@
             margin-right: 0;
             margin-bottom: 15px;
         }
+    .cart-footer {
+        padding: 10px 15px;
+    }
+
+        .cart-footer .total-price {
+            font-size: 1rem;
+        }
+
+        .cart-footer .checkout-btn {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+    .modal-body img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .modal-body .item-name {
+        font-size: 10px;
+    }
 }
 
 @media (max-width: 767px) {
@@ -61,6 +82,7 @@
             margin-right: 15px;
             margin-bottom: 0;
         }
+
 }
 
 @media (max-width: 576px) {

@@ -1,0 +1,109 @@
+﻿.body-voice-custom {
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e1e;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+}
+
+/* Particles.js container */
+#particles-js {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    top: 0;
+    left: 0;
+}
+
+.phone-call-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8.5px);
+    -webkit-backdrop-filter: blur(8.5px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    width: 400px;
+    text-align: center;
+    z-index: 1;
+}
+
+.caller-info {
+    margin-bottom: 25px;
+}
+
+.caller-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.caller-number {
+    color: #dddddd;
+    font-size: 18px;
+}
+
+.call-message {
+    font-size: 20px;
+    color: #cccccc;
+    margin-bottom: 30px;
+}
+
+.call-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn-action {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-answer {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+    .btn-answer:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+    }
+
+.btn-reject {
+    background-color: #dc3545;
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+    .btn-reject:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+    }
+
+.btn-end {
+    background-color: #ffc107;
+    color: #1e1e1e;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
+    .btn-end:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+    }

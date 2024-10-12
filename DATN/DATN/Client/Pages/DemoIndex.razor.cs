@@ -17,7 +17,7 @@ namespace DATN.Client.Pages
     {
         private Table table = new Table();
         private List<Table> tables = new List<Table>();
-        private List<Product> products = new List<Product>();
+        private QR qR = new QR();
 
         protected override async Task OnInitializedAsync()
         {
@@ -27,41 +27,52 @@ namespace DATN.Client.Pages
                 await ProcessMd5Value(extractedMd5);
             }
         }
-        private async Task AddToCart(Product product)
-        {
-            Cart cart = new Cart();
-            cart.ProductId = product.ProductId;
-            cart.ProductName = product.ProductName;
-            cart.Price = product.Price;
-            cart.ProductImage = product.ProductImage;
-
-            await _cartService.AddItemToCartAsync(cart,1);
-            Navigation.NavigateTo("/order-list");
-        }
         private async Task ProcessMd5Value(string md5)
         {
-            tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-
-            foreach (var t in tables)
+            try
             {
-                var encodedTableNumber = await GenerateMD5Hash(t.TableNumber.ToString());
-                if (encodedTableNumber == md5)
+                tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+
+                foreach (var t in tables)
                 {
-                    table = t;
-                    await _localStorageService.SetItemAsync("n", table.TableNumber.ToString());
-                    break;
+                    var encodedTableNumber = await GenerateMD5Hash(t.TableNumber.ToString());
+                    if (encodedTableNumber == md5)
+                    {
+                        table = t;
+                        break;
+                    }
+                }
+                qR.NumberTable = table.TableNumber;
+                var response = await httpClient.PostAsJsonAsync("api/AuthJWT/GenerateQrToken", qR);
+                if (response.IsSuccessStatusCode)
+                {
+                    var qRResponse = await response.Content.ReadFromJsonAsync<QRResponse>();
+
+                    if (qRResponse != null && qRResponse.IsSuccessFull)
+                    {
+                        await _localStorageService.SetItemAsync("n", qRResponse.Token);
+                        Navigation.NavigateTo("/");
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Lỗi qRResponse is null");
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi Post QR");
                 }
             }
-
-            if (table != null)
+            catch(Exception ex)
             {
-                products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi",ex);
             }
+            
         }
 
-        private async Task<string> GenerateMD5Hash(string input)
+        private async Task<string> GenerateMD5Hash(string text)
         {
-            return await JS.InvokeAsync<string>("generateMD5Hash", input);
+            return await JS.InvokeAsync<string>("generateMD5Hash", text);
         }
 
     }

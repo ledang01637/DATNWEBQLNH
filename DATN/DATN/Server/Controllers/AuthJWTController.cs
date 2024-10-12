@@ -88,11 +88,12 @@ namespace DATN.Server.Controllers
                 });
             }
         }
-
-
-
         private string GenerateJwtToken(Account account, RoleAccount roleAccount)
         {
+            if(account == null || roleAccount == null)
+            {
+                return null;
+            }
             var jwt = _configuration.GetSection("Jwt").Get<JWT>();
 
             var claims = new[]
@@ -151,66 +152,60 @@ namespace DATN.Server.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        //JWT table
+        //JWT Stringee
         [HttpPost]
         [Route("GenerateQrToken")]
         public IActionResult GenerateQrToken(QR qr)
         {
-            var token = GenerateJwtTokenV3(qr.NumberTable);
-            return Ok(new LoginRespone
+            var token = AccessTokenStringee(qr.NumberTable.ToString());
+            return Ok(new QRResponse
             {
+                IsSuccessFull = true,
                 Token = token
             });
         }
 
-        private string GenerateJwtTokenV3(int numberTable)
+        [HttpPost]
+        [Route("ManagerToken")]
+        public IActionResult ManagerToken([FromBody] LoginRequest loginModel)
         {
-            var jwt = _configuration.GetSection("Jwt").Get<JWT>();
+            var token = AccessTokenStringee(loginModel.Username);
+            return Ok(new QRResponse
+            {
+                IsSuccessFull = true,
+                Token = token
+            });
+        }
 
+        private string AccessTokenStringee(string userId)
+        {
+
+            string _apiKeySid = "SK.0.JswyWnoTcY3sIq71enUhZfI0Iwr9cGU";
+            string _apiKeySecret= "NE1lUFAxemNGd0pCQ3RYWEp5VEJQZlV5bmlCV3pkaw==";
+;
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, jwt.Subject),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-
-                new Claim("tableNumber", numberTable.ToString()),
-                new Claim(ClaimTypes.Role, "Customer")
+                new Claim(JwtRegisteredClaimNames.Jti, $"{_apiKeySid}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"),
+                new Claim(JwtRegisteredClaimNames.Iss, _apiKeySid),
+                new Claim("userId", userId)
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
+
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_apiKeySecret));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                jwt.Issuer,
-                jwt.Audience,
+                _apiKeySid,
+                _apiKeySid,
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(60),
+                expires: DateTimeOffset.UtcNow.AddMinutes(60).UtcDateTime,
                 signingCredentials: signIn
             );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
 
-        //[HttpPost("TableInfo")]
-        //public async Task<IActionResult> TableInfo(QRResponse Token)
-        //{
-        //    var handler = new JwtSecurityTokenHandler();
-        //    var jwtToken = handler.ReadToken(Token.Token) as JwtSecurityToken;
-
-        //    var numberTableClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == "tableNumber")?.Value;
-
-        //    if (numberTableClaim != null)
-        //    {
-        //        var tableInfo = await _appDBContext.Tables.FirstOrDefaultAsync(a => a.TableNumber == int.Parse(numberTableClaim));
-        //        if (tableInfo != null)
-        //        {
-        //            return Ok(tableInfo);
-        //        }
-        //    }
-
-        //    return BadRequest("Invalid token or table number.");
-        //}
-
-        //
         public bool ValidateUser(string username, string password)
         {
             using (SHA1 sha1 = SHA1.Create())

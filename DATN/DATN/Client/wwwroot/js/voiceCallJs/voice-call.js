@@ -1,4 +1,60 @@
-﻿function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton) {
+﻿
+function layout() {
+    particlesJS("particles-js", {
+        "particles": {
+            "number": {
+                "value": 50,
+                "density": {
+                    "enable": true,
+                    "value_area": 800
+                }
+            },
+            "color": {
+                "value": "#ffffff"
+            },
+            "shape": {
+                "type": "circle",
+                "stroke": {
+                    "width": 0,
+                    "color": "#000000"
+                }
+            },
+            "opacity": {
+                "value": 0.5,
+                "random": false
+            },
+            "size": {
+                "value": 3,
+                "random": true
+            },
+            "move": {
+                "enable": true,
+                "speed": 2,
+                "direction": "bottom",
+                "random": false,
+                "straight": false,
+                "out_mode": "out",
+                "bounce": false
+            }
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+                "onhover": {
+                    "enable": false,
+                    "mode": "repulse"
+                },
+                "onclick": {
+                    "enable": false,
+                    "mode": "push"
+                },
+                "resize": true
+            }
+        },
+        "retina_detect": true
+    });
+}
+function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton) {
     call1.on('addremotestream', function (stream) {
         console.log('addremotestream');
         var remoteVideoElement = remoteVideo.get(0);
@@ -46,13 +102,18 @@
     });
 }
 
-function setupCall(token, callerId, calleeId) {
+function setupCall(token, callerId, calleeId, isCall) {
+    var callButton = $('#btn-call');
+    var answerCallButton = $('#btn-answer');
+    var endCallButton = $('#btn-end');
+    var rejectCallButton = $('#btn-reject');
+
     var localVideo = $('#localVideo');
     var remoteVideo = $('#remoteVideo');
-    var callButton = $('#callButton');
-    var answerCallButton = $('#answerCallButton');
-    var rejectCallButton = $('#rejectCallButton');
-    var endCallButton = $('#endCallButton');
+
+    var callboxId = $('#call-box');
+    const callMessage = $('#call-message');
+    const callActions = $('#call-actions');
 
     var currentCall = null;
 
@@ -72,7 +133,7 @@ function setupCall(token, callerId, calleeId) {
     });
 
     // MAKE CALL
-    callButton.on('click', function () {
+    if (isCall) {
         currentCall = new StringeeCall(client, callerId, calleeId, false);
 
         settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton);
@@ -83,16 +144,19 @@ function setupCall(token, callerId, calleeId) {
                 document.dispatchEvent(new Event('connect_ok'));
             }
         });
-    });
+    }
 
     // RECEIVE CALL
     client.on('incomingcall', function (incomingcall) {
         $('#incoming-call-notice').show();
         currentCall = incomingcall;
         settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton);
-        callButton.hide();
-        answerCallButton.show();
-        rejectCallButton.show();
+        if (callboxId != undefined || callboxId != null) {
+            callboxId.style.display = "block";
+        }
+        //callButton.hide();
+        //answerCallButton.show();
+        //rejectCallButton.show();
     });
 
     // Event handler for buttons
@@ -104,6 +168,13 @@ function setupCall(token, callerId, calleeId) {
         if (currentCall != null) {
             currentCall.answer(function (res) {
                 console.log('+++ answering call: ', res);
+                callMessage.textContent = 'Đang nghe...';
+                callActions.innerHTML = `
+                <button class="btn-action btn-end" id="btn-end">
+                    <i class="bi bi-telephone-down-fill" style="font-size: 24px;"></i>
+                    <span>Kết thúc</span>
+                </button>
+            `;
             });
         }
     });
@@ -156,4 +227,8 @@ function setupVideo(answerButtonId, callButtonId, remoteVideo, localVideo) {
         remoteVideo.play();
     });
 }
+
+// Khởi tạo Particles.js
+
+
 

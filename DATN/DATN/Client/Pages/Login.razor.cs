@@ -8,6 +8,9 @@ using System.Net.Http;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using Microsoft.AspNetCore.Components.Authorization;
+using DATN.Client.Shared;
+using Microsoft.AspNetCore.Components;
 
 
 
@@ -21,6 +24,7 @@ namespace DATN.Client.Pages
         private string currentPassword = string.Empty;
         private string confirmNewPassword = string.Empty;
         private string Token = "";
+        private Type CurrentLayout { get; set; }
 
         private async Task HandleLogin()
         {
@@ -41,7 +45,6 @@ namespace DATN.Client.Pages
                         var accountId = jsonToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
                         bool isActiveBool = false;
 
-                        Navigation.NavigateTo("/");
                         if (!string.IsNullOrEmpty(isActive))
                         {
                             bool.TryParse(isActive, out isActiveBool);
@@ -54,30 +57,39 @@ namespace DATN.Client.Pages
                             Navigation.NavigateTo("/");
                             return;
                         }
-                        var expiryTime = DateTime.Now.AddMinutes(30).ToString("o");
+
                         await _localStorageService.SetItemAsync("authToken", Token);
-                        await _localStorageService.SetItemAsync("userName", Username);
-                        await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                        await _localStorageService.SetItemAsync("AccountId", accountId);
+                        var expiryTime = DateTime.Now.AddMinutes(45).ToString("o");
+                        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+                        var user = authState.User;
 
-                        //if (customAuthStateProvider != null)
-                        //{
-                        //    await JS.InvokeVoidAsync("showAlert", "success", "Đăng nhập thành công", "");
-                        //}
-                        //else
-                        //{
-                        //    await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản chưa được xác thực", "");
-                        //}
-
-    
-                        if (int.Parse(roleId) == 3)
+                        if (user.Identity.IsAuthenticated && user.IsInRole("3"))
                         {
-                            Navigation.NavigateTo("/", true);
+                            var res = await httpClient.PostAsJsonAsync("api/AuthJWT/ManagerToken/", loginUser);
+                            if (res.IsSuccessStatusCode)
+                            {
+                                var resResponese = await res.Content.ReadFromJsonAsync<QRResponse>();
+                                if (resResponese != null && resResponese.IsSuccessFull)
+                                {
+                                    await _localStorageService.SetItemAsync("m", resResponese.Token);
+                                    await _localStorageService.SetItemAsync("userName", Username);
+                                    await _localStorageService.SetItemAsync("expiryTime", expiryTime);
+                                    await _localStorageService.SetItemAsync("AccountId", accountId);
+                                }
+                            }
+                            CurrentLayout = typeof(LayoutAdmin);
+                            Navigation.NavigateTo("/admin", true);
                         }
                         else
                         {
+                            CurrentLayout = typeof(MainLayout);
+                            await _localStorageService.SetItemAsync("userName", Username);
+                            await _localStorageService.SetItemAsync("expiryTime", expiryTime);
+                            await _localStorageService.SetItemAsync("AccountId", accountId);
                             Navigation.NavigateTo("/", true);
                         }
+
+
                     }
                     else
                     {
@@ -97,7 +109,6 @@ namespace DATN.Client.Pages
             }
         }
 
-
         private async Task HandlePasswordChange()
         {
             //if (loggedInUser == null)
@@ -116,5 +127,6 @@ namespace DATN.Client.Pages
             //loggedInUser.Password = passwordChangeModel.NewPassword;
             //await JS.InvokeVoidAsync("showAlert", "Đổi mật khẩu thành công");
         }
+
     }
 }
