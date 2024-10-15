@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace DATN.Client.Pages
 {
-    public partial class DemoAddImageProduct
+    public partial class InvoicePreview
     {
         private async Task PrintBill()
         {

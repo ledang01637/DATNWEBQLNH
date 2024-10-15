@@ -257,7 +257,7 @@ function callButtonManager(isClose) {
     if (isClose) {
         callBox.style.display = 'none';
     }
-    $('#caller-name').text(`Nhập tên bạn muốn gọi: `);
+    $('#caller-name').text(`Nhập bàn bạn muốn gọi`);
     $('#btn-call').show();
     $('#toNumber').prop('hidden', false);
     $('#btn-end').hide();

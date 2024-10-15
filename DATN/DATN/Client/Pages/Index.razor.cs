@@ -182,7 +182,7 @@ namespace DATN.Client.Pages
             var cartItem = carts.FirstOrDefault(c => c.ProductId == productId);
             if (cartItem == null)
             {
-                await JS.InvokeVoidAsync("showLog", "Cart item not found");
+                await JS.InvokeVoidAsync("showAlert", "warning" ,"Cart item not found");
                 return;
             }
 

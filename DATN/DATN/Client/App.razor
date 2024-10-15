@@ -3,13 +3,24 @@
 <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
     <Found Context="routeData">
         <CascadingAuthenticationState>
-            @if (IsAdmin)
+            @if (IsLoading)
             {
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(LayoutAdmin)" />
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             }
             else
             {
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                @if (IsAdmin)
+                {
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(LayoutAdmin)" />
+                }
+                else
+                {
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                }
             }
         </CascadingAuthenticationState>
     </Found>
@@ -33,12 +44,12 @@
 </Router>
 @code {
     private bool IsAdmin { get; set; }
-
+    private bool IsLoading { get; set; } = true;
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-
         IsAdmin = user.Identity.IsAuthenticated && user.IsInRole("3");
+        IsLoading = false;
     }
 }

@@ -124,11 +124,16 @@
 
 </style>
 
+
+
+
+
 <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
 
-<div id="particles-js"></div>
 
-<div class="box position-relative" id="call-box">
+
+<div class="box" id="call-box">
+    <div id="particles-js"></div>
     <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
         <i class="far fa-window-close text-danger fs-4"></i>
     </button>

@@ -25,12 +25,14 @@ namespace DATN.Client.Pages
             if (token == null)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                Navigation.NavigateTo("/");
                 return;
             }
             from = GetTableNumberFromToken(token);
             if (from == null)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                Navigation.NavigateTo("/");
                 return;
             }
             await SetupCall(token, from, to);
@@ -63,6 +65,7 @@ namespace DATN.Client.Pages
             catch(Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", ex);
+                Navigation.NavigateTo("/");
             }
         }
         private async Task setupVideo()
