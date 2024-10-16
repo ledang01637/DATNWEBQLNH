@@ -1,6 +1,7 @@
 ﻿@page "/edittable"
 @inject IJSRuntime JS
 @inject HttpClient httpClient
+@inject NavigationManager Navigation
 <style>
     .table-card {
         transition: transform 0.2s;
@@ -25,12 +26,12 @@
         margin-bottom: 20px;
     }
 
-    .sortable {
+/*     .sortable {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
         gap: 10px;
         border: 2px dashed #ccc;
-    }
+    } */
     .highlight {
         background-color: #ffc107;
         border: 2px solid #ff9800;
@@ -42,9 +43,13 @@
     <h1 class="text-center">Floor Management</h1>
     <div class="btn-create mb-2">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateModel">Thêm mới bàn</button>
-        <button class="btn btn-secondary"@onclick="() => AcctiveMoveTable(false)">Chỉnh sửa vị trí bàn</button>
-        <button class="btn btn-secondary" @onclick="() => AcctiveMoveTable(true)">Đổi vị trí bàn</button>
+        <button class="btn btn-secondary" @onclick="() => ActivateMoveTable(false)">Chỉnh sửa vị trí bàn</button>
+        <button class="btn btn-secondary" @onclick="() => ActivateMoveTable(true)">Đổi vị trí bàn</button>
         <button class="btn btn-secondary" @onclick="SaveTable">Lưu bàn</button>
+    </div>
+    <div class="form-group">
+        <label for="numcol">Số cột bạn muốn</label>
+         <input class="form-control" id="numcol" min="1" max="10" type="number" @bind-value="numcol" name="name" />
     </div>
 
     @if (tables == null || floors == null)
@@ -57,19 +62,21 @@
         {
             <div class="floor">
                 <h3>Floor @floor.NumberFloor</h3>
-                <div id="floor-@floor.FloorId" data-floor-id="@floor.NumberFloor" class="sortable position-relative">
+                <div id="floor-@floor.FloorId" data-floor-id="@floor.FloorId" style="display: grid; grid-template-columns: repeat(@numcol, 1fr); gap: 10px; border: 2px dashed #ccc;" class="sortable position-relative">
                     @foreach (var table in tables.Where(t => t.FloorId == floor.FloorId).OrderBy(t => t.Position))
                     {
+                        bool isDuplicatePosition = tables.Any(t => t.FloorId == floor.FloorId && t.TableId != table.TableId && t.Position == table.Position);
+                        Console.WriteLine(isDuplicatePosition);
                         <div class="m-2 grid-item" 
-                            data-id="@table.TableId" 
-                            data-position="@table.Position"
+                             data-id="@table.TableId" 
+                             data-position="@table.Position"
                              style="@(isMoveTable ? "col-md-2" : $"grid-column: {GetColumnFromPosition(table.Position)}; grid-row: {GetRowFromPosition(table.Position)};")">
-                            <div class="card table-card">
+                            <div class="card table-card" style="background-color:@(isDuplicatePosition ? "red" : "transparent");">
                                 <div class="card-body text-center position-relative">
                                     <img src="/images/png/table.png" class="img-fluid" alt="Table Image" style="height: 50px;">
                                     <div class="position-absolute top-0 end-0 fw-bold m-1">
                                         <div class="card bg-light text-dark" style="width: 25px; height: 25px;">
-                                            @table.TableNumber
+                                            @table.TableId
                                         </div>
                                     </div>
                                     <button class="btn btn-outline-primary btn-sm content-btn content-btn-edit"

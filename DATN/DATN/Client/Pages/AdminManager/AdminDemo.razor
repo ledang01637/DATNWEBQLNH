@@ -1,8 +1,45 @@
-﻿@layout LayoutAdmin
-@page "/admin"
+﻿@page "/admin"
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
 
-<h3>AdminDemo</h3>
+<h3>Admin Dashboard</h3>
+
+@if (isProcessing)
+{
+    <p>Đang xử lý đơn hàng: @GetMessage</p>
+
+}
+else
+{
+    <p>Chưa có đơn hàng nào.</p>
+}
 
 @code {
+    private string GetMessage;
+    private HubConnection hubConnection;
+    private bool isProcessing = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
+            .Build();
+
+        hubConnection.On<string>("UpdateAdminDashboard", (message) =>
+        {
+            isProcessing = true;
+            GetMessage = message;
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
 }

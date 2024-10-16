@@ -13,7 +13,7 @@ using DATN.Client.Service;
 
 namespace DATN.Client.Pages
 {
-    public partial class DemoIndex
+    public partial class LoadQR
     {
         private Table table = new Table();
         private List<Table> tables = new List<Table>();

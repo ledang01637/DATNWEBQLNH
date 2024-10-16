@@ -1,0 +1,11 @@
+﻿@page "/demo"
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@layout MainLayout
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<h3>Client - Thanh toán</h3>
+<input @bind-value="message" />
+
+<button class="btn btn-success" @onclick="ProcessPayment">Thanh toán</button>

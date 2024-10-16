@@ -20,79 +20,90 @@ namespace DATN.Client.Pages.AdminManager
         public DotNetObjectReference<TablePage> dotNetObjectReference;
         private int selectTableId;
         private bool isMoveTable = false;
+        private int numcol = 6;
         private int rowCount { get; set; }
         private string row { get; set; }
         private string column { get; set; }
-
 
         protected override async Task OnInitializedAsync()
         {
             dotNetObjectReference = DotNetObjectReference.Create(this);
             await LoadAll();
         }
+
         private async Task LoadAll()
         {
             try
             {
                 tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-                if (tables.Count > 0)
+                if (tables.Any())
                 {
-                    tables = tables.Where(a => a.IsDeleted.Equals(false)).ToList();
+                    tables = tables.Where(a => !a.IsDeleted).ToList();
                     CalculateRowCount();
                 }
                 floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
             }
             catch (Exception ex)
             {
-                var query = $"[C#] fix error: {ex.Message}";
-                await JS.InvokeVoidAsync("openChatGPT", query);
+                await HandleError(ex);
             }
         }
+
         private void CalculateRowCount()
         {
             rowCount = (int)Math.Ceiling((double)tables.Count / 6);
-
-            if (tables.Count() % 6 == 0)
-            {
-                rowCount += 1;
-                Console.WriteLine("rowCount" + rowCount);
-            }
+            if (tables.Count % 6 == 0) rowCount++;
+            Console.WriteLine("rowCount: " + rowCount);
         }
+
         private async Task AddTable()
         {
+            if (await ValidateTableExists(tableModel.TableNumber)) return;
+
             try
             {
-                var existingTable = tables.FirstOrDefault(r => r.TableNumber == tableModel.TableNumber);
-                if (existingTable != null)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Số bàn đã tồn tại");
-                    await Task.Delay(1000);
-                    return;
-                }
-                Console.Write("a", tableModel);
-                tableModel.IsDeleted = false;
-                tableModel.Status = "Bàn trống";
-                tableModel.Position = $"{row} - {column}";
+                SetDefaultTableProperties();
                 var response = await httpClient.PostAsJsonAsync("api/Table/AddTable", tableModel);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "success", "Thành công", "");
-                    await LoadAll();
-                }
-                else
-                {
-                    Console.WriteLine("Error add Table");
-                }
+                await HandleResponse(response, "Thành công", "Error add Table");
             }
             catch (Exception ex)
             {
-                var query = $"[C#] fix error: {ex.Message}";
-                await JS.InvokeVoidAsync("openChatGPT", query);
-                Console.WriteLine($"{ex.Message}");
-
+                await HandleError(ex);
             }
         }
+
+        private async Task<bool> ValidateTableExists(int tableNumber)
+        {
+            var existingTable = tables.FirstOrDefault(r => r.TableNumber == tableNumber);
+            if (existingTable != null)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Số bàn đã tồn tại");
+                await Task.Delay(1000);
+                return true;
+            }
+            return false;
+        }
+
+        private void SetDefaultTableProperties()
+        {
+            tableModel.IsDeleted = false;
+            tableModel.Status = "Bàn trống";
+            tableModel.Position = $"{row} - {column}";
+        }
+
+        private async Task HandleResponse(HttpResponseMessage response, string successMessage, string errorMessage)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("showAlert", "success", successMessage, "");
+                await LoadAll();
+            }
+            else
+            {
+                Console.WriteLine(errorMessage);
+            }
+        }
+
         private async Task LoadTableForEdit(int tableId)
         {
             tableModel = await httpClient.GetFromJsonAsync<Table>($"api/Table/{tableId}");
@@ -103,122 +114,75 @@ namespace DATN.Client.Pages.AdminManager
             isMoveTable = true;
             await JS.InvokeVoidAsync("MoveTable");
         }
+
         private async Task UpdateTable()
         {
             try
             {
-                tableModel.IsDeleted = false;
-                tableModel.Position = $"{row} - {column}";
+                SetDefaultTableProperties();
                 var response = await httpClient.PutAsJsonAsync($"api/Table/{selectTableId}", tableModel);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "success", "Thành công", "");
-                    isMoveTable = false;
-                    await LoadAll();
-                }
-                else
-                {
-                    Console.WriteLine("Error update Table");
-                }
+                await HandleResponse(response, "Thành công", "Error update Table");
+                isMoveTable = false;
             }
             catch (Exception ex)
             {
-                var query = $"[C#] fix error: {ex.Message}";
-                await JS.InvokeVoidAsync("openChatGPT", query);
-                Console.WriteLine($"{ex.Message}");
+                await HandleError(ex);
             }
         }
+
         private async Task DeleteTable()
         {
             try
             {
                 await JS.InvokeVoidAsync("closeModal", "ConfirmDeleteModal");
                 tableModel.IsDeleted = true;
-                tableModel.Position = $"{row} - {column}";
-                var response = await httpClient.PutAsJsonAsync($"api/Table/{selectTableId}", tableModel);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "success", "Thành công", "");
-                    isMoveTable = false;
-                    await LoadAll();
-                }
-                else
-                {
-                    Console.WriteLine("Error delete Table");
-                }
+                await UpdateTable(); // Tái sử dụng logic cập nhật cho việc xóa
             }
             catch (Exception ex)
             {
-                var query = $"[C#] fix error: {ex.Message}";
-                await JS.InvokeVoidAsync("openChatGPT", query);
-                Console.WriteLine($"{ex.Message}");
+                await HandleError(ex);
             }
         }
-        private void OnFloorChanged(ChangeEventArgs e)
-        {
-            tableModel.FloorId = int.Parse(e.Value.ToString());
-        }
-        private void OnRawChange(ChangeEventArgs e)
-        {
-            var newRow = e.Value.ToString();
-            if (newRow != row)
-            {
-                row = newRow;
-            }
-        }
-        private void OnColumnChange(ChangeEventArgs e)
-        {
-            column = e.Value.ToString();
-        }
+
         private int GetRowFromPosition(string position)
         {
-            if (string.IsNullOrEmpty(position))
-            {
-                return 0;
-            }
-            var parts = position.Split('-');
-            return int.Parse(parts[0].Trim().Replace("Hàng", "").Trim());
+            return string.IsNullOrEmpty(position) ? 0 : int.Parse(position.Split('-')[0].Trim().Replace("Hàng", "").Trim());
         }
+
         public int GetColumnFromPosition(string position)
         {
-            if (string.IsNullOrEmpty(position))
-            {
-                return 0;
-            }
-            var parts = position.Split('-');
-            return int.Parse(parts[1].Trim().Replace("Cột", "").Trim());
+            return string.IsNullOrEmpty(position) ? 0 : int.Parse(position.Split('-')[1].Trim().Replace("Cột", "").Trim());
         }
-        private async Task GetPosionTable(int FloorId, bool IsSwap)
+
+        private async Task GetPositionTable(int floorId, bool isSwap)
         {
-            await JS.InvokeVoidAsync("MoveTable", FloorId, IsSwap,dotNetObjectReference);
+            await JS.InvokeVoidAsync("MoveTable", floorId, isSwap, dotNetObjectReference, numcol);
         }
-        private async Task AcctiveMoveTable(bool _isSwap)
+
+        private async Task ActivateMoveTable(bool isSwap)
         {
             isMoveTable = true;
-            foreach (var f in floors)
+            foreach (var floor in floors)
             {
-               await GetPosionTable(f.FloorId, _isSwap);
+                await GetPositionTable(floor.FloorId, isSwap);
             }
         }
 
         private async Task SaveTable()
         {
-            for (int i = 0; i < tablesChanges.Count; i++)
+            foreach (var tableChange in tablesChanges)
             {
-                var tableChange = tablesChanges[i];
                 await httpClient.PutAsJsonAsync($"api/Table/{tableChange.TableId}", tableChange);
             }
             tablesChanges.Clear();
             isMoveTable = false;
+            Navigation.NavigateTo("edittable", true);
         }
 
-        [JSInvokable("UpdateTablePosition")]
-        public void UpdateTablePosition(int tableId, string newPosition, int newFloorId)
+        [JSInvokable("MoveFloor")]
+        public void MoveFloor(int tableId, string newPosition, int newFloorId)
         {
             var table = tables.FirstOrDefault(t => t.TableId == tableId);
-
             if (table != null)
             {
                 table.Position = newPosition;
@@ -233,11 +197,58 @@ namespace DATN.Client.Pages.AdminManager
                     Status = table.Status
                 });
             }
-
         }
+        [JSInvokable("UpdateTablePosition")]
+        public void UpdateTablePosition(int tableId, string newPosition, int newFloorId, int swappedTableId, string swappedPosition)
+        {
+            var currentTable = tables.FirstOrDefault(t => t.TableId == tableId);
+            if (currentTable != null)
+            {
+                currentTable.Position = newPosition;
+                currentTable.FloorId = newFloorId;
+
+                tablesChanges.Add(new Table
+                {
+                    TableId = tableId,
+                    Position = newPosition,
+                    FloorId = newFloorId,
+                    TableNumber = currentTable.TableNumber,
+                    SeatingCapacity = currentTable.SeatingCapacity,
+                    IsDeleted = currentTable.IsDeleted,
+                    Status = currentTable.Status
+                });
+            }
+
+            var swappedTable = tables.FirstOrDefault(t => t.TableId == swappedTableId);
+            if (swappedTable != null)
+            {
+                swappedTable.Position = swappedPosition;
+
+                tablesChanges.Add(new Table
+                {
+                    TableId = swappedTableId,
+                    Position = swappedPosition,
+                    FloorId = swappedTable.FloorId,
+                    TableNumber = swappedTable.TableNumber,
+                    SeatingCapacity = swappedTable.SeatingCapacity,
+                    IsDeleted = swappedTable.IsDeleted,
+                    Status = swappedTable.Status
+                });
+            }
+        }
+
+
+        private async Task HandleError(Exception ex)
+        {
+            var query = $"[C#] fix error: {ex.Message}";
+            await JS.InvokeVoidAsync("openChatGPT", query);
+            Console.WriteLine($"{ex.Message}");
+        }
+
         public void Dispose()
         {
             dotNetObjectReference?.Dispose();
         }
+
     }
 }
