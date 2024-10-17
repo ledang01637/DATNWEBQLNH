@@ -18,7 +18,7 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("GetShifte")]
-        public List<Shifte> GetShiftes()
+        public List<Shifte> GetShifte()
         {
             return _ShifteService.GetShifte();
         }
