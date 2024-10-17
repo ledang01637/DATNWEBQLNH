@@ -14,30 +14,26 @@ namespace DATN.Client.Pages.AdminManager
     public partial class AdminEmployee
     {
         private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
-        private List<DATN.Shared.EmployeeShifte> listEmployeeShifte = new List<DATN.Shared.EmployeeShifte>();
-        private List<DATN.Shared.Shifte> listShifte = new List<DATN.Shared.Shifte>();
         private List<DATN.Shared.Employee> filter = new List<DATN.Shared.Employee>();
         private bool isLoaded = false;
         private string errorMessage;
 
         protected override async Task OnInitializedAsync()
         {
-            await Load();
+            await LoadEmployee();
             isLoaded = true;
         }
 
-        private async Task Load()
+        private async Task LoadEmployee()
         {
             try
             {
-                listShifte = await httpClient.GetFromJsonAsync<List<DATN.Shared.Shifte>>("api/Shifte/GetShifte");
-                listEmployeeShifte = await httpClient.GetFromJsonAsync<List<DATN.Shared.EmployeeShifte>>("api/EmployeeShifte/GetEmployeeShifte");
                 listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
                 filter = listEmployee;
             }
             catch (Exception ex)
             {
-                errorMessage = $"Error loading Employee: {ex.Message}";
+                errorMessage = $"Error loading menu: {ex.Message}";
             }
         }
 
@@ -49,7 +45,7 @@ namespace DATN.Client.Pages.AdminManager
                 if (employee != null)
                 {
                     await httpClient.DeleteAsync($"api/Employee/{employeeId}");
-                    await Load();
+                    await LoadEmployee(); // Load lại dữ liệu sau khi xóa
                     StateHasChanged();
                 }
             }
@@ -66,7 +62,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private void CreateEmployee()
         {
-            Navigation.NavigateTo($"/createemployee");
+            Navigation.NavigateTo("/createemployee");
         }
 
         private void FilterEmployee(ChangeEventArgs e)
@@ -77,5 +73,9 @@ namespace DATN.Client.Pages.AdminManager
                 : listEmployee.Where(p => p.EmployeeName.ToLower().Contains(searchTerm)).ToList();
         }
 
+
+
     }
 }
+
+

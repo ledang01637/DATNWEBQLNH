@@ -63,7 +63,7 @@ namespace DATN.Client.Pages
                         }
                         else
                         {
-                            Navigation.NavigateTo("/adminaccount", true);
+                            Navigation.NavigateTo($"/information?username={Username}", true);
                         }
                     }
                     else

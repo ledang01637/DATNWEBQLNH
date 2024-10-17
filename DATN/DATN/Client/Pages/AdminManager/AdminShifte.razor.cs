@@ -13,7 +13,6 @@ namespace DATN.Client.Pages.AdminManager
 {
     public partial class AdminShifte
     {
-        private List<DATN.Shared.EmployeeShifte> listEmployeeShifte = new List<DATN.Shared.EmployeeShifte>();
         private List<DATN.Shared.Shifte> listShifte = new List<DATN.Shared.Shifte>();
         private List<DATN.Shared.Shifte> filter = new List<DATN.Shared.Shifte>();
         private bool isLoaded = false;
@@ -21,15 +20,14 @@ namespace DATN.Client.Pages.AdminManager
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadShifte();
+            await LoadUnits();
             isLoaded = true;
         }
 
-        private async Task LoadShifte()
+        private async Task LoadUnits()
         {
             try
             {
-                listEmployeeShifte = await httpClient.GetFromJsonAsync<List<DATN.Shared.EmployeeShifte>>("api/EmployeeShifte/GetEmployeeShifte");
                 listShifte = await httpClient.GetFromJsonAsync<List<DATN.Shared.Shifte>>("api/Shifte/GetShifte");
                 filter = listShifte;
             }
@@ -37,63 +35,46 @@ namespace DATN.Client.Pages.AdminManager
             {
                 errorMessage = $"Error loading unit: {ex.Message}";
             }
+
         }
 
-        private async Task HideShifte(int shifteId)
+        private async Task DeleteShifte(int shifteId)
         {
             try
             {
                 var shifte = listShifte.FirstOrDefault(p => p.Shifte_Id == shifteId);
                 if (shifte != null)
                 {
-                    shifte.IsDeleted = false;
-                    await httpClient.PutAsJsonAsync($"api/Shifte/{shifteId}", shifte);
-                    await LoadShifte();
+                    await httpClient.DeleteAsync($"api/Unit/{shifteId}");
+                    await LoadUnits();
                     StateHasChanged();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error hiding voucher: {ex.Message}");
+                errorMessage = $"Error deleting unit: {ex.Message}";
             }
         }
 
-        private async Task RestoreShifte(int shifteId)
+        private void EditShifte(int shifteId)
         {
-            try
-            {
-                var shifte = listShifte.FirstOrDefault(p => p.Shifte_Id == shifteId);
-                if (shifte != null)
-                {
-                    shifte.IsDeleted = false;
-                    await httpClient.PutAsJsonAsync($"api/Shifte/{shifteId}", shifte);
-                    await LoadShifte();
-                    StateHasChanged();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
-            }
-        }
-
-        private void EditShifte(int voucherId)
-        {
-            Navigation.NavigateTo($"/editshifte/{voucherId}");
+            Navigation.NavigateTo($"/editunit/{shifteId}");
         }
 
         private void CreateShifte()
         {
-            Navigation.NavigateTo($"/createshifte");
+            Navigation.NavigateTo($"/createunit");
         }
+
 
         private void Filter(ChangeEventArgs e)
         {
-            var searchTerm = e.Value.ToString().ToLower();
+            var searchTerm = e.Value?.ToString().ToLower() ?? string.Empty;
             filter = string.IsNullOrWhiteSpace(searchTerm)
                 ? listShifte
                 : listShifte.Where(p => p.Shifte_Name.ToLower().Contains(searchTerm)).ToList();
         }
+
 
 
 

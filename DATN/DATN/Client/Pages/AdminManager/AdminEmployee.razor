@@ -51,7 +51,7 @@
                                 </thead>
 
                                 <tbody>
-                                    @foreach (var employee in filter)
+                                    @foreach (var employee in listEmployee)
                                     {
                                         <tr>
                                             <td>@employee.EmployeeName</td>
@@ -89,5 +89,3 @@
         <h3>Không có quyền truy cập</h3>
     </NotAuthorized>
 </AuthorizeView>
-
-

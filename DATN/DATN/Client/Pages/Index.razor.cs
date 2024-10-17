@@ -23,7 +23,7 @@ namespace DATN.Client.Pages
         protected override async Task OnInitializedAsync()
         {
             await LoadAll();
-            await JS.InvokeVoidAsync("initializeIsotope");
+            //await JS.InvokeVoidAsync("initializeIsotope");
         }
         private async Task LoadAll()
         {
@@ -82,14 +82,14 @@ namespace DATN.Client.Pages
                 StateHasChanged();
             }
         }
-        private async Task FilterProducts(ChangeEventArgs e)
-        {
-            var searchTerm = e.Value.ToString().ToLower();
-            await LoadAll();
-            if (products != null)
-            {
-                products = products.Where(p => p.ProductName.ToLower().Contains(searchTerm)).ToList();
-            }
-        }
+        //private async Task FilterProducts(ChangeEventArgs e)
+        //{
+        //    var searchTerm = e.Value.ToString().ToLower();
+        //    await LoadAll();
+        //    if (products != null)
+        //    {
+        //        products = products.Where(p => p.ProductName.ToLower().Contains(searchTerm)).ToList();
+        //    }
+        //}
     }
 }

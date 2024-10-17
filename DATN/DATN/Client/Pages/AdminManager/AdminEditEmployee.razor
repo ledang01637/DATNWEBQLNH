@@ -1,4 +1,4 @@
-﻿@page "/createemployee"
+﻿@page "/editemployee/{employeeId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -8,12 +8,12 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+                <h5 class="text-center mb-0">CHỈNH SỬA DANH MỤC</h5>
             </div>
             <div class="card-body">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@employee" OnValidSubmit="CreateEmployee" Context="editFormContext">
+                    <EditForm Model="@employee" OnValidSubmit="EditEmployee" Context="editFormContext">
                         <DataAnnotationsValidator />
                         <div class="text-danger mb-3">
                             <ValidationSummary />
@@ -62,30 +62,13 @@
                             <ValidationMessage For="@(() => employee.Salary)" />
                         </div>
 
-                        <div class="form-group">
-                            <label for="AccountId" class="control-label"><strong>AccountId</strong></label>
-                            <select id="AccountId" @bind="employee.AccountId" class="form-control">
-                                <option value="">Chọn Account</option>
-                                @if (accounts != null && accounts.Any())
-                                {
-                                    @foreach (var account in accounts)
-                                    {
-                                        <option value="@account.AccountId">@account.UserName</option>
-                                    }
-                                }
-                            </select>
-                            <ValidationMessage For="@(() => employee.AccountId)" />
-                        </div>
-
-
                         <div class="form-group text-center">
                             <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                                <a class="btn btn-secondary mx-2" data-bs-target="#carouselExample" data-bs-slide="prev">Quay Về</a>
+                                <button type="submit" class="btn btn-danger mx-2">Cập Nhật</button>
+                                <a href="/admincategorymanage" class="btn btn-secondary mx-2">Quay Về</a>
                             </div>
                         </div>
                     </EditForm>
-
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
                         <div class="alert alert-success mt-3">
@@ -109,52 +92,55 @@
 </div>
 
 @code {
+    [Parameter] public int employeeId { get; set; }
+
     private string errorMessage;
     private string successMessage;
     private DATN.Shared.Employee employee = new DATN.Shared.Employee();
-    private List<Account> accounts = new List<Account>();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadAccounts();
+        await LoadEditEmployee();
         isLoaded = true;
     }
 
-    private async Task LoadAccounts()
+    private async Task LoadEditEmployee()
     {
         try
         {
-            // Gọi API để lấy danh sách tài khoản
-            var response = await httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
-
+            var response = await httpClient.GetFromJsonAsync<Employee>($"api/Employee/{employeeId}");
             if (response != null)
             {
-                // Lọc danh sách tài khoản chỉ lấy những tài khoản có AccountType == "Employee"
-                accounts = response.Where(a => a.AccountType == "Employee").ToList();
+                employee = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy danh mục.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
         }
     }
 
-    private async Task CreateEmployee()
+    private async Task EditEmployee()
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync("api/Employee/AddEmployee", employee);
+            var response = await httpClient.PutAsJsonAsync($"api/Employee/{employeeId}", employee);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Thêm thành công!";
+                successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminemployee");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"error: {errorContent}";
+                errorMessage = $"Lỗi khi cập nhật danh mục: {errorContent}";
             }
         }
         catch (Exception ex)
@@ -164,6 +150,5 @@
         }
 
         StateHasChanged();
-        Navigation.NavigateTo("/adminemployee");
     }
 }

@@ -58,14 +58,15 @@
                                             <td>@account.CreateDate</td>
                                             <td>@account.UpdateDate</td>
                                             <td>@account.UserName</td>
-                                            <td>@account.Password</td>
+@*                                             <td>@account.Password</td> *@
+                                            <td>*****</td>
                                             <td>
                                                 @if (account.IsActive)
                                                 {
                                                     <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Edit</button>
                                                     <button class="btn btn-danger" @onclick="() => HideAccount(account.AccountId)">Hide</button>
-                                                    <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Update</button>
-                                                    <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Default</button>
+                                                    <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Employee</button>
+                                                    <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Customer</button>
                                                 }
                                                 else
                                                 {
