@@ -10,6 +10,11 @@ namespace DATN.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+        //    modelBuilder.Entity<Employee>()
+        //.Property(e => e.Name)
+        //.HasColumnType("varchar(18)")   // Giới hạn kiểu dữ liệu là varchar(18)
+        //.HasMaxLength(18)               // Giới hạn độ dài tối đa là 18 ký tự
+        //.IsRequired();
             modelBuilder.Entity<Employee>().Property(d => d.Salary).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Menu>().Property(f => f.PriceCombo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Order>().Property(f => f.TotalAmount).HasColumnType("decimal(18,2)");

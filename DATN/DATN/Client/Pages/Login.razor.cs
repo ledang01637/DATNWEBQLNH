@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace DATN.Client.Pages
 {
-    
+
     public partial class Login
     {
         private LoginRequest loginUser = new LoginRequest();
@@ -28,33 +28,32 @@ namespace DATN.Client.Pages
 
         private async Task HandleLogin()
         {
+            if (string.IsNullOrEmpty(loginUser.Username) || string.IsNullOrEmpty(loginUser.Password))
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Vui nhập tài khoản và mật khẩu");
+                return;
+            }
+
             var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
             if (response.IsSuccessStatusCode)
             {
                 try
                 {
                     var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
-                    if (loginResponse != null && loginResponse.SuccsessFull)
+                    if (loginResponse?.SuccsessFull == true)
                     {
                         Token = loginResponse.Token;
                         var handler = new JwtSecurityTokenHandler();
                         var jsonToken = handler.ReadToken(Token) as JwtSecurityToken;
-                        var Username = jsonToken.Claims.FirstOrDefault(c => c.Type == "Username")?.Value;
-                        var isActive = jsonToken.Claims.FirstOrDefault(c => c.Type == "IsActive")?.Value;
-                        var roleId = jsonToken.Claims.FirstOrDefault(c => c.Type == "RoleId")?.Value;
-                        var accountId = jsonToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
-                        bool isActiveBool = false;
 
-                        if (!string.IsNullOrEmpty(isActive))
-                        {
-                            bool.TryParse(isActive, out isActiveBool);
-                        }
+                        var Username = jsonToken?.Claims.FirstOrDefault(c => c.Type == "Username")?.Value;
+                        var isActive = jsonToken?.Claims.FirstOrDefault(c => c.Type == "IsActive")?.Value;
+                        var roleId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "RoleId")?.Value;
+                        var accountId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
 
-                        if (!isActiveBool)
+                        if (bool.TryParse(isActive, out bool isActiveBool) && !isActiveBool)
                         {
-                            await JS.InvokeVoidAsync("showAlert", "warning","Tài khoản bị khóa","Vui lòng liên hệ Admin");
-                            await Task.Delay(1000);
-                            Navigation.NavigateTo("/");
+                            await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản bị khóa", "Vui lòng liên hệ Admin");
                             return;
                         }
 
@@ -63,13 +62,13 @@ namespace DATN.Client.Pages
                         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
                         var user = authState.User;
 
-                        if (user.Identity.IsAuthenticated && user.IsInRole("3"))
+                        if (user.Identity.IsAuthenticated && (user.IsInRole("1") || user.IsInRole("2") || user.IsInRole("3")))
                         {
                             var res = await httpClient.PostAsJsonAsync("api/AuthJWT/ManagerToken/", loginUser);
                             if (res.IsSuccessStatusCode)
                             {
                                 var resResponese = await res.Content.ReadFromJsonAsync<QRResponse>();
-                                if (resResponese != null && resResponese.IsSuccessFull)
+                                if (resResponese?.IsSuccessFull == true)
                                 {
                                     await _localStorageService.SetItemAsync("m", resResponese.Token);
                                     await _localStorageService.SetItemAsync("userName", Username);
@@ -88,12 +87,10 @@ namespace DATN.Client.Pages
                             await _localStorageService.SetItemAsync("AccountId", accountId);
                             Navigation.NavigateTo("/", true);
                         }
-
-
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản hoặc mật khẩu không đúng! ", "");
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản hoặc mật khẩu không đúng!", "");
                     }
                 }
                 catch (JsonException ex)
@@ -127,6 +124,6 @@ namespace DATN.Client.Pages
             //loggedInUser.Password = passwordChangeModel.NewPassword;
             //await JS.InvokeVoidAsync("showAlert", "Đổi mật khẩu thành công");
         }
-
     }
+
 }
