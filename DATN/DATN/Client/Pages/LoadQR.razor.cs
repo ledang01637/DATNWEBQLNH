@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.Generic;
 using DATN.Client.Service;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace DATN.Client.Pages
 {
@@ -26,6 +27,7 @@ namespace DATN.Client.Pages
             {
                 await ProcessMd5Value(extractedMd5);
             }
+
         }
         private async Task ProcessMd5Value(string md5)
         {
@@ -74,6 +76,5 @@ namespace DATN.Client.Pages
         {
             return await JS.InvokeAsync<string>("generateMD5Hash", text);
         }
-
     }
 }

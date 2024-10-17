@@ -1,5 +1,6 @@
 ﻿using DATN.Client.Service;
 using DATN.Shared;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -29,16 +30,22 @@ namespace DATN.Client.Pages
         private bool isUseVoucher = false;
         private int vcId;
 
+        private HubConnection hubConnection;
+
         protected override async Task OnInitializedAsync()
         {
             try
             {
+                hubConnection = new HubConnectionBuilder()
+               .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
+               .Build();
+
                 carts = await _localStorageService.GetCartItemAsync("historyOrder");
                 if (carts.Any())
                 {
                     CalculateTotal();
                 }
-
+                await hubConnection.StartAsync();
                 await LoadCustomerVouchers();
             }
             catch (Exception ex)
@@ -68,26 +75,33 @@ namespace DATN.Client.Pages
         {
             try
             {
-                string token = await _localStorageService.GetItemAsync("n");
-                int numberTable = GetTableNumberFromToken(token);
-
-                await LoadTables();
-                Table table = tables.FirstOrDefault(a => a.TableNumber == numberTable);
-
-                if (table == null) throw new Exception("Không tìm thấy bàn!");
-
-                string accountType = await CheckTypeAccount();
-
-                if (accountType == "No Account")
+                if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
                 {
-                    await HandleNoAccountPayment(table);
+                    string token = await _localStorageService.GetItemAsync("n");
+                    int numberTable = GetTableNumberFromToken(token);
+
+                    await LoadTables();
+                    Table table = tables.FirstOrDefault(a => a.TableNumber == numberTable);
+
+                    if (table == null) throw new Exception("Không tìm thấy bàn!");
+
+                    string accountType = await CheckTypeAccount();
+
+                    if (accountType == "No Account")
+                    {
+                        await HandleNoAccountPayment(table);
+                    }
+                    else
+                    {
+                        await HandleAccountPayment(table);
+                    }
+                    await hubConnection.SendAsync("SendMessage", order);
+                    await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
                 }
                 else
                 {
-                    await HandleAccountPayment(table);
+                    await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
                 }
-
-                await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
             }
             catch (Exception ex)
             {
@@ -286,5 +300,12 @@ namespace DATN.Client.Pages
             return null;
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            if (hubConnection is not null)
+            {
+                await hubConnection.DisposeAsync();
+            }
+        }
     }
 }

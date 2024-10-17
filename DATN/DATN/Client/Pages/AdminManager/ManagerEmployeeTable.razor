@@ -121,7 +121,147 @@
         height: 100%;
         z-index: -1;
     }
+        body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
 
+    .container {
+      max-width: 1200px;
+    }
+    .floor-section {
+  margin-bottom: 50px;
+  padding: 20px;
+  border: 2px solid #dee2e6; /* Light gray border */
+  border-radius: 12px;        /* Rounded corners */
+  background-color: #fff;     /* White background for better contrast */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+    .header-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .header-info h4 {
+      font-weight: 500;
+      margin: 0;
+    }
+
+    #clock {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    h3, h5 {
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .table-container h5 {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 15px;
+    }
+
+    .btn-table {
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      background-size: 40px;
+      background-position: center left 15px;
+      background-repeat: no-repeat;
+      padding-left: 60px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-table:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-outline-secondary {
+      background-color: #e9ecef;
+      color: #6c757d;
+    }
+
+    .btn-outline-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .btn-outline-warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+      padding: 30px;
+    }
+
+    .list-group-item {
+      font-weight: 500;
+    }
+
+    .list-group-item span {
+      font-weight: bold;
+    }
+
+    .btn-success {
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 12px 0;
+      border-radius: 8px;
+      background-color: #28a745;
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-success:hover {
+      background-color: #218838;
+    }
+
+    .modal-header {
+      border-bottom: none;
+    }
+
+    .modal-footer {
+      border-top: none;
+    }
+
+    .modal-footer .btn-primary {
+      background-color: #007bff;
+      border-radius: 8px;
+    }
+
+    .floor-section {
+      margin-bottom: 50px;
+    }
+
+    .status-summary {
+      margin-bottom: 40px;
+    }
+
+    .status-summary .badge {
+      font-size: 1.2rem;
+      padding: 10px 15px;
+    }
 </style>
 
 
@@ -129,6 +269,49 @@
 
 
 <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+
+
+<div class="justify-content-center">
+    <div class="card shadow-sm">
+        <div class="row">
+            <!-- Khu vực các bàn -->
+            <div class="col-md-8 table-container">
+                <h3 class="mb-4">Trạng thái bàn</h3>
+                <div id="floor-1" class="floor-section">
+                    <h5>Tầng 1</h5>
+                    <div class="row" id="table-status-floor-1">
+                        <!-- Bàn ở tầng 1 sẽ được thêm từ JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal để hiển thị chi tiết đơn hàng của bàn chờ xác nhận -->
+<div class="modal fade" id="modalOrder" tabindex="-1" aria-labelledby="modalOrderLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalOrderLabel">Chi tiết đơn hàng - Bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="modal-order-details" class="list-group mb-3">
+                    <!-- Chi tiết đơn hàng sẽ được thêm từ JavaScript -->
+                </ul>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Tổng cộng</span>
+                    <strong id="modal-total-amount">$0.00</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="box" id="call-box">
     <div id="particles-js"></div>
