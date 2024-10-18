@@ -30,7 +30,7 @@ namespace DATN.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            carts = await _cartService.GetCartAsync(); 
+            carts = await _cartService.GetCartAsync();
             await UpdateCartTotals();
             await LoadAll();
             await JS.InvokeVoidAsync("initializeIsotope");
@@ -161,20 +161,20 @@ namespace DATN.Client.Pages
             _ = _cartService.SaveCartAsync(carts);
         }
 
-        private async Task UpdateCartTotals()
+        private Task UpdateCartTotals()
         {
             TotalQuantity = carts.Sum(c => c.Quantity);
             TotalAmount = carts.Sum(c => c.Price * c.Quantity);
-            await Task.Delay(500);
             StateHasChanged();
+            return Task.CompletedTask;
         }
 
-        private async Task UpdateCartTotals(decimal priceChange, int quantityChange)
+        private Task UpdateCartTotals(decimal priceChange, int quantityChange)
         {
             TotalQuantity += quantityChange;
             TotalAmount += priceChange * quantityChange;
-            await Task.Delay(500);
             StateHasChanged();
+            return Task.CompletedTask;
         }
 
         private async Task ModifyQuantity(int productId, int change)
@@ -182,7 +182,7 @@ namespace DATN.Client.Pages
             var cartItem = carts.FirstOrDefault(c => c.ProductId == productId);
             if (cartItem == null)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning" ,"Cart item not found");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Cart item not found");
                 return;
             }
 
@@ -208,7 +208,7 @@ namespace DATN.Client.Pages
         }
         private async void NaviOrderList()
         {
-            if(!(carts.Count > 0)) 
+            if (!(carts.Count > 0))
             {
                 await JS.InvokeVoidAsync("showAlert", "warning", "Giỏ hàng rỗng", "Vui lòng chọn món ăn");
                 return;

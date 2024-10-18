@@ -1,6 +1,9 @@
 ﻿@page "/tablestatus"
 @using System.Timers
 @inject IJSRuntime JS
+@layout MainLayout
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
 
 <style>
     body {

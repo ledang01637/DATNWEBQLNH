@@ -49,11 +49,11 @@ namespace DATN.Client.Pages.AdminManager
                 getMessage = numTable;
                 getCarts = carts;
 
-                if (!string.IsNullOrEmpty(getMessage) && int.TryParse(getMessage, out int tableId))
+                if (!string.IsNullOrEmpty(getMessage) && int.TryParse(getMessage, out int tableNumber))
                 {
-                    if (!numtables.Contains(tableId))
+                    if (!numtables.Contains(tableNumber))
                     {
-                        numtables.Add(tableId);
+                        numtables.Add(tableNumber);
                     }
                 }
 
@@ -107,20 +107,39 @@ namespace DATN.Client.Pages.AdminManager
             await JS.InvokeVoidAsync("openChatGPT", query);
             Console.WriteLine($"{ex.Message}");
         }
-
         private void ShowProductModal(int numberTable)
         {
+            var newCarts = getCarts.Where(c => c.TableNumber == numberTable).ToList();
+
             if (cartsByTable.TryGetValue(numberTable, out var existingCarts))
             {
-                cartsDto = existingCarts;
+                foreach (var cartItem in newCarts)
+                {
+                    var existingItem = existingCarts.FirstOrDefault(c => c.ProductId == cartItem.ProductId);
+                    if (existingItem != null)
+                    {
+                        existingItem.Quantity += cartItem.Quantity;
+                    }
+                    else
+                    {
+                        existingCarts.Add(cartItem);
+                    }
+                }
             }
             else
             {
-                cartsDto = getCarts.Where(c => c.TableId == numberTable).ToList();
-                cartsByTable[numberTable] = cartsDto;
+                cartsByTable[numberTable] = newCarts;
             }
+
+            cartsDto = cartsByTable[numberTable];
+
             StateHasChanged();
-        }  
+        }
+
+        private async void ConfirmOrder()
+        {
+            await JS.InvokeVoidAsync("showAlert", "success", "Đã gửi đầu bếp");
+        }
 
         public async ValueTask DisposeAsync()
         {

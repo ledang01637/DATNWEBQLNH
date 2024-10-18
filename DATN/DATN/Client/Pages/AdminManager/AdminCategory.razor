@@ -6,7 +6,20 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
+<style>
+    .product-table-container {
+        max-height: 900px;
+        overflow-y: auto;
+    }
 
+        .product-table-container table {
+            width: 100%;
+        }
+
+    .search-bar, .filter-bar {
+        margin-bottom: 20px;
+    }
+</style>
 <AuthorizeView Roles="1">
     <Authorized>
         @if (isLoaded)
@@ -56,22 +69,8 @@
         <h3>Không có quyền truy cập</h3>
     </NotAuthorized>
 </AuthorizeView>
-<style>
-    .product-table-container {
-        max-height: 900px;
-        overflow-y: auto;
-    }
 
-        .product-table-container table {
-            width: 100%;
-        }
-
-    .search-bar, .filter-bar {
-        margin-bottom: 20px;
-    }
-</style>
-
-@if (isLoaded)
+@* @if (isLoaded)
 {
     <div class="col-md-12 grid-margin stretch-card p-5">
         <div class="card">
@@ -129,5 +128,5 @@ else if (!string.IsNullOrEmpty(errorMessage))
 else
 {
     <p>Loading...</p>
-}
+} *@
 

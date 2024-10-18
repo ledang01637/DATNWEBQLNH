@@ -101,7 +101,7 @@ namespace DATN.Client.Pages
                         {
                             var cartDto = new CartDTO
                             {
-                                TableId = table.TableNumber,
+                                TableNumber = table.TableNumber,
                                 ProductId = cartItems[i].ProductId,
                                 UnitId = cartItems[i].UnitId,
                                 ProductName = cartItems[i].ProductName,
@@ -111,7 +111,8 @@ namespace DATN.Client.Pages
                             carts.Add(cartDto);
                         }
                         Console.WriteLine(carts.Count);
-                        await hubConnection.SendAsync("SendTable", table.TableId.ToString() , carts);
+                        Console.WriteLine(table.TableNumber.ToString());
+                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts);
                     }
                 }
                 else

@@ -78,6 +78,9 @@ namespace DATN.Client.Pages
                 if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
                 {
                     string token = await _localStorageService.GetItemAsync("n");
+
+                    if(string.IsNullOrEmpty(token)) { await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR"); return ; }
+
                     int numberTable = GetTableNumberFromToken(token);
 
                     await LoadTables();
