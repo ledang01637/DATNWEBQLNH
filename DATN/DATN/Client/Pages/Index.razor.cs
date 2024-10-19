@@ -160,7 +160,15 @@ namespace DATN.Client.Pages
             await UpdateCartTotals(product.Price, 1);
             _ = _cartService.SaveCartAsync(carts);
         }
+        private async Task RemoveAllCarts()
+        {
+            carts.Clear();
+            TotalQuantity = 0;
+            TotalAmount = 0;
 
+            await _cartService.SaveCartAsync(carts);
+            StateHasChanged();
+        }
         private Task UpdateCartTotals()
         {
             TotalQuantity = carts.Sum(c => c.Quantity);
