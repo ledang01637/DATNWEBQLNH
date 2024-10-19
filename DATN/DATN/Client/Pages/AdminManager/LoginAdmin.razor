@@ -1,6 +1,6 @@
-﻿@page "/login"
+﻿@page "/login-admin"
 @using DATN.Client.Service
-@layout MainLayout
+@layout InitLayout
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -63,27 +63,6 @@
         <div class="alert alert-danger mt-3">Email hoặc mật khẩu không chính xác.</div>
     }
 </div>
-@*
-    @if (loggedInUser != null)
-    {
-        <div class="mt-4 login-card">
-            <h4 class="text-center mb-4">Đổi mật khẩu</h4>
-            <EditForm Model="@passwordChangeModel" OnValidSubmit="HandlePasswordChange">
-                <div class="mb-3">
-                    <InputText type="password" class="form-control" placeholder="Mật khẩu mới" @bind-Value="passwordChangeModel.NewPassword" />
-                    <ValidationMessage For="@(() => passwordChangeModel.NewPassword)" />
-                </div>
-                <div class="mb-3">
-                    <InputText type="password" class="form-control" placeholder="Xác nhận mật khẩu mới" @bind-Value="passwordChangeModel.ConfirmNewPassword" />
-                    <ValidationMessage For="@(() => passwordChangeModel.ConfirmNewPassword)" />
-                </div>
-                <h4 class="text-center mb-4">Xác nhận mã OTP</h4>
-                <button type="submit" class="btn btn-primary-custom">Đổi mật khẩu</button>
-            </EditForm>
-        </div>
-    } *@
-
-
 <!-- Modal thông báo thành công -->
 <div class="modal fade" tabindex="-1" role="dialog" id="successModal">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -91,8 +70,6 @@
             <div class="modal-body">
                 <img src="https://img.icons8.com/fluency/48/000000/checkmark.png" alt="Success Icon" />
                 <h4 class="mt-3" style="color: #d35400;">Thành công</h4>
-                <p>Chúc quý khách ngon miệng</p>
-                <button type="button" class="btn btn-primary-custom mt-2" data-bs-dismiss="modal">Ăn ngay thôi!</button>
             </div>
         </div>
     </div>

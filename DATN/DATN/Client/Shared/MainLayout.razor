@@ -6,25 +6,19 @@
 @inject IJSRuntime JS
 
 <CascadingAuthenticationState>
-     @if (String.IsNullOrEmpty(wifiIpAddress))
+    @if (isAcceptWifi)
     {
-        <div class="layout-rain">
-            <div class="bubbles" id="bubbles">
-                <img src="images/shipper.png" class="shipper" alt="">
-                <hr class="divider">
+        <div class="container mt-1 foodcustom">
+            @Body
+        </div>
+    }
+    else
+    {
+        <div class="container-fluid access-denied-container">
+            <div class="access-denied-card">
+                <h1>Wifi không hợp lệ</h1>
+                <p>Vui lòng truy cập bằng Wifi của quán !</p>
             </div>
-        </div>
-    }
-    else if (isAcceptWifi)
-    {
-        <div class="container mt-1 foodcustom">
-            @Body
-        </div>
-    }
-   else
-    {
-        <div class="container mt-1 foodcustom">
-            @Body
         </div>
     } 
 </CascadingAuthenticationState>

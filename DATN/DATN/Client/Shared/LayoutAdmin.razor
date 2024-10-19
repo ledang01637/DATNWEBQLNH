@@ -50,7 +50,14 @@
             </div>
         </Authorized>
         <NotAuthorized>
-            <h1>Trang chỉ dành cho Admin</h1>
+            <div class="container-fluid access-denied-container">
+                <div class="access-denied-card">
+                    <h1>403</h1>
+                    <p><strong>Access Denied</strong></p>
+                    <p>You do not have permission to access this page.</p>
+                    <a href="/" class="btn btn-primary mt-3">Go to Homepage</a>
+                </div>
+            </div>
         </NotAuthorized>
     </AuthorizeView>
 </CascadingAuthenticationState>

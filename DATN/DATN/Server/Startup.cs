@@ -14,6 +14,7 @@ using System;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using DATN.Server.Hubs;
+using DATN.Server.Hash;
 
 namespace DATN.Server
 {
@@ -83,6 +84,7 @@ namespace DATN.Server
             services.AddScoped<TableService>();
             services.AddScoped<UnitService>();
             services.AddScoped<VoucherService>();
+            services.AddScoped<FileEncryptionService>();
             services.AddScoped<NetworkService>();
 
             services.AddDbContext<AppDBContext>(options =>
