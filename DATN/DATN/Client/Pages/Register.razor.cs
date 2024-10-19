@@ -65,7 +65,7 @@ namespace DATN.Client.Pages
                     var creatRoleAccount = await response.Content.ReadFromJsonAsync<Account>();
                     if(creatRoleAccount  != null)
                     {
-                        RoleAccount roleAccount = new RoleAccount()
+                        RoleAccount roleAccount = new()
                         {
                             IsActive = true,
                             AccountId = creatRoleAccount.AccountId,

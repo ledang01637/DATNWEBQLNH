@@ -50,7 +50,7 @@ namespace DATN.Client.Pages.AdminManager
                 return;
             }
 
-            var response = await httpClient.PostAsJsonAsync("api/Network/post-wifi-ip", IP);
+            var response = await httpClient.PostAsJsonAsync("api/Network/remove-wifi-ip", IP);
 
             if (response.IsSuccessStatusCode)
             {
