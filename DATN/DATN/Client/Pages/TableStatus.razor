@@ -1,0 +1,296 @@
+﻿@page "/tablestatus"
+@using System.Timers
+@inject IJSRuntime JS
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    .container {
+        max-width: 1200px;
+    }
+
+    .floor-section {
+        margin-bottom: 50px;
+        padding: 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+    }
+
+        .header-info h4 {
+            font-weight: 500;
+            margin: 0;
+        }
+
+    #clock {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    h3, h5 {
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .table-container h5 {
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin-bottom: 15px;
+    }
+
+    .btn-table {
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        background-size: 40px;
+        background-position: center left 15px;
+        background-repeat: no-repeat;
+        padding-left: 60px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-image: url("/images/png/table.png");
+    }
+
+        .btn-table:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .btn-outline-secondary {
+        background-color: #e9ecef;
+        color: #6c757d;
+    }
+
+    .btn-outline-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .btn-outline-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border-color: #ffeeba;
+    }
+
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    .list-group-item {
+        font-weight: 500;
+    }
+
+        .list-group-item span {
+            font-weight: bold;
+        }
+
+    .btn-success {
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 12px 0;
+        border-radius: 8px;
+        background-color: #28a745;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+        .modal-footer .btn-primary {
+            background-color: #007bff;
+            border-radius: 8px;
+        }
+
+    .floor-section {
+        margin-bottom: 50px;
+    }
+
+    .status-summary {
+        margin-bottom: 40px;
+    }
+
+        .status-summary .badge {
+            font-size: 1.2rem;
+            padding: 10px 15px;
+        }
+</style>
+
+<div class="container my-5">
+    <!-- Thông tin nhân viên và đồng hồ thời gian -->
+    <div class="header-info">
+        <h4>Nhân viên: <span id="employee-name">@employeeName</span></h4>
+        <h4 id="clock">@currentTime</h4>
+    </div>
+
+    <!-- Tóm tắt trạng thái bàn -->
+    <div class="status-summary text-center">
+        <span class="badge bg-success">Bàn có người: @OccupiedCount</span>
+        <span class="badge bg-secondary">Bàn trống: @AvailableCount</span>
+        <span class="badge bg-warning text-dark">Bàn chờ xác nhận: @PendingCount</span>
+    </div>
+
+    <div class="row">
+        <!-- Khu vực các bàn -->
+        <div class="col-md-8 table-container">
+            <h3 class="mb-4">Trạng thái bàn</h3>
+
+            <!-- Tầng 1 -->
+            <div id="floor-1" class="floor-section">
+                <h5>Tầng 1</h5>
+                <div class="row">
+                    @foreach (var table in tables.Where(t => t.Floor == 1))
+                    {
+                        <div class="col-6 col-md-3 mb-3">
+                            <button class="btn btn-table w-100 @GetTableClass(table.Status)" @onclick="() => HandleTableClick(table)">
+                                @table.Label
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Tầng 2 -->
+            <div id="floor-2" class="floor-section">
+                <h5>Tầng 2</h5>
+                <div class="row">
+                    @foreach (var table in tables.Where(t => t.Floor == 2))
+                    {
+                        <div class="col-6 col-md-3 mb-3">
+                            <button class="btn btn-table w-100 @GetTableClass(table.Status)" @onclick="() => HandleTableClick(table)">
+                                @table.Label
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải chứa bảng tóm tắt đơn hàng -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Đơn hàng</h5>
+                    <ul id="order-summary" class="list-group mb-3">
+                        @foreach (var order in currentOrders)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @order.Name <span>$@order.Price.ToString("0.00")</span>
+                            </li>
+                        }
+                        }
+                    </ul>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tổng cộng</span>
+                        <strong id="total-amount">$@TotalAmount.ToString("0.00")</strong>
+                    </div>
+                    <button class="btn btn-success w-100">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string employeeName = "Vinh đẹp trai";
+    private string currentTime;
+    private int OccupiedCount => tables.Count(t => t.Status == "occupied");
+    private int AvailableCount => tables.Count(t => t.Status == "available");
+    private int PendingCount => tables.Count(t => t.Status == "pending");
+    private List<Table> tables = new List<Table>
+    {
+        new Table { Id = 1, Status = "available", Label = "Bàn 1", Floor = 1 },
+        new Table { Id = 2, Status = "occupied", Label = "Bàn 2", Floor = 1 },
+        new Table { Id = 3, Status = "pending", Label = "Bàn 3", Floor = 1 },
+        new Table { Id = 4, Status = "available", Label = "Bàn 4", Floor = 2 },
+        new Table { Id = 5, Status = "occupied", Label = "Bàn 5", Floor = 2 },
+        new Table { Id = 6, Status = "pending", Label = "Bàn 6", Floor = 2 }
+    };
+    private List<Order> currentOrders = new List<Order>
+    {
+        new Order { Name = "Cappuccino", Price = 4.5m },
+        new Order { Name = "Mocha", Price = 5.0m },
+        new Order { Name = "Espresso", Price = 3.0m }
+    };
+    private decimal TotalAmount => currentOrders.Sum(order => order.Price);
+
+    protected override void OnInitialized()
+    {
+        var timer = new Timer(1000);
+        timer.Elapsed += UpdateTime;
+        timer.Start();
+    }
+
+    private void UpdateTime(object sender, ElapsedEventArgs e)
+    {
+        currentTime = DateTime.Now.ToString("HH:mm:ss");
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetTableClass(string status)
+    {
+        return status switch
+        {
+            "available" => "btn-outline-secondary",
+            "occupied" => "btn-outline-success",
+            "pending" => "btn-outline-warning",
+            _ => "btn-outline-secondary"
+        };
+    }
+
+    private void HandleTableClick(Table table)
+    {
+        Console.WriteLine($"Table {table.Label} clicked!");
+        // Add further logic here for table click events (e.g., update status or show details)
+    }
+
+    private class Table
+    {
+        public int Id { get; set; }
+        public string Status { get; set; }
+        public string Label { get; set; }
+        public int Floor { get; set; }
+    }
+
+    private class Order
+    {
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+}
