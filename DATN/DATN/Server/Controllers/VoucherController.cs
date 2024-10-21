@@ -32,7 +32,8 @@ namespace DATN.Server.Controllers
                 PointRequired = Voucher.PointRequired,
                 DiscountValue = Voucher.DiscountValue,
                 ExpriationDate = Voucher.ExpriationDate,
-                IsActive = Voucher.IsActive,
+                IsAcctive = Voucher.IsAcctive,
+                IsDeleted = Voucher.IsDeleted
 
             });
         }

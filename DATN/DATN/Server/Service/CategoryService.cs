@@ -56,7 +56,7 @@ namespace DATN.Server.Service
             }
             existingCate.CategoryName = updateCategory.CategoryName;
             existingCate.CategoryDescription = updateCategory.CategoryDescription;
-            existingCate.IsDelete = updateCategory.IsDelete;
+            existingCate.IsDeleted = updateCategory.IsDeleted;
 
             _context.Update(existingCate);
             _context.SaveChanges();

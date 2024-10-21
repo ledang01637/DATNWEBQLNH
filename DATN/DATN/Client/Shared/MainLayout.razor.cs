@@ -11,13 +11,20 @@ namespace DATN.Client.Shared
         private string wifiIpAddress;
         private bool isAcceptWifi;
         private string errorMessage;
+        private bool isLoading;
 
         protected override async Task OnInitializedAsync()
         {
+            isLoading = true;
             try
             {
                 wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
-                if(string.IsNullOrEmpty(wifiIpAddress)) { wifiIpAddress = "No access"; isAcceptWifi = false; return; }
+                Console.WriteLine(wifiIpAddress);
+                if(string.IsNullOrEmpty(wifiIpAddress)) 
+                { 
+                    isAcceptWifi = false; 
+                    return; 
+                }
                 isAcceptWifi = true;
             }
             catch (HttpRequestException ex)
@@ -25,6 +32,10 @@ namespace DATN.Client.Shared
                 isAcceptWifi = false;
                 errorMessage = "Access denied: " + ex.Message;
                 Console.WriteLine(errorMessage);
+            }
+            finally
+            {
+                isLoading = false;
             }
         }
     }

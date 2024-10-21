@@ -96,7 +96,7 @@ namespace DATN.Client.Pages.AdminManager
                 if (account != null && role != null)
                 {
                     account.AccountType = "Employee"; // Cập nhật loại tài khoản
-                    role.Roleid = 2; // Cập nhật vai trò thành Employee
+                    role.RoleId = 2; // Cập nhật vai trò thành Employee
 
                     // Gửi yêu cầu cập nhật tài khoản
                     var accountResponse = await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
@@ -132,7 +132,7 @@ namespace DATN.Client.Pages.AdminManager
                 if (account != null && role != null)
                 {
                     account.AccountType = "Customer"; // Cập nhật loại tài khoản
-                    role.Roleid = 3; // Cập nhật vai trò thành Customer
+                    role.RoleId = 3; // Cập nhật vai trò thành Customer
 
                     // Gửi yêu cầu cập nhật tài khoản
                     var accountResponse = await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
@@ -216,7 +216,7 @@ namespace DATN.Client.Pages.AdminManager
             var searchTerm = e.Value.ToString().ToLower();
             filter = string.IsNullOrWhiteSpace(searchTerm)
                 ? listAccount
-                : listAccount.Where(p => p.AccountType.ToLower().Contains(searchTerm) || p.UserName.ToLower().Contains(searchTerm)).ToList();
+                : listAccount.Where(p => p.AccountType.ToLower().Contains(searchTerm) || p.Email.ToLower().Contains(searchTerm)).ToList();
         }
 
     }

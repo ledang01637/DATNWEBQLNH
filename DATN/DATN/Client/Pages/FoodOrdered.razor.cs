@@ -118,12 +118,12 @@ namespace DATN.Client.Pages
             order = new Order
             {
                 TableId = table.TableId,
-                OrderDate = DateTime.Now,
+                CreateDate = DateTime.Now,
                 TotalAmount = Total,
                 Status = "Đang xử lý",
                 CustomerId = customerNoAccount.CustomerId,
                 PaymentMethod = "",
-                CustomerVoucherId = null
+                CustomerVoucherId = 0
             };
 
             await ProcessOrder();
@@ -135,12 +135,12 @@ namespace DATN.Client.Pages
             order = new Order
             {
                 TableId = table.TableNumber,
-                OrderDate = DateTime.Now,
+                CreateDate = DateTime.Now,
                 TotalAmount = Total,
                 Status = "Đang xử lý",
                 CustomerId = customerNoAccount.CustomerId,
                 PaymentMethod = "",
-                CustomerVoucherId = isUseVoucher ? vcId : null
+                CustomerVoucherId = isUseVoucher ? vcId : 0
             };
 
             await ProcessOrder();

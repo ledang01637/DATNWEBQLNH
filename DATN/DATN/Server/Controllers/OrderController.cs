@@ -29,7 +29,7 @@ namespace DATN.Server.Controllers
             return _OrderService.AddOrder(new Order
             {
                 TableId = Order.TableId,
-                OrderDate = Order.OrderDate,
+                CreateDate = Order.CreateDate,
                 TotalAmount = Order.TotalAmount,
                 Status = Order.Status,
                 PaymentMethod = Order.PaymentMethod,

@@ -12,11 +12,11 @@ namespace DATN.Shared
         [Key]
         public int MenuId { get; set; }
         public string MenuName { get; set; }
-        public string? MenuDescription { get; set; }
+        public string MenuDescription { get; set; }
         public decimal PriceCombo { get; set; }
-        public bool IsDelete { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public ICollection<MenuItem> MenuItems { get; set; }
+        public virtual ICollection<MenuItem> MenuItems { get; set; }
 
     }
 }

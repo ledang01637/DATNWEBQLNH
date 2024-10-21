@@ -14,7 +14,8 @@ namespace DATN.Shared
 
         public string UnitName { get; set; }
         public string UnitDescription { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public ICollection<Product> Products { get; set; }
+        public virtual ICollection<Product> Products { get; set; }
     }
 }

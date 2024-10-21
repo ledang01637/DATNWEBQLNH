@@ -12,10 +12,10 @@ namespace DATN.Shared
         [Key]
         public int Shifte_Id { get; set; }
         public string Shifte_Name { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public bool IsDeleted { get; set; }
 
-        public ICollection<EmployeeShifte> EmployeeShiftes { get; set; }
+        public virtual ICollection<EmployeeShifte> EmployeeShiftes { get; set; }
     }
 }

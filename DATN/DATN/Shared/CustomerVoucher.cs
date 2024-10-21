@@ -17,10 +17,11 @@ namespace DATN.Shared
         public string Status { get; set; }
         public DateTime RedeemDate { get; set; }
         public DateTime ExpirationDate { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public Order Order { get; set; }
-        public Voucher Vouchers { get; set; }
-        public Customer Customers { get; set; }
+        public virtual Order Order { get; set; }
+        public virtual Voucher Vouchers { get; set; }
+        public virtual Customer Customers { get; set; }
 
 
     }

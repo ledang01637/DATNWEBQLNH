@@ -17,7 +17,7 @@ namespace DATN.Shared
         public bool IsDeleted { get; set; }
         public int OrderId { get; set; }
 
-        public Customer Customers { get; set; }
-        public Order Orders { get; set; }
+        public virtual Customer Customers { get; set; }
+        public virtual Order Orders { get; set; }
     }
 }

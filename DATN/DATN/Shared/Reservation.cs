@@ -12,13 +12,17 @@ namespace DATN.Shared
     {
         [Key]
         public int ReservationId { get; set; }
+        public int TableId { get; set; }
         public string CustomerName { get; set; }
         public string CustomerPhone { get; set; }
         public DateTime ReservationDate { get; set; }
-        public DateTime ReservationTime { get; set; }
-        public int Numberguest { get; set; }
-        public int CustomerId { get; set; }
+        public int NumberGuest { get; set; }
+        public int NumberSeat {  get; set; }
+        public bool Is_Payment {  get; set; }
+        public decimal DepositPayment {  get; set; }
+        public string PaymentMethod {  get; set; }
+        public bool IsDeleted {  get; set; }
 
-        public Table Tables { get; set; }
+        public virtual Table Tables { get; set; }
     }
 }

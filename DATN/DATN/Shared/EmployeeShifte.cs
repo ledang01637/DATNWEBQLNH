@@ -15,7 +15,9 @@ namespace DATN.Shared
         public int EmployeeId { get; set; }
         public int ShifteId { get; set; }
 
-        public Employee Employees { get; set; }
-        public Shifte Shiftes { get; set; }
+        public bool IsDeleted { get; set; }
+
+        public virtual Employee Employees { get; set; }
+        public virtual Shifte Shiftes { get; set; }
     }
 }

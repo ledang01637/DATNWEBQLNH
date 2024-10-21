@@ -15,7 +15,7 @@ namespace DATN.Shared
         public string RoleDescription { get; set; }
         public bool IsDeleted { get; set; }
 
-        public ICollection<RoleAccount> RoleAccounts { get; set; }
+        public virtual ICollection<RoleAccount> RoleAccounts { get; set; }
     }
 }
 

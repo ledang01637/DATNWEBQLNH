@@ -183,7 +183,7 @@
         }
 
         // Tìm tài khoản dựa trên username
-        var account = listAccount.FirstOrDefault(x => x.UserName == username);
+        var account = listAccount.FirstOrDefault(x => x.Email == username);
 
         if (account == null)
         {

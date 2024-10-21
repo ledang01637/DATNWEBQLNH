@@ -53,14 +53,14 @@ namespace DATN.Client.Pages
 
                 await Task.WhenAll(productTask, categoryTask, menuTask, accountTask);
 
-                products = (await productTask)?.Where(p => !p.IsDelete).ToList() ?? new List<Product>();
-                categories = (await categoryTask)?.Where(c => !c.IsDelete).ToList() ?? new List<Category>();
+                products = (await productTask)?.Where(p => !p.IsDeleted).ToList() ?? new List<Product>();
+                categories = (await categoryTask)?.Where(c => !c.IsDeleted).ToList() ?? new List<Category>();
                 menus = await menuTask ?? new List<Menu>();
                 accounts = await accountTask ?? new List<Account>();
 
                 if (accounts != null)
                 {
-                    loginUser.Username = "no account";
+                    loginUser.Email = "no account";
                     loginUser.Password = "123456";
 
                     var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);

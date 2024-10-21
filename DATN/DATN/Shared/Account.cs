@@ -15,12 +15,13 @@ namespace DATN.Shared
         public string AccountType { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
-        public string UserName { get; set; }
+        public string Email { get; set; }
         public string Password { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public ICollection<RoleAccount> RoleAccounts { get; set; }
-        public Employee Employees { get; set; }
-        public Customer Customers { get; set; }
+        public virtual ICollection<RoleAccount> RoleAccounts { get; set; }
+        public virtual Employee Employees { get; set; }
+        public virtual Customer Customers { get; set; }
     }
 }

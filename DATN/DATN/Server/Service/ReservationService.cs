@@ -57,10 +57,13 @@ namespace DATN.Server.Service
             existing.CustomerName = update.CustomerName;
             existing.CustomerPhone = update.CustomerPhone;
             existing.ReservationDate = update.ReservationDate;
-            existing.ReservationTime = update.ReservationTime;
-            existing.Numberguest = update.Numberguest;
+            existing.NumberGuest = update.NumberGuest;
             existing.Tables = update.Tables;
-            existing.CustomerId = update.CustomerId;
+            existing.Is_Payment = update.Is_Payment;
+            existing.DepositPayment = update.DepositPayment;
+            existing.PaymentMethod = update.PaymentMethod;
+            existing.IsDeleted = update.IsDeleted;
+
 
             _context.Update(existing);
             _context.SaveChanges();

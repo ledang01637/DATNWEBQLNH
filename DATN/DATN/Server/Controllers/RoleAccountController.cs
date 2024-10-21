@@ -28,10 +28,9 @@ namespace DATN.Server.Controllers
         {
             return _RoleAccountService.AddRoleAccount(new RoleAccount
             {
-                Roleid = RoleAccount.Roleid,
+                RoleId = RoleAccount.RoleId,
                 AccountId = RoleAccount.AccountId,
-                IsActive = RoleAccount.IsActive,
-
+                IsDeleted = RoleAccount.IsDeleted
             });
         }
 

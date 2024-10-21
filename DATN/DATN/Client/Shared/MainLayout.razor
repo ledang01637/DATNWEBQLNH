@@ -6,7 +6,16 @@
 @inject IJSRuntime JS
 
 <CascadingAuthenticationState>
-    @if (isAcceptWifi)
+
+    @if (isLoading)
+    {
+        <div class="layout-rain">
+            <div class="bubbles" id="bubbles">
+                <img src="images/shipper.png" class="shipper" alt="">
+                <hr class="divider">
+            </div>
+        </div>
+    }else if (isAcceptWifi)
     {
         <div class="container mt-1 foodcustom">
             @Body

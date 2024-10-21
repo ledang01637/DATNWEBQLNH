@@ -38,12 +38,12 @@ namespace DATN.Server.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var isSuccess = ValidateUser(loginModel.Username, loginModel.Password);
+            var isSuccess = ValidateUser(loginModel.Email, loginModel.Password);
 
             var successLogin = _appDBContext.Accounts
-                .FirstOrDefault(x => x.UserName == loginModel.Username && isSuccess);
+                .FirstOrDefault(x => x.Email == loginModel.Email && isSuccess);
 
-            if (successLogin != null && successLogin.UserName.Equals("Customer"))
+            if (successLogin != null && successLogin.Email.Equals("Customer"))
             {
                 var token = GenerateJwtTokenV2(successLogin);
                 return Ok(new LoginRespone
@@ -53,12 +53,12 @@ namespace DATN.Server.Controllers
                 });
             }
 
-            if (successLogin != null && !successLogin.UserName.Equals("Customer"))
+            if (successLogin != null && !successLogin.Email.Equals("Customer"))
             {
                 var roles = _appDBContext.Roles.ToList();
                 var roleAccount = _appDBContext.RoleAccounts
                     .AsEnumerable()
-                    .FirstOrDefault(a => roles.Any(r => r.RoleId == a.Roleid) && a.AccountId == successLogin.AccountId);
+                    .FirstOrDefault(a => roles.Any(r => r.RoleId == a.RoleId) && a.AccountId == successLogin.AccountId);
 
 
                 if (roleAccount != null)
@@ -102,15 +102,15 @@ namespace DATN.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
 
-                new Claim("Username", account.UserName),
+                new Claim("Username", account.Email),
                 new Claim("AccountId", account.AccountId.ToString()),
                 new Claim("AccountType", account.AccountType),
                 new Claim("CreateDate", account.CreateDate.ToString()),
                 new Claim("UpdateDate", account.UpdateDate.ToString()),
-                new Claim("IsActive", account.IsActive.ToString()),
+                new Claim("IsActive", account.IsActive.ToString()), 
 
-                new Claim("RoleId", roleAccount.Roleid.ToString()),
-                new Claim(ClaimTypes.Role, roleAccount.Roleid.ToString())
+                new Claim("RoleId", roleAccount.RoleId.ToString()),
+                new Claim(ClaimTypes.Role, roleAccount.RoleId.ToString())
 
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
@@ -135,7 +135,7 @@ namespace DATN.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
 
-                new Claim("Username", account.UserName),
+                new Claim("Username", account.Email),
                 new Claim(ClaimTypes.Role, "Customer")
 
             };
@@ -171,10 +171,10 @@ namespace DATN.Server.Controllers
         {
 
 
-            var isSuccess = ValidateUser(loginModel.Username, loginModel.Password);
+            var isSuccess = ValidateUser(loginModel.Email, loginModel.Password);
 
             var successLogin = _appDBContext.Accounts
-                .FirstOrDefault(x => x.UserName == loginModel.Username && isSuccess);
+                .FirstOrDefault(x => x.Email == loginModel.Email && isSuccess);
 
             if (successLogin != null)
             {
@@ -227,7 +227,7 @@ namespace DATN.Server.Controllers
                 byte[] hashedBytes = sha1.ComputeHash(passwordBytes);
                 password = Convert.ToBase64String(hashedBytes);
             }
-            var user = _appDBContext.Accounts.FirstOrDefault(u => u.UserName.Equals(username) && u.Password.Equals(password));
+            var user = _appDBContext.Accounts.FirstOrDefault(u => u.Email.Equals(username) && u.Password.Equals(password));
             if (user == null)
                 return false;
             else

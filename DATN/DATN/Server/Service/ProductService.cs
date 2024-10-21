@@ -58,9 +58,9 @@ namespace DATN.Server.Service
             existing.ProductName = update.ProductName;
             existing.Price = update.Price;
             existing.CategoryId = update.CategoryId;
-            existing.ProductDescripntion = update.ProductDescripntion;
+            existing.ProductDescription = update.ProductDescription;
             existing.ProductImage = update.ProductImage;
-            existing.IsDelete = update.IsDelete;
+            existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);
             _context.SaveChanges();

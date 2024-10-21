@@ -19,8 +19,8 @@ namespace DATN.Shared
         public string Status { get; set; }
         public bool IsDeleted { get; set; }
 
-        public Floor Floors { get; set; }
-        public ICollection<Order> Orders { get; set; }
-        public ICollection<Reservation> Reservations { get; set; }
+        public virtual Floor Floors { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<Reservation> Reservations { get; set; }
     }
 }

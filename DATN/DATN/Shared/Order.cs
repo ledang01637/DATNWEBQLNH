@@ -12,17 +12,21 @@ namespace DATN.Shared
         [Key]
         public int OrderId { get; set; }
         public int TableId { get; set; }
-        public DateTime OrderDate { get; set; }
+        public int EmployeeId {  get; set; }
+        public DateTime CreateDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
-        public int? CustomerId { get; set; }
+        public int CustomerId { get; set; }
         public string PaymentMethod { get; set; }
-        public int? CustomerVoucherId { get; set; }
+        public string Note { get; set; }
+        public int CustomerVoucherId { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public Customer Customers { get; set; }
-        public Table Tables { get; set; }
-        public ICollection<OrderItem> OrderItems { get; set; }
-        public ICollection<RewardPointe> RewardPointes { get; set; }
-        public CustomerVoucher CustomerVouchers { get; set; }
+        public virtual Customer Customers { get; set; }
+        public virtual Table Tables { get; set; }
+        public virtual ICollection<OrderItem> OrderItems { get; set; }
+        public virtual CustomerVoucher CustomerVouchers { get; set; }
+        public virtual Employee Employee { get; set; }
+        public virtual RewardPointe RewardPointes { get; set; }
     }
 }

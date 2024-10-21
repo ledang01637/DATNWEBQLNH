@@ -21,7 +21,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task HandleLogin()
         {
-            if (string.IsNullOrEmpty(loginUser.Username) || string.IsNullOrEmpty(loginUser.Password))
+            if (string.IsNullOrEmpty(loginUser.Email) || string.IsNullOrEmpty(loginUser.Password))
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Vui nhập tài khoản và mật khẩu");
                 return;

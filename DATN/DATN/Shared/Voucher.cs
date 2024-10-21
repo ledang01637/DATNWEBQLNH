@@ -15,8 +15,9 @@ namespace DATN.Shared
         public int PointRequired { get; set; }
         public decimal DiscountValue { get; set; }
         public DateTime ExpriationDate {  get; set; }
-        public bool IsActive { get; set; }
+        public bool IsAcctive { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public ICollection<CustomerVoucher> CustomerVouchers { get; set; }
+        public virtual ICollection<CustomerVoucher> CustomerVouchers { get; set; }
     }
 }

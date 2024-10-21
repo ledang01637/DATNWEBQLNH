@@ -46,7 +46,7 @@ namespace DATN.Client.Pages.AdminManager
                 var product = listProd.FirstOrDefault(p => p.ProductId == productId);
                 if (product != null)
                 {
-                    product.IsDelete = true;
+                    product.IsDeleted = true;
                     await httpClient.PutAsJsonAsync($"api/Product/{productId}", product);
                     await LoadProducts();
                     StateHasChanged();
@@ -65,7 +65,7 @@ namespace DATN.Client.Pages.AdminManager
                 var product = listProd.FirstOrDefault(p => p.ProductId == productId);
                 if (product != null)
                 {
-                    product.IsDelete = false;
+                    product.IsDeleted = false;
                     await httpClient.PutAsJsonAsync($"api/Product/{productId}", product);
                     await LoadProducts();
                     StateHasChanged();

@@ -41,7 +41,7 @@ namespace DATN.Client.Pages
             try
             {
 
-                var exitsUsername = accounts.FirstOrDefault(x => x.UserName.Equals(account.UserName));
+                var exitsUsername = accounts.FirstOrDefault(x => x.Email.Equals(account.Email));
                 if (exitsUsername != null)
                 {
 
@@ -57,7 +57,7 @@ namespace DATN.Client.Pages
                 account.CreateDate = DateTime.Now;
                 account.UpdateDate = DateTime.Now;
                 account.IsActive = true;
-                account.UserName = account.UserName.ToLower();
+                account.Email = account.Email.ToLower();
 
                 var response = await httpClient.PostAsJsonAsync("api/Account/AddAccount", account);
                 if (response.IsSuccessStatusCode)
@@ -67,9 +67,9 @@ namespace DATN.Client.Pages
                     {
                         RoleAccount roleAccount = new()
                         {
-                            IsActive = true,
+                            IsDeleted = false,
                             AccountId = creatRoleAccount.AccountId,
-                            Roleid = 3
+                            RoleId = 3
                         };
                         var responseRoleAccount = await httpClient.PostAsJsonAsync("api/RoleAccount/AddRoleAccount", roleAccount);
 

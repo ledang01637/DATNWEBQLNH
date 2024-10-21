@@ -54,7 +54,7 @@
                                     <td>@connectMenu.MenuName</td>
                                     <td>@connectProduct.ProductName</td>
                                     <td class="text-center">
-                                        @if (!item.IsDelete)
+                                        @if (!item.IsDeleted)
                                         {
                                             <button class="btn btn-primary" @onclick="() => EditMenuItem(item.MenuItemId)">Sửa</button>
                                             <button class="btn btn-danger" @onclick="() => Hide(item.MenuItemId)">Ẩn</button>

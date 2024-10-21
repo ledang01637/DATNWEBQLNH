@@ -55,7 +55,7 @@ namespace DATN.Server.Service
                 return null;
             }
             existing.TableId = update.TableId;
-            existing.OrderDate = update.OrderDate;
+            existing.CreateDate = update.CreateDate;
             existing.TotalAmount = update.TotalAmount;
             existing.Status = update.Status;
             existing.CustomerId = update.CustomerId;

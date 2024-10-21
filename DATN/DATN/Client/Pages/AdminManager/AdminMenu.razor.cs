@@ -44,7 +44,7 @@ namespace DATN.Client.Pages.AdminManager
                 var menu = listMenu.FirstOrDefault(p => p.MenuId == menuId);
                 if (menu != null)
                 {
-                    menu.IsDelete = true;
+                    menu.IsDeleted = true;
                     await httpClient.PutAsJsonAsync($"api/Menu/{menuId}", menu);
                     await LoadMenus();
                     StateHasChanged();
@@ -63,7 +63,7 @@ namespace DATN.Client.Pages.AdminManager
                 var menu = listMenu.FirstOrDefault(p => p.MenuId == menuId);
                 if (menu != null)
                 {
-                    menu.IsDelete = false;
+                    menu.IsDeleted = false;
                     await httpClient.PutAsJsonAsync($"api/Menu/{menuId}", menu);
                     await LoadMenus();
                     StateHasChanged();

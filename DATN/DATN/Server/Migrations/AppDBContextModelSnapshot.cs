@@ -27,22 +27,29 @@ namespace DATN.Server.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("AccountType")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("char(40)");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AccountId");
 
@@ -57,12 +64,15 @@ namespace DATN.Server.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("CategoryDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("CategoryName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
-                    b.Property<bool>("IsDelete")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.HasKey("CategoryId");
@@ -73,27 +83,33 @@ namespace DATN.Server.Migrations
             modelBuilder.Entity("DATN.Shared.Customer", b =>
                 {
                     b.Property<int>("CustomerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("varchar(12)");
 
                     b.Property<int>("TotalRewardPoint")
                         .HasColumnType("int");
@@ -119,6 +135,9 @@ namespace DATN.Server.Migrations
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsUsed")
                         .HasColumnType("bit");
 
@@ -126,7 +145,9 @@ namespace DATN.Server.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("VoucherId")
                         .HasColumnType("int");
@@ -154,10 +175,14 @@ namespace DATN.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("EmployeeName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("datetime2");
@@ -166,10 +191,14 @@ namespace DATN.Server.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("varchar(12)");
 
                     b.Property<string>("Position")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Salary")
                         .HasColumnType("decimal(18,2)");
@@ -184,13 +213,14 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.EmployeeShifte", b =>
                 {
-                    b.Property<int>("EmployeeShifteId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
+
+                    b.Property<int>("EmployeeShifteId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("ShifteDay")
                         .HasColumnType("datetime2");
@@ -198,9 +228,7 @@ namespace DATN.Server.Migrations
                     b.Property<int>("ShifteId")
                         .HasColumnType("int");
 
-                    b.HasKey("EmployeeShifteId");
-
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("EmployeeId");
 
                     b.HasIndex("ShifteId");
 
@@ -214,7 +242,7 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("NumberFloor")
@@ -232,14 +260,17 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsDelete")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("MenuDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("MenuName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<decimal>("PriceCombo")
                         .HasColumnType("decimal(18,2)");
@@ -256,7 +287,7 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsDelete")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("MenuId")
@@ -281,20 +312,33 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CustomerVoucherId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("OrderDate")
+                    b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PaymentMethod")
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerVoucherId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("TableId")
                         .HasColumnType("int");
@@ -307,8 +351,9 @@ namespace DATN.Server.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("CustomerVoucherId")
-                        .IsUnique()
-                        .HasFilter("[CustomerVoucherId] IS NOT NULL");
+                        .IsUnique();
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("TableId");
 
@@ -321,6 +366,9 @@ namespace DATN.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -356,20 +404,24 @@ namespace DATN.Server.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsDelete")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ProductDescripntion")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ProductDescription")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<byte[]>("ProductImage")
+                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ProductName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
@@ -390,37 +442,52 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("varchar(12)");
 
-                    b.Property<int>("Numberguest")
+                    b.Property<decimal>("DepositPayment")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Is_Payment")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NumberGuest")
                         .HasColumnType("int");
+
+                    b.Property<int>("NumberSeat")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime>("ReservationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ReservationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("TablesTableId")
+                    b.Property<int>("TableId")
                         .HasColumnType("int");
 
                     b.HasKey("ReservationId");
 
-                    b.HasIndex("TablesTableId");
+                    b.HasIndex("TableId");
 
                     b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("DATN.Shared.RewardPointe", b =>
                 {
-                    b.Property<int>("RewardPointId")
+                    b.Property<int>("RewardPoint")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -434,18 +501,16 @@ namespace DATN.Server.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RewardPoint")
+                    b.Property<int>("RewardPointId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("RewardPointId");
+                    b.HasKey("RewardPoint");
 
-                    b.HasIndex("CustomerId")
+                    b.HasIndex("OrderId")
                         .IsUnique();
-
-                    b.HasIndex("OrderId");
 
                     b.ToTable("RewardPointes");
                 });
@@ -461,10 +526,13 @@ namespace DATN.Server.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("RoleDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("RoleName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.HasKey("RoleId");
 
@@ -481,17 +549,17 @@ namespace DATN.Server.Migrations
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Roleid")
+                    b.Property<int>("RoleId")
                         .HasColumnType("int");
 
                     b.HasKey("RoleaccountId");
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("Roleid");
+                    b.HasIndex("RoleId");
 
                     b.ToTable("RoleAccounts");
                 });
@@ -503,17 +571,19 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Shifte_Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Shifte_Id");
 
@@ -534,13 +604,17 @@ namespace DATN.Server.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Position")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SeatingCapacity")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("TableNumber")
                         .HasColumnType("int");
@@ -559,11 +633,17 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("UnitDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("UnitName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("UnitId");
 
@@ -583,14 +663,19 @@ namespace DATN.Server.Migrations
                     b.Property<DateTime>("ExpriationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool>("IsAcctive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("PointRequired")
                         .HasColumnType("int");
 
                     b.Property<string>("VoucherCode")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("VoucherId");
 
@@ -605,7 +690,15 @@ namespace DATN.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DATN.Shared.RewardPointe", "RewardPoints")
+                        .WithOne("Customers")
+                        .HasForeignKey("DATN.Shared.Customer", "CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Accounts");
+
+                    b.Navigation("RewardPoints");
                 });
 
             modelBuilder.Entity("DATN.Shared.CustomerVoucher", b =>
@@ -619,7 +712,7 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.Voucher", "Vouchers")
                         .WithMany("CustomerVouchers")
                         .HasForeignKey("VoucherId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Customers");
@@ -641,7 +734,7 @@ namespace DATN.Server.Migrations
             modelBuilder.Entity("DATN.Shared.EmployeeShifte", b =>
                 {
                     b.HasOne("DATN.Shared.Employee", "Employees")
-                        .WithMany()
+                        .WithMany("EmployeeShiftes")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -649,7 +742,7 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.Shifte", "Shiftes")
                         .WithMany("EmployeeShiftes")
                         .HasForeignKey("ShifteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Employees");
@@ -662,13 +755,13 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.Menu", "Menus")
                         .WithMany("MenuItems")
                         .HasForeignKey("MenuId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DATN.Shared.Product", "Products")
                         .WithMany("MenuItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Menus");
@@ -680,21 +773,33 @@ namespace DATN.Server.Migrations
                 {
                     b.HasOne("DATN.Shared.Customer", "Customers")
                         .WithMany("Orders")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DATN.Shared.CustomerVoucher", "CustomerVouchers")
                         .WithOne("Order")
-                        .HasForeignKey("DATN.Shared.Order", "CustomerVoucherId");
+                        .HasForeignKey("DATN.Shared.Order", "CustomerVoucherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DATN.Shared.Employee", "Employee")
+                        .WithMany("Orders")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("DATN.Shared.Table", "Tables")
                         .WithMany("Orders")
                         .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Customers");
 
                     b.Navigation("CustomerVouchers");
+
+                    b.Navigation("Employee");
 
                     b.Navigation("Tables");
                 });
@@ -704,13 +809,13 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.Order", "Orders")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DATN.Shared.Product", "Products")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Orders");
@@ -723,44 +828,38 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.Category", "Categories")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DATN.Shared.Unit", "units")
+                    b.HasOne("DATN.Shared.Unit", "Units")
                         .WithMany("Products")
                         .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Categories");
 
-                    b.Navigation("units");
+                    b.Navigation("Units");
                 });
 
             modelBuilder.Entity("DATN.Shared.Reservation", b =>
                 {
                     b.HasOne("DATN.Shared.Table", "Tables")
                         .WithMany("Reservations")
-                        .HasForeignKey("TablesTableId");
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Tables");
                 });
 
             modelBuilder.Entity("DATN.Shared.RewardPointe", b =>
                 {
-                    b.HasOne("DATN.Shared.Customer", "Customers")
-                        .WithOne("RewardPoints")
-                        .HasForeignKey("DATN.Shared.RewardPointe", "CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DATN.Shared.Order", "Orders")
-                        .WithMany("RewardPointes")
-                        .HasForeignKey("OrderId")
+                        .WithOne("RewardPointes")
+                        .HasForeignKey("DATN.Shared.RewardPointe", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Customers");
 
                     b.Navigation("Orders");
                 });
@@ -775,8 +874,8 @@ namespace DATN.Server.Migrations
 
                     b.HasOne("DATN.Shared.Role", "Roles")
                         .WithMany("RoleAccounts")
-                        .HasForeignKey("Roleid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Accounts");
@@ -789,7 +888,7 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.Floor", "Floors")
                         .WithMany("Tables")
                         .HasForeignKey("FloorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Floors");
@@ -814,13 +913,18 @@ namespace DATN.Server.Migrations
                     b.Navigation("CustomerVouchers");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("RewardPoints");
                 });
 
             modelBuilder.Entity("DATN.Shared.CustomerVoucher", b =>
                 {
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("DATN.Shared.Employee", b =>
+                {
+                    b.Navigation("EmployeeShiftes");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("DATN.Shared.Floor", b =>
@@ -845,6 +949,11 @@ namespace DATN.Server.Migrations
                     b.Navigation("MenuItems");
 
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("DATN.Shared.RewardPointe", b =>
+                {
+                    b.Navigation("Customers");
                 });
 
             modelBuilder.Entity("DATN.Shared.Role", b =>

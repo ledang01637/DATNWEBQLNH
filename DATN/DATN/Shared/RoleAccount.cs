@@ -11,11 +11,11 @@ namespace DATN.Shared
     {
         [Key]
         public int RoleaccountId { get; set; }
-        public int Roleid { get; set; }
+        public int RoleId { get; set; }
         public int AccountId { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public Role Roles { get; set; }
-        public Account Accounts { get; set; }
+        public virtual Role Roles { get; set; }
+        public virtual Account Accounts { get; set; }
     }
 }
