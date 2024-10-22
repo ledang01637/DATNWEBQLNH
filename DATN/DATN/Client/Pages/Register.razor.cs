@@ -53,6 +53,7 @@ namespace DATN.Client.Pages
                     account.Password = Convert.ToBase64String(hashedBytes);
                 }
 
+                account.AccountType = "Customer";
                 account.CreateDate = DateTime.Now;
                 account.IsActive = true;
                 account.UserName = account.UserName.ToLower();

@@ -28,15 +28,15 @@
     <Authorized>
         @if (isLoaded)
         {
-            <div class="col-md-12 grid-margin stretch-card p-5">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Category</h4>
+            <div class="col-md-12 grid-margin p-5">
+                <div class="card border border-0">
+                    <div class="card-body bg-white">
+                        <h4 class="card-title text-black">Category</h4>
                         <p class="card-description">
                             <button class="btn btn-success" @onclick="() => CreateCategory()">Add new category</button>
                         </p>
                         <div class="search-bar">
-                            <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="FilterCategories" />
+                            <input type="text" class="form-control" placeholder="searching category..." @oninput="FilterCategories" />
                         </div>
                         <div class="product-table-container">
                             <table class="table">
