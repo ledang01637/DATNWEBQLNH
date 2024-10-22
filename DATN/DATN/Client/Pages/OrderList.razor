@@ -1,0 +1,86 @@
+﻿@page "/order-list"
+@using DATN.Client.Service
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject CartService _cartService
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+
+
+<section class="iphone-13-mini-2-inner">
+    <div class="frame-parent">
+        <div class="frame-wrapper">
+            <div class="frame-group">
+                <div class="frame-container">
+                    <div class="frame-div">
+                        <div class="line4-31-group3119-31-iphone13-parent">
+                            <div class="line4-31-group3119-31-iphone13"></div>
+                            <div class="line5-31-group3119-31-iphone13"></div>
+                            <div class="line6-31-group3119-31-iphone13"></div>
+                        </div>
+                    </div>
+                    <h1 class="foodgo">Foodgo</h1>
+                    <div class="ellipse4-31-iphone13mini-1-wrapper">
+                        <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<div class="container mt-4">
+    <h4 style="text-align: center;">Danh sách gọi món</h4>
+    @if (cartItems == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        @foreach (var item in cartItems)
+        {
+            <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
+                <div class="row">
+                    <div class="col-3">
+                        <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductImage)" class="img-fluid rounded" alt="Chicken Burger">
+                    </div>
+                    <div class="col-7">
+                        <div class="card-body p-2">
+                            <h5 class="card-title mb-1">@item.ProductName</h5>
+                            <p class="text-muted mb-1">Burger Factory LTD</p>
+                            <p class="price text-danger mb-1">@item.Price.ToString("###,0##") VND</p>
+                            <p class="mb-0">Số lượng: @item.Quantity</p>
+                        </div>
+                    </div>
+                    <div class="col-2 d-flex align-items-center">
+                        <a @onclick="() => RemoveFromCart(item)" class="w-100 h-25 btn-warning rounded d-flex justify-content-center align-items-center">
+                            <i class="fa-solid fa-trash" style="color:#ed1f1f"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+
+
+    <div class="total-section">
+        <div class="d-flex justify-content-between">
+            <p class="mb-0">Tổng tiền</p>
+            <p class="mb-0"><strong>@Total.ToString("###,0##") VND</strong></p>
+        </div>
+        <button @onclick="Order" type="button" class="btn btn-warning w-100 mt-2">
+            Gọi món ăn
+        </button>
+    </div>
+</div>
+<nav class="navbar fixed-bottom navbar-light bg-light">
+    <div class="container-fluid justify-content-around">
+        <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
+        <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
+        <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
+        <a href="#" class="nav-link"><i class="bi bi-person"></i></a>
+    </div>
+</nav>
+

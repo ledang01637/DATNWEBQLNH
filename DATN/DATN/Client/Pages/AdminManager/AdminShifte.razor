@@ -1,0 +1,76 @@
+﻿@page "/adminshifte"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+
+<style>
+    .product-table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+        .product-table-container table {
+            width: 100%;
+        }
+
+    .search-bar, .filter-bar {
+        margin-bottom: 20px;
+    }
+</style>
+
+@if (isLoaded)
+{
+    <div class="col-md-12 grid-margin stretch-card p-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Shifte</h4>
+                <p class="card-description">
+                    <button class="btn btn-success" @onclick="() => CreateShifte()">Add new unit</button>
+                </p>
+                <div class="search-bar">
+                    <input type="text" class="form-control" placeholder="Searching shifte..." @oninput="Filter" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>UnitName</th>
+                                <th>UnitDescription</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var shifte in filter)
+                            {
+                                if (shifte != null)
+                                {
+                                    <tr>
+                                        <td>@shifte.Shifte_Name</td>
+                                        <td>@shifte.StartTime</td>
+                                        <td>@shifte.EndTime</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-primary" @onclick="() => EditShifte(shifte.Shifte_Id)">Edit</button>
+                                            <button class="btn btn-danger" @onclick="() => DeleteShifte(shifte.Shifte_Id)">Delete</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+

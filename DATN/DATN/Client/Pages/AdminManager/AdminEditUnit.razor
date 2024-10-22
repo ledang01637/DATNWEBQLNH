@@ -1,0 +1,123 @@
+﻿@page "/editunit/{UnitId:int}"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">CHỈNH SỬA DANH MỤC</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@unit" OnValidSubmit="EditUnit" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UnitName" class="control-label"><strong>UnitName</strong></label>
+                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" />
+                            <ValidationMessage For="@(() => unit.UnitName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UnitDescription" class="control-label"><strong>UnitDescription</strong></label>
+                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" />
+                            <ValidationMessage For="@(() => unit.UnitDescription)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Cập Nhật</button>
+                                <a href="/admincategorymanage" class="btn btn-secondary mx-2">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UnitId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Unit unit = new DATN.Shared.Unit();
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEditUnit();
+        isLoaded = true;
+    }
+
+    private async Task LoadEditUnit()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<Unit>($"api/Unit/GetUnitId/{UnitId}");
+            if (response != null)
+            {
+                unit = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy danh mục.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditUnit()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Unit/EditUnit/{UnitId}", unit);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminunit");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật danh mục: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+}

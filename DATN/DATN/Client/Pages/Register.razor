@@ -1,0 +1,88 @@
+@page "/register"
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+
+
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .register-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary-custom {
+        background-color: #d35400;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 0;
+        width: 100%;
+        font-weight: bold;
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #e67e22;
+        }
+</style>
+<div class="register-card">
+    <h3 class="text-center mb-4">Đăng ký</h3>
+    <EditForm Model="@account" OnValidSubmit="HandleValidSubmitAsync">
+        <DataAnnotationsValidator />
+
+        <div class="mb-4 position-relative">
+            <InputText class="form-control" placeholder="Tên người dùng" @bind-Value="account.UserName" />
+            <ValidationMessage For="@(() => account.UserName)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
+        </div>
+
+        <div class="mb-4 position-relative">
+            <InputText type="password" class="form-control" placeholder="Mật khẩu" @bind-Value="account.Password" />
+            <ValidationMessage For="@(() => account.Password)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
+        </div>
+        <div class="mb-4 position-relative">
+            <InputSelect class="form-control" placeholder="Quyền" @bind-Value="account.AccountType">
+                <option value="Customer">Customer</option>
+            </InputSelect>
+
+        </div>
+        <button type="submit" class="btn btn-primary-custom">Tôi đang rất đói!</button>
+    </EditForm>
+</div>
+
+@if (accounts == null)
+{
+    <p>Đang loading</p>
+}
+else if (!accounts.Any())
+{
+    <p>Trống</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <tbody>
+            @foreach (var item in accounts)
+            {
+                <tr>
+                    <td>@item.UserName</td>
+                    <td>@item.Password</td>
+                    <td>@item.CreateDate</td>
+                    <td>@item.UpdateDate</td>
+                    <td>@item.IsActive</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,226 @@
+﻿
+@page "/information"
+
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    canvas {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    .form-label {
+        color: white;
+    }
+</style>
+
+<AuthorizeView Roles="1,2">
+    <Authorized>
+
+        @if (isLoaded)
+        {
+            <div class="container-scroller">
+                <div class="container-fluid">
+                    <div class="">
+                        <div class="bg-white">
+                            <div class="row">
+                                <div class="col-lg-12 grid-margin stretch-card">
+                                    <div class="card bg-white border border-0">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Biểu đồ doanh thu</h4>
+                                            <canvas id="revenueChart" style="height:250px; width: 100%"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="col-lg-6 grid-margin stretch-card">
+                                    <div class="card bg-white">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Doughnut chart</h4>
+                                            <canvas id="doughnutChart" style="height:250px"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 grid-margin stretch-card">
+                                    <div class="card bg-white">
+                                        <div class="card-body">
+                                            <form>
+                                                <div class="mb-3">
+                                                    <label for="name" class="form-label">Họ và Tên</label>
+                                                    <input type="text" class="form-control" style="color:black;" id="name" placeholder="Nhập họ và tên" @bind="name" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="email" class="form-label">Email</label>
+                                                    <input type="email" class="form-control" style="color:black;" id="email" placeholder="Nhập email" @bind="email" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="phone" class="form-label">Số Điện Thoại</label>
+                                                    <input type="tel" class="form-control" style="color:black;" id="phone" placeholder="Nhập số điện thoại" @bind="phone" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="address" class="form-label">Địa Chỉ</label>
+                                                    <input type="text" class="form-control" style="color:black;" id="address" placeholder="Nhập địa chỉ" @bind="address" readonly>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                var colors = ['#007bff', '#28a745', '#333333', '#c3e6cb', '#dc3545', '#6c757d'];
+
+                // Biểu đồ doanh thu (Revenue chart)
+                var revenueChart = document.getElementById("revenueChart");
+                if (revenueChart) {
+                    new Chart(revenueChart, {
+                        type: 'line',
+                        data: {
+                            labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+                            datasets: [{
+                                label: 'Doanh thu (triệu VND)',
+                                data: [120, 190, 300, 500, 200, 300, 400, 200, 250, 400, 450, 320],
+                                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                borderColor: '#007bff',
+                                borderWidth: 3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function (value) { return value + " triệu"; }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            </script>
+
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-danger">@errorMessage</p>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+
+    </Authorized>
+    <NotAuthorized>
+        <h3>Không có quyền truy cập</h3>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private int accountId;
+    private string name;
+    private string email;
+    private string phone;
+    private string address;
+    private bool isLoaded = false;
+    private string errorMessage;
+    private string username;
+    private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
+    private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        username = GetQueryParameter("username");
+        await Load();
+        await LoadAccountByUsername(username);
+        isLoaded = true;
+    }
+
+    private string GetQueryParameter(string key)
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        return query.TryGetValue(key, out var value) ? value.ToString() : null;
+    }
+
+    private async Task Load()
+    {
+        try
+        {
+            listAccount = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
+            listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading accounts: {ex.Message}";
+        }
+    }
+
+    private async Task LoadAccountByUsername(string username)
+    {
+        if (listAccount == null || !listAccount.Any())
+        {
+            errorMessage = "Danh sách tài khoản chưa được tải.";
+            return;
+        }
+
+        // Tìm tài khoản dựa trên username
+        var account = listAccount.FirstOrDefault(x => x.UserName == username);
+
+        if (account == null)
+        {
+            errorMessage = "Không tìm thấy tài khoản.";
+            return;
+        }
+
+        // Tìm thông tin nhân viên dựa trên accountId
+        var employeeInformation = listEmployee.FirstOrDefault(e => e.AccountId == account.AccountId);
+
+        if (employeeInformation == null)
+        {
+            errorMessage = "Không tìm thấy thông tin nhân viên.";
+            return;
+        }
+
+        try
+        {
+            // Lấy thông tin chi tiết nhân viên dựa trên employeeId
+            var accountDetails = await httpClient.GetFromJsonAsync<DATN.Shared.Employee>($"api/Employee/{employeeInformation.EmployeeId}");
+
+            if (accountDetails != null)
+            {
+                accountId = accountDetails.AccountId;
+                name = accountDetails.EmployeeName;
+                email = accountDetails.Email;
+                phone = accountDetails.PhoneNumber;
+                address = accountDetails.Address;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy chi tiết tài khoản.";
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            errorMessage = $"Lỗi khi kết nối đến máy chủ: {httpEx.Message}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi tải thông tin tài khoản: {ex.Message}";
+        }
+    }
+
+}

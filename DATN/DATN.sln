@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DATN.Server", "DATN\Server\DATN.Server.csproj", "{20B6B8A3-ED34-4B28-9B94-ED79F8B587F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DATN.Server", "DATN\Server\DATN.Server.csproj", "{20B6B8A3-ED34-4B28-9B94-ED79F8B587F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DATN.Client", "DATN\Client\DATN.Client.csproj", "{B542FC12-27ED-41A3-813D-0E8041242404}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DATN.Client", "DATN\Client\DATN.Client.csproj", "{B542FC12-27ED-41A3-813D-0E8041242404}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DATN.Shared", "DATN\Shared\DATN.Shared.csproj", "{86191C36-3D31-4DA5-A0BF-77ECDEEE4F44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DATN.Shared", "DATN\Shared\DATN.Shared.csproj", "{86191C36-3D31-4DA5-A0BF-77ECDEEE4F44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,11 +1,16 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using DATN.Server.Data;
+using DATN.Server.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System;
 
 namespace DATN.Server
 {
@@ -25,6 +30,59 @@ namespace DATN.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddDbContext<AppDBContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
+                optionos =>
+                {
+                    optionos.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                    };
+                });
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                
+            })
+            .AddCookie();
+
+            services.AddScoped<AccountService>();
+            services.AddScoped<CategoryService>();
+            services.AddScoped<CustomerService>();
+            services.AddScoped<CustomerVoucherService>();
+            services.AddScoped<EmployeeService>();
+            services.AddScoped<EmployeeShifteService>();
+            services.AddScoped<FloorService>();
+            services.AddScoped<MenuItemService>();
+            services.AddScoped<MenuService>();
+            services.AddScoped<OrderItemService>();
+            services.AddScoped<OrderService>();
+            services.AddScoped<ProductService>();
+            services.AddScoped<ReservationService>();
+            services.AddScoped<RewardPointeService>();
+            services.AddScoped<RoleAccountService>();
+            services.AddScoped<RoleService>();
+            services.AddScoped<ShifteService>();
+            services.AddScoped<TableService>();
+            services.AddScoped<UnitService>();
+            services.AddScoped<VoucherService>();
+            services.AddScoped<NetworkService>();
+
+            services.AddDbContext<AppDBContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,8 +103,10 @@ namespace DATN.Server
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {

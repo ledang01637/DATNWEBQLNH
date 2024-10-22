@@ -1,0 +1,101 @@
+﻿@page "/createunit"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">add Product</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@unit" OnValidSubmit="CreateUnit" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UnitName" class="control-label"><strong>UnitName</strong></label>
+                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" />
+                            <ValidationMessage For="@(() => unit.UnitName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UnitDescription" class="control-label"><strong>UnitDescription</strong></label>
+                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" />
+                            <ValidationMessage For="@(() => unit.UnitDescription)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                                <a href="/admincategory" class="btn btn-secondary mx-2">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Unit unit = new DATN.Shared.Unit();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = true;
+    }
+
+    private async Task CreateUnit()
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Unit/AddUnit", unit);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Thêm thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminunit");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Error : {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+}
