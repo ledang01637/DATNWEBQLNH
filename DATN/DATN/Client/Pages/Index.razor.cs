@@ -1,6 +1,7 @@
 ﻿using DATN.Client.Service;
 using DATN.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using Newtonsoft.Json.Linq;
@@ -15,21 +16,29 @@ namespace DATN.Client.Pages
 {
     public partial class Index
     {
-        private List<Product> products = new List<Product>();
-        private List<Menu> menus = new List<Menu>();
-        private List<Category> categories = new List<Category>();
-        private List<MenuItem> menuItems = new List<MenuItem>();
-        private List<Account> accounts = new List<Account>();
-        private List<Cart> carts = new List<Cart>();
-        private LoginRequest loginUser = new LoginRequest();
+        private List<Product> products = new();
+        private List<Menu> menus = new();
+        private List<Category> categories = new();
+        private List<MenuItem> menuItems = new();
+        private List<Account> accounts = new();
+        private List<Cart> carts = new();
+        private readonly LoginRequest loginUser = new();
+        private HubConnection hubConnection;
         private string ComboName;
         private bool isGridView = true;
         private int TotalQuantity;
         private decimal TotalAmount;
         private bool isProcessing = false;
+        private string messageText { get; set; }
+        private string note;
 
         protected override async Task OnInitializedAsync()
         {
+            hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
+                .Build();
+            await hubConnection.StartAsync();
+
             carts = await _cartService.GetCartAsync();
             await UpdateCartTotals();
             await LoadAll();
@@ -133,13 +142,8 @@ namespace DATN.Client.Pages
 
         private async Task AddToCart(Product product)
         {
-            if (carts == null)
-            {
-                await JS.InvokeVoidAsync("showLog", "Cart is null");
-                return;
-            }
-
             var existingCart = carts.FirstOrDefault(c => c.ProductId == product.ProductId);
+
             if (existingCart != null)
             {
                 existingCart.Quantity += 1;
@@ -152,13 +156,12 @@ namespace DATN.Client.Pages
                     ProductName = product.ProductName,
                     Price = product.Price,
                     ProductImage = product.ProductImage,
-                    Quantity = 1
+                    Quantity = 1,
                 };
                 carts.Add(newCart);
             }
-
-            await UpdateCartTotals(product.Price, 1);
             _ = _cartService.SaveCartAsync(carts);
+            await UpdateCartTotals(product.Price, 1);
         }
         private async Task RemoveAllCarts()
         {
@@ -222,6 +225,10 @@ namespace DATN.Client.Pages
                 return;
             }
             await JS.InvokeVoidAsync("closeModal", "cartModal");
+            if(!string.IsNullOrEmpty(note)) 
+            {
+                ListCart.Note = note;
+            }
             Navigation.NavigateTo("/order-list");
         }
         private async void NaviCustomer()
@@ -231,9 +238,42 @@ namespace DATN.Client.Pages
 
         }
 
+        private async Task SendMessage()
+        {
+            if(string.IsNullOrEmpty(messageText)) { await JS.InvokeVoidAsync("showAlert", "warning", "Lỗi", "Vui lòng nhập yêu cầu"); return; }
+            string token = await _localStorageService.GetItemAsync("n");
+            if (string.IsNullOrEmpty(token))
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                return;
+            }
+
+            int number = GetTableNumberFromToken(token);
+
+            if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
+            {
+                await hubConnection.SendAsync("SendMessageTable", messageText, number.ToString());
+                await JS.InvokeVoidAsync("closeModal", "sendMasageModal");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành công","Đã gửi yêu cầu");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
+                return;
+            }
+        }
+
         private async Task ScrollToTop()
         {
             await JS.InvokeVoidAsync("scrollToTop");
+        }
+
+        private static int GetTableNumberFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+            var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
+            return int.Parse(userId?.Value);
         }
 
         //private string GetGridColumnClass()

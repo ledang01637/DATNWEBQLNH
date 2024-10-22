@@ -9,9 +9,13 @@ namespace DATN.Server.Hubs
 {
     public class SockHub : Hub
     {
-        public async Task SendTable(string message, List<CartDTO> carts)
+        public async Task SendTable(string message, List<CartDTO> carts, string note)
         {
-            await Clients.All.SendAsync("UpdateTable", message, carts);
+            await Clients.All.SendAsync("UpdateTable", message, carts, note);
+        }
+        public async Task SendMessageTable(string message, string numberTable)
+        {
+            await Clients.All.SendAsync("RequidTable", message, numberTable);
         }
         public async Task SendMessage(string message)
         {

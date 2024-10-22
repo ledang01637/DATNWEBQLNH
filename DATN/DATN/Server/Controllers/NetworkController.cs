@@ -54,6 +54,18 @@ namespace DATN.Server.Controllers
             return BadRequest("Địa chỉ IP không hợp lệ.");
         }
 
+        [HttpGet("get-ip")]
+        public IActionResult GetIPWifi()
+        {
+            var ip = _networkService.GetWifiIPAddress();
+            if (!string.IsNullOrEmpty(ip))
+            {
+                return Ok(ip);
+            }
+            return NotFound("Không tìm thấy IP");
+        } 
+
+
         [HttpPost("post-wifi-ip")]
         public async Task<IActionResult> PostWifiIpAddressAsync([FromBody] string IP)
         {

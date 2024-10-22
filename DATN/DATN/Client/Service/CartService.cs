@@ -11,7 +11,6 @@ namespace DATN.Client.Service
     {
         private readonly IJSRuntime _jsRuntime;
         private const string CartKey = "cart";
-
         public CartService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;

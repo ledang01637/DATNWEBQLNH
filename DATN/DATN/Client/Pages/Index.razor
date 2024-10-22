@@ -114,10 +114,8 @@
             <li class="active" data-filter="*">All</li>
             @if (categories == null)
             {
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
             }
             else
@@ -168,25 +166,23 @@
 
                     foreach (var p in products)
                     {
-                        <div class="col-sm-6 col-lg-4 all @(p.CategoryId)">
+                        <div class="col-sm-6 col-md-4 all @(p.CategoryId) mb-4">
                             <div class="box">
-                                <div>
-                                    <div class="img-box">
-                                        <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="">
-                                    </div>
-                                    <div class="detail-box">
-                                        <h5>
-                                            @p.ProductName
-                                        </h5>
-                                        <p style="display: @(p.ProductDescription == null ? "none" : "block")">@p.ProductDescription</p>
-                                        <div class="options">
-                                            <h6>
-                                                @p.Price.ToString("###,0##")
-                                            </h6>
-                                            <a @onclick="() => AddToCart(p)" class="nav-link btn">
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </a>
-                                        </div>
+                                <div class="img-box">
+                                    <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="Image">
+                                </div>
+                                <div class="detail-box">
+                                    <h5>
+                                        @p.ProductName
+                                    </h5>
+                                    <p style="display: @(p.ProductDescription == null ? "none" : "block")">@p.ProductDescription</p>
+                                    <div class="options d-flex justify-content-between align-items-center">
+                                        <h6>
+                                            @p.Price.ToString("###,0##") đ
+                                        </h6>
+                                        <a @onclick="() => AddToCart(p)" class="nav-link btn">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -212,7 +208,7 @@
 </section>
 
 <button id="callButtonIndex" class="call-button">
-    <i class="fa-solid fa-phone"></i>
+    <i class="fa-solid fa-user"></i>
 </button>
 <button @onclick="ScrollToTop" id="scrollToTopBtn" class="btn btn-outline-primary position-fixed top-50 end-0 translate-middle-y m-2 rounded-circle" style="display: none; width: 40px; height: 40px;">
     <i class="fa-solid fa-arrow-up position-absolute top-50 start-50 translate-middle"></i>
@@ -222,7 +218,10 @@
 <!-- Các nút mở rộng -->
 <div class="expand-buttons" id="expandButtons">
     <button @onclick="NaviCustomer" id="callStaffBtn">
-        <i class="fa-solid fa-user"></i>
+        <i class="fa-solid fa-phone"></i>
+    </button>
+    <button id="messageStaffBtn" data-bs-toggle="modal" data-bs-target="#sendMasageModal">
+        <i class="fa-regular fa-message"></i>
     </button>
     <button id="closeBtn">
         <i class="fa-solid fa-times"></i>
@@ -261,7 +260,7 @@
                                 <img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="@c.ProductName" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;" />
                                 <div class="flex-grow-1">
                                     <div class="fw-bold">@c.ProductName</div>
-                                    <div class="text-muted">@c.Price.ToString("N0")đ</div>
+                                    <div class="text-danger">@c.Price.ToString("N0")đ</div>
                                 </div>
                                 <div class="quantity-control">
                                     <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
@@ -273,7 +272,12 @@
                                     </button>
                                 </div>
                             </li>
+
                         }
+                        <li class="list-group-item">
+                            <div class="fw-bold">Ghi chú</div>
+                            <textarea rows="2" @bind="note" class="form-control" placeholder="Thêm ghi chú nếu có..."></textarea>
+                        </li>
                         <li class="list-group-item">
                             <button class="btn btn-danger" @onclick="RemoveAllCarts">Xóa tất cả</button>
                         </li>
@@ -286,6 +290,26 @@
             </div>
             <div class="modal-footer">
                 <button class="checkout-btn-model" @onclick="NaviOrderList">Đặt món</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal send massage -->
+
+<div class="modal fade" id="sendMasageModal" tabindex="-1" aria-labelledby="sendMasageModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sendMasageModal">Gửi yêu cầu nhân viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea @bind="messageText" class="form-control" rows="3" cols="3"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="checkout-btn-model" @onclick="SendMessage">Gửi</button>
             </div>
         </div>
     </div>

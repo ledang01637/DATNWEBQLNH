@@ -25,8 +25,9 @@ namespace DATN.Client.Pages.AdminManager
         private bool isMoveTable = false;
         private int numcol = 6;
         private string getMessage;
-        private string getJson;
-        private Dictionary<int, List<CartDTO>> cartsByTable = new Dictionary<int, List<CartDTO>>();
+        private string getRequid;
+        private string Note;
+        private Dictionary<int, List<CartDTO>> cartsByTable = new();
 
         private int rowCount { get; set; }
 
@@ -43,11 +44,12 @@ namespace DATN.Client.Pages.AdminManager
                 StateHasChanged();
             });
 
-            hubConnection.On<string, List<CartDTO>>("UpdateTable", (numTable, carts) =>
+            hubConnection.On<string, List<CartDTO>, string>("UpdateTable", (numTable, carts, note) =>
             {
                 isProcessing = true;
                 getMessage = numTable;
                 getCarts = carts;
+                Note = note;
 
                 if (!string.IsNullOrEmpty(getMessage) && int.TryParse(getMessage, out int tableNumber))
                 {
@@ -57,6 +59,14 @@ namespace DATN.Client.Pages.AdminManager
                     }
                 }
 
+                StateHasChanged();
+            });
+
+            hubConnection.On<string,string>("RequidTable", (message,requidTable) =>
+            {
+                isProcessing = true;
+                getMessage = message;
+                getRequid = requidTable;
                 StateHasChanged();
             });
 

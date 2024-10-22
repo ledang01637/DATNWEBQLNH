@@ -72,5 +72,18 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
+        private async Task HandleGetIP()
+        {
+            try
+            {
+                var ip = await httpClient.GetStringAsync("api/Network/get-ip");
+                if(string.IsNullOrEmpty(ip)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi Get IP"); return; }
+                IP = ip;
+            }
+            catch(Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", ex.Message);
+            }
+        }
     }
 }

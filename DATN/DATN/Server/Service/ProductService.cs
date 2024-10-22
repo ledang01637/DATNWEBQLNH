@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -18,6 +19,14 @@ namespace DATN.Server.Service
         {
             return _context.Products.ToList();
         }
+
+        public List<Product> GetProductInclude()
+        {
+            return _context.Products
+                .Include(a => a.Categories)
+                .Include(a => a.Units).ToList();
+        }
+
         public Product AddProduct(Product Product)
         {
             _context.Add(Product);

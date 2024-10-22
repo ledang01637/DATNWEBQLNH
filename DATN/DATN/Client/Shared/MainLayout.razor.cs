@@ -19,7 +19,6 @@ namespace DATN.Client.Shared
             try
             {
                 wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
-                Console.WriteLine(wifiIpAddress);
                 if(string.IsNullOrEmpty(wifiIpAddress)) 
                 { 
                     isAcceptWifi = false; 
@@ -31,7 +30,6 @@ namespace DATN.Client.Shared
             {
                 isAcceptWifi = false;
                 errorMessage = "Access denied: " + ex.Message;
-                Console.WriteLine(errorMessage);
             }
             finally
             {

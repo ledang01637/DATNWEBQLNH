@@ -33,13 +33,13 @@
 </section>
 <div class="container mt-4">
     <h4 style="text-align: center;">Danh sách gọi món</h4>
-    @if (cartItems == null)
+    @if (ListCart.Carts == null)
     {
         <p>Loading...</p>
     }
     else
     {
-        @foreach (var item in cartItems)
+        @foreach (var item in ListCart.Carts)
         {
             <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
                 <div class="row">
@@ -49,7 +49,6 @@
                     <div class="col-7">
                         <div class="card-body p-2">
                             <h5 class="card-title mb-1">@item.ProductName</h5>
-                            <p class="text-muted mb-1">Burger Factory LTD</p>
                             <p class="price text-danger mb-1">@item.Price.ToString("###,0##") VND</p>
                             <p class="mb-0">Số lượng: @item.Quantity</p>
                         </div>
@@ -62,10 +61,11 @@
                 </div>
             </div>
         }
-
-
+        <div class="list-group-item mb-3">
+            <div class="fw-bold">Ghi chú</div>
+            <textarea rows="2" @bind="ListCart.Note" class="form-control"></textarea>
+        </div>
     }
-
 
     <div class="total-section">
         <div class="d-flex justify-content-between">

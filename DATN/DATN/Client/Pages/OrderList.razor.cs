@@ -17,7 +17,6 @@ namespace DATN.Client.Pages
 {
     public partial class OrderList
     {
-        private List<Cart> cartItems = new List<Cart>();
         private HubConnection hubConnection;
         private decimal Total;
 
@@ -28,7 +27,7 @@ namespace DATN.Client.Pages
                 .Build();
 
             await hubConnection.StartAsync();
-            cartItems = await _cartService.GetCartAsync();
+            ListCart.Carts = await _cartService.GetCartAsync();
             CalculateTotal();
         }
 
@@ -39,13 +38,13 @@ namespace DATN.Client.Pages
                 if (product.Quantity > 1)
                 {
                     product.Quantity -= 1;
-                    await _cartService.SaveCartAsync(cartItems);
+                    await _cartService.SaveCartAsync(ListCart.Carts);
                 }
                 else
                 {
                     await _cartService.RemoveItemFromCartAsync(product);
                 }
-                cartItems = await _cartService.GetCartAsync();
+                ListCart.Carts = await _cartService.GetCartAsync();
                 CalculateTotal();
             }
         }
@@ -53,7 +52,7 @@ namespace DATN.Client.Pages
         private void CalculateTotal()
         {
             Total = 0;
-            foreach (var item in cartItems)
+            foreach (var item in ListCart.Carts)
             {
                 Total += item.Price * item.Quantity;
             }
@@ -61,10 +60,10 @@ namespace DATN.Client.Pages
         }
         private async Task Order()
         {
-            if (cartItems.Count > 0)
+            if (ListCart.Carts.Count > 0)
             {
                 var expiryTime = DateTime.Now.AddMinutes(30).ToString("o");
-                await _localStorageService.SetCartItemAsync("historyOrder", cartItems);
+                await _localStorageService.SetCartItemAsync("historyOrder", ListCart.Carts);
                 await _localStorageService.SetItemAsync("cartExpiryTime", expiryTime);
                 await SenMessageAsync();
                 await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
@@ -93,26 +92,24 @@ namespace DATN.Client.Pages
                 var table = tables.FirstOrDefault(t => t.TableNumber == number);
                 if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
                 {
-                    if (table is not null && cartItems.Count > 0)
+                    if (table is not null && ListCart.Carts.Count > 0)
                     {
-                        List<CartDTO> carts = new List<CartDTO>();
+                        List<CartDTO> carts = new();
 
-                        for (int i = 0; i < cartItems.Count; i++)
+                        for (int i = 0; i < ListCart.Carts.Count; i++)
                         {
                             var cartDto = new CartDTO
                             {
                                 TableNumber = table.TableNumber,
-                                ProductId = cartItems[i].ProductId,
-                                UnitId = cartItems[i].UnitId,
-                                ProductName = cartItems[i].ProductName,
-                                Price = cartItems[i].Price,
-                                Quantity = cartItems[i].Quantity
+                                ProductId = ListCart.Carts[i].ProductId,
+                                UnitId = ListCart.Carts[i].UnitId,
+                                ProductName = ListCart.Carts[i].ProductName,
+                                Price = ListCart.Carts[i].Price,
+                                Quantity = ListCart.Carts[i].Quantity
                             };
                             carts.Add(cartDto);
                         }
-                        Console.WriteLine(carts.Count);
-                        Console.WriteLine(table.TableNumber.ToString());
-                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts);
+                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCart.Note);
                     }
                 }
                 else
