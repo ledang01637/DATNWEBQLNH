@@ -163,6 +163,18 @@ namespace DATN.Client.Pages
             _ = _cartService.SaveCartAsync(carts);
             await UpdateCartTotals(product.Price, 1);
         }
+        private async Task RemoveFromCart(Cart product)
+        {
+            var existingCart = carts.FirstOrDefault(c => c.ProductId == product.ProductId);
+
+            if (existingCart != null)
+            {
+                carts.Remove(existingCart);
+                _ = _cartService.SaveCartAsync(carts);
+                await UpdateCartTotals(-product.Price * product.Quantity, -product.Quantity);
+            }
+        }
+
         private async Task RemoveAllCarts()
         {
             carts.Clear();
@@ -182,8 +194,19 @@ namespace DATN.Client.Pages
 
         private Task UpdateCartTotals(decimal priceChange, int quantityChange)
         {
+
+
             TotalQuantity += quantityChange;
+
+            if(priceChange < 0) 
+            {
+                TotalAmount += priceChange;
+                StateHasChanged();
+                return Task.CompletedTask;
+            }
+
             TotalAmount += priceChange * quantityChange;
+
             StateHasChanged();
             return Task.CompletedTask;
         }

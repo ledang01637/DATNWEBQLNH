@@ -22,25 +22,25 @@
                             <div class="line6-31-group3119-31-iphone13"></div>
                         </div>
                     </div>
-                    <h1 class="foodgo">Foodgo</h1>
+                    <h1 class="foodgo">Tech Titans</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
                         <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
                     </div>
                 </div>
             </div>
         </div>
-        <div class="drink-parent text-center d-flex flex-nowrap justify-content-start justify-content-sm-center">
+        @* <div class="drink-parent text-center d-flex flex-nowrap justify-content-start justify-content-sm-center">
             <div class="drink d-flex justify-content-center align-items-center">
                 <div class="rounded d-flex flex-wrap align-items-center justify-content-center" style="width: 50px; height: 50px; background: #e9d1d1">
                     <i class="bi bi-cup-straw fs-2 text-white"></i>
                 </div>
                 <span class="mt-2 d-block text-dark" style="max-width: 70px;"></span>
             </div>
-        </div>
+        </div> *@
     </div>
 </section>
 
-<section class="food_section layout_padding-bottom">
+<section class="food_section">
     <div class="container foodcustom">
         <div class="mb-2 ">
             <div id="carouselFade" class="carousel slide" data-bs-ride="carousel">
@@ -269,6 +269,11 @@
                                     <span class="badge bg-primary">@c.Quantity</span>
                                     <button type="button" class="btn btn-sm m-2" @onclick="() => IncreaseQuantity(c.ProductId)">
                                         <span>+</span>
+                                    </button>
+                                </div>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCart(c)">
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </li>

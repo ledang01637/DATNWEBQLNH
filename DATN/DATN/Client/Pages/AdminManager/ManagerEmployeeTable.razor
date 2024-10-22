@@ -270,49 +270,6 @@
 
 <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
 
-
-<div class="justify-content-center">
-    <div class="card shadow-sm">
-        <div class="row">
-            <!-- Khu vực các bàn -->
-            <div class="col-md-8 table-container">
-                <h3 class="mb-4">Trạng thái bàn</h3>
-                <div id="floor-1" class="floor-section">
-                    <h5>Tầng 1</h5>
-                    <div class="row" id="table-status-floor-1">
-                        <!-- Bàn ở tầng 1 sẽ được thêm từ JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal để hiển thị chi tiết đơn hàng của bàn chờ xác nhận -->
-<div class="modal fade" id="modalOrder" tabindex="-1" aria-labelledby="modalOrderLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalOrderLabel">Chi tiết đơn hàng - Bàn</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul id="modal-order-details" class="list-group mb-3">
-                    <!-- Chi tiết đơn hàng sẽ được thêm từ JavaScript -->
-                </ul>
-                <div class="d-flex justify-content-between mb-3">
-                    <span>Tổng cộng</span>
-                    <strong id="modal-total-amount">$0.00</strong>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
-                <button type="button" class="btn btn-primary">Xác nhận</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="box" id="call-box">
     <div id="particles-js"></div>
     <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
