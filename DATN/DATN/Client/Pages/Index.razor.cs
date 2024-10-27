@@ -92,7 +92,8 @@ namespace DATN.Client.Pages
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showLog", "Tài khoản mật khẩu không chính xác");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Tài khoản mật khẩu không chính xác");
+                        return;
                     }
                 }
 
@@ -250,7 +251,7 @@ namespace DATN.Client.Pages
             await JS.InvokeVoidAsync("closeModal", "cartModal");
             if(!string.IsNullOrEmpty(note)) 
             {
-                ListCart.Note = note;
+                ListCartDTO.Note = note;
             }
             Navigation.NavigateTo("/order-list");
         }
@@ -275,7 +276,7 @@ namespace DATN.Client.Pages
 
             if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.SendAsync("SendMessageTable", messageText, number.ToString());
+                await hubConnection.SendAsync("SendMessageTable", messageText, number);
                 await JS.InvokeVoidAsync("closeModal", "sendMasageModal");
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành công","Đã gửi yêu cầu");
             }

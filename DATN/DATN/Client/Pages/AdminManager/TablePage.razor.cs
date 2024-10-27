@@ -13,10 +13,10 @@ namespace DATN.Client.Pages.AdminManager
 {
     public partial class TablePage
     {
-        private Table tableModel = new Table();
-        private List<Table> tables = new List<Table>();
-        private List<Table> tablesChanges = new List<Table>();
-        private List<Floor> floors = new List<Floor>();
+        private Table tableModel = new();
+        private List<Table> tables = new();
+        private List<Table> tablesChanges = new();
+        private List<Floor> floors = new();
         public DotNetObjectReference<TablePage> dotNetObjectReference;
         private int selectTableId;
         private bool isMoveTable = false;
@@ -53,7 +53,6 @@ namespace DATN.Client.Pages.AdminManager
         {
             rowCount = (int)Math.Ceiling((double)tables.Count / 6);
             if (tables.Count % 6 == 0) rowCount++;
-            Console.WriteLine("rowCount: " + rowCount);
         }
 
         private async Task AddTable()
@@ -95,12 +94,12 @@ namespace DATN.Client.Pages.AdminManager
         {
             if (response.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("showAlert", "success", successMessage, "");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành công", errorMessage);
                 await LoadAll();
             }
             else
             {
-                Console.WriteLine(errorMessage);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", errorMessage);
             }
         }
 

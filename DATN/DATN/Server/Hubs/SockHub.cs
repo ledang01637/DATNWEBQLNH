@@ -13,13 +13,13 @@ namespace DATN.Server.Hubs
         {
             await Clients.All.SendAsync("UpdateTable", message, carts, note);
         }
-        public async Task SendMessageTable(string message, string numberTable)
+        public async Task SendMessageTable(string message, int numberTable)
         {
             await Clients.All.SendAsync("RequidTable", message, numberTable);
         }
         public async Task SendMessage(string message)
         {
-            await Clients.All.SendAsync("UpdateAdminDashboard", message);
+            await Clients.All.SendAsync("ReqMessage", message);
         }
         public async Task SendOrderUpdate(Order order)
         {

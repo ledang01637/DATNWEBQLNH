@@ -33,13 +33,13 @@
 </section>
 <div class="container mt-4">
     <h4 style="text-align: center;">Danh sách gọi món</h4>
-    @if (ListCart.Carts == null)
+    @if (Carts == null)
     {
         <p>Loading...</p>
     }
     else
     {
-        @foreach (var item in ListCart.Carts)
+        @foreach (var item in Carts)
         {
             <div class="card mb-3 p-2 shadow-sm" style="border-radius: 15px;">
                 <div class="row">
@@ -63,7 +63,7 @@
         }
         <div class="list-group-item mb-3">
             <div class="fw-bold">Ghi chú</div>
-            <textarea rows="2" @bind="ListCart.Note" class="form-control"></textarea>
+            <textarea rows="2" @bind="ListCartDTO.Note" class="form-control"></textarea>
         </div>
     }
 

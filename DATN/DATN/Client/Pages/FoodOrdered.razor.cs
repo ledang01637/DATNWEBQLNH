@@ -98,7 +98,7 @@ namespace DATN.Client.Pages
                     {
                         await HandleAccountPayment(table);
                     }
-                    await hubConnection.SendAsync("SendMessage", order);
+                    await hubConnection.SendAsync("SendMessage", "paymentReq");
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
                 }
                 else

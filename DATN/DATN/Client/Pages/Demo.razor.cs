@@ -17,6 +17,7 @@ namespace DATN.Client.Pages
         private bool showModal = false;
         private List<Table> tables = new();
         private List<Floor> floors = new();
+        private List<RequestTable> requestsTable = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -26,6 +27,21 @@ namespace DATN.Client.Pages
 
             tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
             floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
+            
+            if(tables.Count > 0 && floors.Count > 0)
+            {
+                foreach(var table in tables)
+                {
+                    requestsTable.Add(new RequestTable
+                    {
+                        TableId = table.TableId,
+                        NumberTable = table.TableNumber,
+                        FloorId = table.FloorId,
+                        IsCompleted = false
+                    });
+                }
+            }
+
             await hubConnection.StartAsync();
 
         }
@@ -56,6 +72,7 @@ namespace DATN.Client.Pages
         // Function to filter tables based on search term
         private IEnumerable<RequestTable> FilterTables(IEnumerable<RequestTable> requestTables)
         {
+           
             if (searchTerm == 0)
             {
                 return requestTables;

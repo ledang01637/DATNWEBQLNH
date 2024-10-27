@@ -2,6 +2,7 @@
 @inject IJSRuntime JS
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@layout EmployeeLayout
 <style>
     .table-card {
         transition: transform 0.2s;
@@ -25,13 +26,6 @@
     .floor {
         margin-bottom: 20px;
     }
-
-/*     .sortable {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
-        border: 2px dashed #ccc;
-    } */
     .highlight {
         background-color: #ffc107;
         border: 2px solid #ff9800;

@@ -1,6 +1,6 @@
 ﻿@page "/manager"
 
-@layout LayoutAdmin
+@layout EmployeeLayout
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 @inject LocalStorageService _localStorageService
@@ -121,154 +121,217 @@
         height: 100%;
         z-index: -1;
     }
-        body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f8f9fa;
-      color: #333;
+
+    .floor {
+        margin-bottom: 30px;
     }
 
-    .container {
-      max-width: 1200px;
-    }
-    .floor-section {
-  margin-bottom: 50px;
-  padding: 20px;
-  border: 2px solid #dee2e6; /* Light gray border */
-  border-radius: 12px;        /* Rounded corners */
-  background-color: #fff;     /* White background for better contrast */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-    .header-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
+    .table-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
     }
 
-    .header-info h4 {
-      font-weight: 500;
-      margin: 0;
+        .table-card:hover {
+            transform: scale(1.05);
+            background: #dee2e6;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+    .custom-table {
+        font-size: 11px;
     }
 
-    #clock {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #007bff;
+    th, td {
+        text-align: center;
+        vertical-align: middle;
     }
 
-    h3, h5 {
-      font-weight: 700;
-      margin-bottom: 20px;
+    tbody {
+        max-height: 350px;
+        overflow-y: auto;
+        display: block;
     }
 
-    .table-container h5 {
-      font-weight: 600;
-      font-size: 1.25rem;
-      margin-bottom: 15px;
-    }
-
-    .btn-table {
-      height: 120px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: 600;
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      background-size: 40px;
-      background-position: center left 15px;
-      background-repeat: no-repeat;
-      padding-left: 60px;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-table:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .btn-outline-secondary {
-      background-color: #e9ecef;
-      color: #6c757d;
-    }
-
-    .btn-outline-success {
-      background-color: #d4edda;
-      color: #155724;
-    }
-
-    .btn-outline-warning {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-
-    .card {
-      border: none;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-body {
-      padding: 30px;
-    }
-
-    .list-group-item {
-      font-weight: 500;
-    }
-
-    .list-group-item span {
-      font-weight: bold;
-    }
-
-    .btn-success {
-      font-size: 1.1rem;
-      font-weight: 600;
-      padding: 12px 0;
-      border-radius: 8px;
-      background-color: #28a745;
-      border: none;
-      transition: background-color 0.3s ease;
-    }
-
-    .btn-success:hover {
-      background-color: #218838;
-    }
-
-    .modal-header {
-      border-bottom: none;
-    }
-
-    .modal-footer {
-      border-top: none;
-    }
-
-    .modal-footer .btn-primary {
-      background-color: #007bff;
-      border-radius: 8px;
+    table thead, table tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
     }
 
     .floor-section {
-      margin-bottom: 50px;
-    }
-
-    .status-summary {
-      margin-bottom: 40px;
-    }
-
-    .status-summary .badge {
-      font-size: 1.2rem;
-      padding: 10px 15px;
+        padding: 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
 
+<div class="row position-relative">
+    <div class="col-md-8">
+        @if(tables == null || floors == null)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var f in floors)
+            {
+                <h3>Tầng @f.NumberFloor</h3>
+                <div class="floor floor-section" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                    @foreach (var table in tables.Where(t => t.FloorId == f.FloorId).OrderBy(t => t.Position))
+                    {
+                        <div id="sortable-floor1">
+                            <div class="mt-2">
+                                <div class="card table-card" style="background: @(GetTableColor(table.TableNumber))"
+                                     @onclick="() => ShowModalForTable(table.TableNumber)" data-bs-toggle="modal" data-bs-target="#tableModal">
+                                    <div class="card-body text-center position-relative">
+                                        <img src="/Image/dinner-table.png" height="50px" alt="Table Image">
+                                        <div class="position-absolute top-0 end-0 fw-bold m-1">
+                                            <div class="card" style="width: 25px; height: 25px;">@table.TableNumber</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
 
+        }
 
+    </div>
 
+    <!-- Bảng yêu cầu bàn -->
+    <div class="col-md-4 custom-table mb-2">
+        <h5 class="mb-2">Quản lý yêu cầu</h5>
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Số bàn</th>
+                    <th>Yêu cầu</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (requests.Count == 0)
+                {
+                    <tr class="table-light">
+                        <td class="fw-bold">Không có yêu cầu</td>
+                    </tr>
+                }else
+                {
+                    foreach(var r in requests)
+                    {
+                        <tr class="@(r.IsCompleted ? "table-success" : "table-danger")">
+                            <td class="fw-bold">@r.TableNumbe</td>
+                            <td class="fw-bold">@r.RequestText</td>
+                            <td class="fw-bold">@(r.IsCompleted ? "Hoàng thành" : "Đang xử lý")</td>
+                        </tr>
+                    }
+                }
 
-<button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
+        <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+    </div>
+</div>
+<div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tableModal">Bàn số: @selectedTableNumber</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="cart-items">
+                    @if ((_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0) || (_cartNote.CartDTOs is not null && _cartNote.CartDTOs.Count > 0))
+                    {
+                        <!-- Hiển thị danh sách món ăn trước đó -->
+                        @if (_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0)
+                        {
+                            <li class="list-group-item text-center bg-light">Danh sách món đã gọi</li>
+                            foreach (var item in _cartNote.PreviousCartDTOs)
+                            {
+                                var prod = products.FirstOrDefault(a => a.ProductId == item.ProductId);
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
+                                             alt="Image"
+                                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">@item.ProductName</div>
+                                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @item.Quantity</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
+                                </li>
+                                TotalAmount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
+                            }
+                        }
+                        @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
+                        {
+                            <!-- Hiển thị danh sách món ăn mới -->
+                            <li class="list-group-item text-center bg-light">Danh sách món mới gọi</li>
+                            foreach (var c in _cartNote.CartDTOs)
+                            {
+                                var prod = products.FirstOrDefault(a => a.ProductId == c.ProductId);
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
+                                             alt="Image"
+                                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">@c.ProductName</div>
+                                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @c.Quantity</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
+                                </li>
+                            }
+                        }
+                        <li class="list-group-item">
+                            <div class="fw-bold">Ghi chú</div>
+                            <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>
+                        </li>
+
+                        <li class="list-group-item">
+                            <div class="fw-bold text-end text-danger">Tổng tiền: @TotalAmount.ToString("N0") VND</div>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-center">Bàn không có khách</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="modal-footer">
+                @if (tableButtonVisibility.ContainsKey(selectedTableNumber))
+                {
+                    var visibility = tableButtonVisibility[selectedTableNumber];
+                    @if (visibility.IsConfirmVisible)
+                    {
+                        <button class="checkout-btn-model bg-danger" @onclick="CancelOrder">Hủy</button>
+                        <button class="checkout-btn-model" style="background: #28a745 !important" @onclick="ConfirmOrder">Xác nhận</button>
+                    }
+                    @if (visibility.IsCheckoutVisible)
+                    {
+                        <button class="checkout-btn-model" style="background: #007bff !important" @onclick="ProcessPayment">Thanh toán</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="box" id="call-box">
     <div id="particles-js"></div>

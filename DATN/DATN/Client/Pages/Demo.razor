@@ -104,7 +104,7 @@
         <input type="text" @bind="searchTerm" class="form-control search-input" placeholder="Tìm bàn..." />
     </div>
 
-    <!-- Accordion for floor management -->
+@*     <!-- Accordion for floor management -->
     <div class="accordion" id="tableAccordion">
         <!-- Lầu 1 -->
         <div class="accordion-item">
@@ -116,11 +116,11 @@
             <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#tableAccordion">
                 <div class="accordion-body">
                     <div class="table-container" id="tableList1">
-                        @foreach (var table in FilterTables(tables1))
+                        @foreach (var table in FilterTables(requestsTable))
                         {
                             <div class="table-card">
-                                <img src="@table.Image" alt="Món ăn" />
-                                <div class="table-number">@table.Number</div>
+                                <img src="/Image/table.png" alt="Món ăn" />
+                                <div class="table-number">@table.NumberTable</div>
 
                                 <div class="customer-requests" style="@(table.IsCompleted ? "display: none;" : "display: block;")">
                                     @foreach (var request in table.Requests)
@@ -144,7 +144,59 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> *@
+
+    @if (tables == null || floors == null)
+    {
+        <p class="text-dark">Loading...</p>
+    }
+    else
+    {
+        <div class="accordion" id="tableAccordion">
+            @foreach (var floor in floors)
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-@floor.FloorId" aria-expanded="true" aria-controls="collapseOne">
+                            Lầu @floor.NumberFloor
+                        </button>
+                    </h2>
+                    <div id="collapseOne-@floor.FloorId" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#tableAccordion">
+                        <div class="accordion-body">
+                            <div class="table-container" id="tableList1">
+                                @foreach (var table in requestsTable.Where(t => t.FloorId == floor.FloorId))
+                                {
+                                    <div class="table-card">
+                                        <img src="/Image/table.png" alt="Món ăn" />
+                                        <div class="table-number">@table.NumberTable</div>
+
+                                        <div class="customer-requests" style="@(table.IsCompleted ? "display: none;" : "display: block;")">
+                                            @foreach (var request in table.Requests)
+                                            {
+                                                <div>@request</div>
+                                            }
+                                        </div>
+
+                                        @if (!table.IsCompleted)
+                                        {
+                                            <button class="btn btn-sm complete-btn @table.ButtonClass" @onclick="() => CompleteTableRequest(table)">
+                                                Đang yêu cầu
+                                            </button>
+                                        }
+                                        <div class="completion-status" style="@(table.IsCompleted ? "display: block;" : "display: none;")">
+                                            Hoàn thành
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    }
+
 
     <!-- Modal for completion notification -->
     @if (showModal)

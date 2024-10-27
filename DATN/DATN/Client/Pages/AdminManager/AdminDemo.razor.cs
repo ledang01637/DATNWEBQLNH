@@ -16,6 +16,7 @@ namespace DATN.Client.Pages.AdminManager
         private Order getOrder = new Order();
         private List<CartDTO> getCarts = new List<CartDTO>();
         private List<CartDTO> cartsDto = new List<CartDTO>();
+        private Dictionary<int, List<CartDTO>> cartsByTable = new();
         private List<int> numtables = new List<int>();
         private HubConnection hubConnection;
         private bool isProcessing = false;
@@ -27,7 +28,7 @@ namespace DATN.Client.Pages.AdminManager
         private string getMessage;
         private string getRequid;
         private string Note;
-        private Dictionary<int, List<CartDTO>> cartsByTable = new();
+
 
         private int rowCount { get; set; }
 
@@ -59,14 +60,6 @@ namespace DATN.Client.Pages.AdminManager
                     }
                 }
 
-                StateHasChanged();
-            });
-
-            hubConnection.On<string,string>("RequidTable", (message,requidTable) =>
-            {
-                isProcessing = true;
-                getMessage = message;
-                getRequid = requidTable;
                 StateHasChanged();
             });
 

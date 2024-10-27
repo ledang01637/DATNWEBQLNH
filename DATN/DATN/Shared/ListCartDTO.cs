@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DATN.Shared
 {
-    public class ListCart
+    public class ListCartDTO
     {
-        public static List<Cart> Carts { get; set; }
+        public static List<CartDTO> CartDTOs { get; set; }
         public static string Note { get; set; }
     }
 }
