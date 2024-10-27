@@ -199,9 +199,12 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
     rejectCallButton.on('click', function () {
         $(this).hide();
         callButton.show();
+        answerCallButton.hide();
         if (currentCall != null) {
             currentCall.reject(function (res) {
                 console.log('+++ reject call: ', res);
+                var callboxElement = callboxId[0];
+                callboxElement.style.display = "none";
             });
         }
 
@@ -210,7 +213,7 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
     endCallButton.on('click', function () {
         $(this).hide();
         callButton.show();
-
+        answerCallButton.hide();
         if (currentCall != null) {
             currentCall.hangup(function (res) {
                 console.log('+++ hangup: ', res);

@@ -8,6 +8,7 @@ namespace DATN.Shared
 {
     public class RequestCustomer
     {
+        public int RequestId { get; set; }
         public int TableNumbe { get; set; }
         public string RequestText { get; set; }
         public bool IsCompleted {  get; set; }

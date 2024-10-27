@@ -178,7 +178,7 @@ namespace DATN.Server.Controllers
 
             if (successLogin != null)
             {
-                var token = AccessTokenStringee(successLogin.AccountType);
+                var token = AccessTokenStringee(successLogin.Email);
 
                 return Ok(new QRResponse
                 {

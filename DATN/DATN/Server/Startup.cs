@@ -91,6 +91,18 @@ namespace DATN.Server
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
             );
 
+            //CORS 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
+
             //Hubs
             services.AddSignalR();
             services.AddResponseCompression(options =>
@@ -124,6 +136,7 @@ namespace DATN.Server
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseCors("AllowAllOrigins");
 
 
             app.UseEndpoints(endpoints =>

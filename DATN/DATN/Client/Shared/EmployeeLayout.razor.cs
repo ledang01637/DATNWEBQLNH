@@ -10,9 +10,11 @@ namespace DATN.Client.Shared
         private bool isAcceptWifi;
         private string errorMessage;
         private bool isLoading;
+        private string Username;
 
         protected override async Task OnInitializedAsync()
         {
+
             isLoading = true;
             try
             {
@@ -23,6 +25,7 @@ namespace DATN.Client.Shared
                     return;
                 }
                 isAcceptWifi = true;
+                Username = await _localStorageService.GetItemAsync("userName");
             }
             catch (HttpRequestException ex)
             {
@@ -37,6 +40,10 @@ namespace DATN.Client.Shared
         private async void Navbar(bool isClose)
         {
             await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);
+        }
+        private void Logout()
+        {
+            Navigation.NavigateTo("/logout");
         }
     }
 }

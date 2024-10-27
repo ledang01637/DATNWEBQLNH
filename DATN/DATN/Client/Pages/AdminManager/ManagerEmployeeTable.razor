@@ -215,6 +215,7 @@
                     <th>Số bàn</th>
                     <th>Yêu cầu</th>
                     <th>Trạng thái</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -228,9 +229,14 @@
                     foreach(var r in requests)
                     {
                         <tr class="@(r.IsCompleted ? "table-success" : "table-danger")">
-                            <td class="fw-bold">@r.TableNumbe</td>
-                            <td class="fw-bold">@r.RequestText</td>
-                            <td class="fw-bold">@(r.IsCompleted ? "Hoàng thành" : "Đang xử lý")</td>
+                            <td>@r.TableNumbe</td>
+                            <td>@r.RequestText</td>
+                            <td>@(r.IsCompleted ? "Hoàng thành" : "Đang xử lý")</td>
+                            <td>
+                                <button class="btn btn-sm fw-bold custom-table btn-success" @onclick="() => ConfirmRequest(r.RequestId)">
+                                    Xác nhận
+                                </button>
+                            </td>
                         </tr>
                     }
                 }
@@ -297,6 +303,7 @@
                                 </li>
                             }
                         }
+
                         <li class="list-group-item">
                             <div class="fw-bold">Ghi chú</div>
                             <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>

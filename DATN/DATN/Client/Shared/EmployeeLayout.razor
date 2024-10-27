@@ -4,6 +4,7 @@
 @inject LocalStorageService _localStorageService
 @inject HttpClient httpClient
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <style>
     .sidebar {
@@ -86,8 +87,8 @@
                             <h2 class="fs-3 d-inline text-center">Quản lý - Bàn</h2>
                         </div>
                         <div>
-                            <span>Xin chào, <strong id="user-name">Lê Đăng</strong></span>
-                            <button class="btn btn-sm btn-outline-danger ms-3" id="logout-btn">Đăng xuất</button>
+                            <span>Xin chào, <strong id="user-name">@Username</strong></span>
+                            <button class="btn btn-sm btn-outline-danger ms-3" id="logout-btn" @onclick="Logout">Đăng xuất</button>
                         </div>
                     </div>
                     @Body

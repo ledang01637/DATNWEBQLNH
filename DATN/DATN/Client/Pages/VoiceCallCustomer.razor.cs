@@ -1,5 +1,6 @@
 ﻿using DATN.Client.Pages.AdminManager;
 using DATN.Shared;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,30 +14,47 @@ namespace DATN.Client.Pages
 {
     public partial class VoiceCallCustomer
     {
+        public DotNetObjectReference<VoiceCallCustomer> dotNetObjectReference;
+
         private string token;
         private string from;
-        private string to = "Manager";
-        public DotNetObjectReference<VoiceCallCustomer> dotNetObjectReference;
+        private string to;
 
         protected override async Task OnInitializedAsync()
         {
-            dotNetObjectReference = DotNetObjectReference.Create(this);
-            token = await _localStorageService.GetItemAsync("n");
-            if (token == null)
+           
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
-                Navigation.NavigateTo("/");
+                dotNetObjectReference = DotNetObjectReference.Create(this);
+
+                token = await _localStorageService.GetItemAsync("n");
+                to = await httpClient.GetStringAsync("api/Voice/get-message");
+
+                if (token is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                    return;
+                }
+                from = GetTableNumberFromToken(token);
+                if (from is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                    return;
+                }
+                if(to is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "To is null");
+                    return;
+                }
+                await SetupCall(token, from.ToLower(), to.ToLower());
+                await setupVideo();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Không thể kết nối: {ex.Message}");
+                await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
                 return;
             }
-            from = GetTableNumberFromToken(token);
-            if (from == null)
-            {
-                await JS.InvokeVoidAsync("showAlert", "error", "From is null");
-                Navigation.NavigateTo("/");
-                return;
-            }
-            await SetupCall(token, from, to);
-            await setupVideo();
         }
 
         private async Task SetupCall(string token, string from, string to)

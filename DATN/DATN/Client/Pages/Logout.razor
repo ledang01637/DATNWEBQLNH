@@ -3,7 +3,7 @@
 @layout MainLayout
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
-@inject CustomAuthenticationStateProvider authenticationStateProvider
+@inject AuthenticationStateProvider authenticationStateProvider
 @inject LocalStorageService _localStorageService;
 
 <h3>Logouting...</h3>
@@ -14,6 +14,6 @@
         var customAuthStateProvider = (CustomAuthenticationStateProvider)authenticationStateProvider;
         await customAuthStateProvider.Logout();
 
-        Navigation.NavigateTo("/login", true);
+        Navigation.NavigateTo("/login-admin", true);
     }
 }

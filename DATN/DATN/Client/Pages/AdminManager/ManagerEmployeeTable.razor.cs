@@ -31,6 +31,7 @@ namespace DATN.Client.Pages.AdminManager
         private decimal TotalAmount = 0;
         private bool IsUsing = false;
         private int selectedTableNumber;
+        private static int nextRequestId = 1;
         private string getMessage;
         private string getReq;
         private string token;
@@ -48,10 +49,11 @@ namespace DATN.Client.Pages.AdminManager
             {
                 RequestCustomer.requestCustomers.Add(new RequestCustomer()
                 {
+                    RequestId = nextRequestId++,
                     TableNumbe = numberTable,
                     RequestText = message,
                     IsCompleted = false
-                });
+                });;
                 requests = RequestCustomer.requestCustomers;
                 StateHasChanged();
             });
@@ -101,8 +103,6 @@ namespace DATN.Client.Pages.AdminManager
                 StateHasChanged();
             });
 
-
-
             hubConnection.On<string>("ReqMessage", (message) =>
             {
                 getReq = message;
@@ -110,6 +110,13 @@ namespace DATN.Client.Pages.AdminManager
             });
 
             await hubConnection.StartAsync();
+            string Username = await _localStorageService.GetItemAsync("userName");
+
+            var response = await httpClient.PostAsJsonAsync("api/Voice/post-message", Username);
+            if(!response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error","Lỗi","Không post được value");
+            }
 
             await LoadAll();
         }
@@ -136,7 +143,6 @@ namespace DATN.Client.Pages.AdminManager
             }
             StateHasChanged();
         }
-
 
 
         private async void ConfirmOrder()
@@ -316,6 +322,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 token = await _localStorageService.GetItemAsync("m");
                 from = GetTableNumberFromToken(token);
+
                 await SetupCall(token, from, to);
                 await setupVideo();
             }
@@ -372,7 +379,7 @@ namespace DATN.Client.Pages.AdminManager
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
-            return userId?.Value;
+            return userId?.Value.ToLower();
         }
 
         private async void CallButton(bool isClose)
@@ -380,6 +387,15 @@ namespace DATN.Client.Pages.AdminManager
             await JS.InvokeVoidAsync("callButtonManager", isClose);
         }
         #endregion
+
+        private static void ConfirmRequest(int RequestId)
+        {
+            var a = requests.FirstOrDefault(a => a.RequestId == RequestId);
+            if(a is not null)
+            {
+                a.IsCompleted = true;
+            }
+        }
         public void Dispose()
         {
             dotNetObjectReference?.Dispose();
