@@ -275,6 +275,7 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Reservation>().Property(e => e.IsDeleted)
                 .HasColumnType("bit")
                 .IsRequired();
+                
             #endregion
             #region Custom RelationShip
             modelBuilder.Entity<Account>().HasKey(b => b.AccountId);
@@ -302,6 +303,9 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Table>().HasKey(l => l.TableId);
             modelBuilder.Entity<RewardPointe>().HasKey(l => l.RewardPoint);
 
+            modelBuilder.Entity<Message>().HasKey(l => l.MessageId);
+            
+            
 
             //Account
             modelBuilder.Entity<Account>()
@@ -479,6 +483,25 @@ namespace DATN.Server.Data
                .WithMany(cv => cv.Tables)
                .HasForeignKey(o => o.FloorId)
                .OnDelete(DeleteBehavior.Restrict);
+
+            //Message
+            modelBuilder.Entity<Message>()
+               .HasOne(o => o.Table)
+               .WithMany(cv => cv.Messages)
+               .HasForeignKey(o => o.TableId)
+               .IsRequired(false)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+               .HasOne(o => o.Account)
+               .WithMany(cv => cv.Messages)
+               .HasForeignKey(o => o.AccountId)
+               .IsRequired(false)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+                .Ignore(m => m.Carts);
+
             #endregion
         }
         #region DbSet
@@ -502,6 +525,7 @@ namespace DATN.Server.Data
         public DbSet<RewardPointe> RewardPointes { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Floor> Floors { get; set; }
+        public DbSet<Message> Message { get; set; }
         #endregion
     }
 

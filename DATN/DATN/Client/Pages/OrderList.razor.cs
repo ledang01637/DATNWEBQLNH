@@ -64,11 +64,10 @@ namespace DATN.Client.Pages
         {
             if (Carts.Count > 0)
             {
-                var expiryTime = DateTime.Now.AddMinutes(30).ToString("o");
-                await _localStorageService.SetCartItemAsync("historyOrder", Carts);
+                var expiryTime = DateTime.Now.AddMinutes(120).ToString("o");
+                await _localStorageService.SetListAsync("historyOrder", Carts);
                 await _localStorageService.SetItemAsync("cartExpiryTime", expiryTime);
                 await SenMessageAsync();
-                await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
             }
             else
             {
@@ -79,14 +78,14 @@ namespace DATN.Client.Pages
         {
             
             string token = await _localStorageService.GetItemAsync("n");
-            if (token == null)
+            if (string.IsNullOrEmpty(token))
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR");
                 return;
             }
 
             int number = GetTableNumberFromToken(token);
-            List<Table> tables = new List<Table>();
+            List<Table> tables = new();
             tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
 
             if(tables != null)
@@ -112,6 +111,7 @@ namespace DATN.Client.Pages
                             carts.Add(cartDto);
                         }
                         await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note);
+                        await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
                     }
                 }
                 else

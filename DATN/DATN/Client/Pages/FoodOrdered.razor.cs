@@ -40,7 +40,7 @@ namespace DATN.Client.Pages
                .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
                .Build();
 
-                carts = await _localStorageService.GetCartItemAsync("historyOrder");
+                carts = await _localStorageService.GetListAsync<Cart>("historyOrder");
                 if (carts.Any())
                 {
                     CalculateTotal();

@@ -217,7 +217,7 @@ namespace DATN.Client.Pages
             var cartItem = carts.FirstOrDefault(c => c.ProductId == productId);
             if (cartItem == null)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Cart item not found");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng thêm món ăn");
                 return;
             }
 
@@ -268,7 +268,7 @@ namespace DATN.Client.Pages
             string token = await _localStorageService.GetItemAsync("n");
             if (string.IsNullOrEmpty(token))
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét QR");
                 return;
             }
 

@@ -1,5 +1,6 @@
 ﻿using DATN.Shared;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -9,6 +10,16 @@ namespace DATN.Server.Hubs
 {
     public class SockHub : Hub
     {
+        public override async Task OnConnectedAsync()
+        {
+            await base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            return base.OnDisconnectedAsync(exception);
+        }
+
         public async Task SendTable(string message, List<CartDTO> carts, string note)
         {
             await Clients.All.SendAsync("UpdateTable", message, carts, note);

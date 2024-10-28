@@ -21,7 +21,9 @@ namespace DATN.Shared
         public bool IsDeleted { get; set; }
 
         public virtual ICollection<RoleAccount> RoleAccounts { get; set; }
+        public virtual ICollection<Message> Messages { get; set; }
         public virtual Employee Employees { get; set; }
         public virtual Customer Customers { get; set; }
+
     }
 }

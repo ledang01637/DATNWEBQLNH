@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATN.Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241021133338_Init")]
+    [Migration("20241028094514_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -305,6 +305,40 @@ namespace DATN.Server.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("MenuItems");
+                });
+
+            modelBuilder.Entity("DATN.Shared.Message", b =>
+                {
+                    b.Property<int>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MessageText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TableId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("TableId");
+
+                    b.ToTable("Message");
                 });
 
             modelBuilder.Entity("DATN.Shared.Order", b =>
@@ -771,6 +805,23 @@ namespace DATN.Server.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("DATN.Shared.Message", b =>
+                {
+                    b.HasOne("DATN.Shared.Account", "Account")
+                        .WithMany("Messages")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DATN.Shared.Table", "Table")
+                        .WithMany("Messages")
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Table");
+                });
+
             modelBuilder.Entity("DATN.Shared.Order", b =>
                 {
                     b.HasOne("DATN.Shared.Customer", "Customers")
@@ -902,6 +953,8 @@ namespace DATN.Server.Migrations
 
                     b.Navigation("Employees");
 
+                    b.Navigation("Messages");
+
                     b.Navigation("RoleAccounts");
                 });
 
@@ -970,6 +1023,8 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.Table", b =>
                 {
+                    b.Navigation("Messages");
+
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");

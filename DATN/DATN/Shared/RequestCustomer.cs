@@ -12,6 +12,7 @@ namespace DATN.Shared
         public int TableNumbe { get; set; }
         public string RequestText { get; set; }
         public bool IsCompleted {  get; set; }
+        public DateTime Time {  get; set; }
 
         public static List<RequestCustomer> requestCustomers = new();
             
