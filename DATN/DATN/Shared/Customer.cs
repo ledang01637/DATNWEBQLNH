@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DATN.Shared
 {
@@ -11,6 +8,7 @@ namespace DATN.Shared
     {
         [Key]
         public int CustomerId { get; set; }
+
         public string CustomerName { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
@@ -20,7 +18,7 @@ namespace DATN.Shared
         public bool IsDeleted { get; set; }
 
         public virtual Account Accounts { get; set; }
-        public virtual RewardPointe RewardPoints { get; set; }
+        public virtual ICollection<RewardPointe> RewardPoints { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<CustomerVoucher> CustomerVouchers { get; set; }
     }

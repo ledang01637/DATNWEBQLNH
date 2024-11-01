@@ -9,19 +9,22 @@
 @inject CartService _cartService
 
 
+@* <div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">Contact</a>
+</div>
+
+<div id="overlay" class="overlay" @onclick="() => Navbar(false)"></div> *@
 
 <section class="iphone-13-mini-2-inner mb-2">
     <div class="frame-parent">
         <div class="frame-wrapper">
             <div class="frame-group">
                 <div class="frame-container">
-                    <div class="frame-div">
-                        <div class="line4-31-group3119-31-iphone13-parent">
-                            <div class="line4-31-group3119-31-iphone13"></div>
-                            <div class="line5-31-group3119-31-iphone13"></div>
-                            <div class="line6-31-group3119-31-iphone13"></div>
-                        </div>
-                    </div>
+                    <i class="fas fa-bars fa-2x fs-1" style="cursor: pointer;"></i>
                     <h1 class="foodgo">Tech Titans</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
                         <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
@@ -222,7 +225,7 @@
 </div>
 
 <!-- Icon giỏ hàng cố định ở dưới -->
-@* @if (carts == null || carts.Count == 0)
+@if (carts == null || carts.Count == 0)
 {
     <nav class="navbar fixed-bottom navbar-light bg-light">
         <div class="container-fluid justify-content-around">
@@ -232,7 +235,7 @@
             <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
         </div>
     </nav>
-} *@
+}
 
 <!-- Modal giỏ hàng khi bấm vào icon -->
 

@@ -38,6 +38,19 @@ namespace DATN.Server.Service
                 return existing;
             }
         }
+        public Order GetOrderStatus(int tableId)
+        {
+            var order = _context.Orders.Where(o => o.TableId == tableId && o.Status.Equals("Đang xử lý")).FirstOrDefault();
+            if (order == null)
+            {
+                return new Order
+                {
+                    TableId = tableId,
+                    Status = "Chưa có khách",
+                };
+            }
+            return order;
+        }
         public Order GetIdOrder(int id)
         {
             var order = _context.Orders.Find(id);
@@ -61,6 +74,10 @@ namespace DATN.Server.Service
             existing.CustomerId = update.CustomerId;
             existing.PaymentMethod = update.PaymentMethod;
             existing.CustomerVoucherId = update.CustomerVoucherId;
+            existing.EmployeeId = update.EmployeeId;
+            existing.IsDeleted = update.IsDeleted;
+            existing.Note = update.Note;
+            
 
             _context.Update(existing);
             _context.SaveChanges();

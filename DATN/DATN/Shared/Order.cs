@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -19,7 +17,7 @@ namespace DATN.Shared
         public int CustomerId { get; set; }
         public string PaymentMethod { get; set; }
         public string Note { get; set; }
-        public int CustomerVoucherId { get; set; }
+        public int? CustomerVoucherId { get; set; }
         public bool IsDeleted { get; set; }
 
         public virtual Customer Customers { get; set; }

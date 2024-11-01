@@ -57,6 +57,7 @@ namespace DATN.Server.Service
             existing.MenuName = update.MenuName;
             existing.MenuDescription = update.MenuDescription;
             existing.PriceCombo = update.PriceCombo;
+            existing.MenuImage = update.MenuImage;
             existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);

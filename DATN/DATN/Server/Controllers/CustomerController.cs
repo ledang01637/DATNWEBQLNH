@@ -22,6 +22,11 @@ namespace DATN.Server.Controllers
         {
             return _CustomerService.GetCustomer();
         }
+        [HttpGet("GetCustomerInclude")]
+        public List<Customer> GetCustomerInclude()
+        {
+            return _CustomerService.GetCustomerInclude();
+        }
 
         [HttpPost("AddCustomer")]
         public Customer AddCustomer(Customer Customer)

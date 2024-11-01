@@ -118,7 +118,6 @@ namespace DATN.Client.Pages.AdminManager
                 existingCartNote.Note = MergeNotes(existingCartNote.Note, note);
             }
 
-            // Cập nhật hoặc thêm các mặt hàng mới vào CartDTOs
             foreach (var newItem in carts)
             {
                 var existingItem = existingCartNote.CartDTOs.FirstOrDefault(item => item.ProductId == newItem.ProductId);
@@ -132,7 +131,6 @@ namespace DATN.Client.Pages.AdminManager
                 }
             }
 
-            // Cập nhật số bàn nếu bàn chưa có trong danh sách
             if (!numtables.Contains(tableNumber))
             {
                 numtables.Add(tableNumber);
@@ -169,7 +167,6 @@ namespace DATN.Client.Pages.AdminManager
             }
             StateHasChanged();
         }
-
 
         private async Task ConfirmOrder()
         {
@@ -238,13 +235,33 @@ namespace DATN.Client.Pages.AdminManager
 
         }
 
-
         private async void ProcessPayment()
         {
+            cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
+
+            if (cartsByTable is null) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!"); return; }
+
+            if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
+            {
+                cartsByTable.Remove(selectedTableNumber);
+                IsUsing = false;
+            }
+            else
+            {
+                cartsByTable[selectedTableNumber] = new CartNote
+                {
+                    PreviousCartDTOs = new List<CartDTO>(_cartNote.CartDTOs),
+                    CartDTOs = new List<CartDTO>(),
+                    Note = _cartNote.Note
+                };
+                existingCartNote.CartDTOs = new List<CartDTO>();
+
+            }
+
             await JS.InvokeVoidAsync("closeModal", "tableModal");
             await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
-            IsUsing = false;
             await InitializeButtonVisibilityAsync(selectedTableNumber);
+            await GetTableColorAsync(selectedTableNumber);
             tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
             StateHasChanged();
         }
@@ -253,7 +270,20 @@ namespace DATN.Client.Pages.AdminManager
         {
             
         }
+        private async Task ConfirmRequestAsync(int RequestId)
+        {
+            var requestToConfirm = requests.FirstOrDefault(r => r.RequestId == RequestId);
+            if (requestToConfirm is not null)
+            {
+                requestToConfirm.IsCompleted = true;
+                requestToConfirm.Time = DateTime.Now;
 
+                await _localStorageService.SetListAsync("requests", requests);
+                StateHasChanged();
+            }
+        }
+
+        //Visibility&Color
 
         private async Task GetTableColorAsync(int tableNumber)
         {
@@ -300,8 +330,6 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
-
-
         private async Task InitializeButtonVisibilityAsync(int tableNumber)
         {
             if (!tableButtonVisibility.ContainsKey(tableNumber))
@@ -330,9 +358,7 @@ namespace DATN.Client.Pages.AdminManager
             StateHasChanged();
         }
 
-
-
-
+        //InitLoad
         private async Task LoadAll()
         {
             try
@@ -358,7 +384,6 @@ namespace DATN.Client.Pages.AdminManager
                 await HandleError(ex);
             }
         }
-
 
 
         private async Task HandleError(Exception ex)
@@ -455,18 +480,7 @@ namespace DATN.Client.Pages.AdminManager
         }
         #endregion
 
-        private async Task ConfirmRequestAsync(int RequestId)
-        {
-            var requestToConfirm = requests.FirstOrDefault(r => r.RequestId == RequestId);
-            if (requestToConfirm is not null)
-            {
-                requestToConfirm.IsCompleted = true;
-                requestToConfirm.Time = DateTime.Now;
 
-                await _localStorageService.SetListAsync("requests", requests);
-                StateHasChanged();
-            }
-        }
 
         public void Dispose()
         {

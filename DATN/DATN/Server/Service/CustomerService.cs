@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -17,6 +18,10 @@ namespace DATN.Server.Service
         public List<Customer> GetCustomer()
         {
             return _context.Customers.ToList();
+        }
+        public List<Customer> GetCustomerInclude()
+        {
+            return _context.Customers.Include(c => c.Accounts).ToList();
         }
         public Customer AddCustomer(Customer Customer)
         {

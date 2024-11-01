@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -18,6 +19,14 @@ namespace DATN.Server.Service
         {
             return _context.OrderItems.ToList();
         }
+        public List<OrderItem> GetOrderItemInclude(int orderId)
+        {
+            return _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .Include(oi => oi.Products)
+                .ToList();
+        }
+
         public OrderItem AddOrderItem(OrderItem OrderItem)
         {
             _context.Add(OrderItem);

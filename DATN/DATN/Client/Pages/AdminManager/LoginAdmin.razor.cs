@@ -55,7 +55,7 @@ namespace DATN.Client.Pages.AdminManager
                         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
                         var user = authState.User;
 
-                        if (user.Identity.IsAuthenticated && (user.IsInRole("1") || user.IsInRole("2") || user.IsInRole("3")))
+                        if (user.Identity.IsAuthenticated && (user.IsInRole("admin")))
                         {
                             var res = await httpClient.PostAsJsonAsync("api/AuthJWT/ManagerToken/", loginUser);
                             if (res.IsSuccessStatusCode)
@@ -75,11 +75,7 @@ namespace DATN.Client.Pages.AdminManager
                         }
                         else
                         {
-                            CurrentLayout = typeof(MainLayout);
-                            await _localStorageService.SetItemAsync("userName", Username);
-                            await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                            await _localStorageService.SetItemAsync("AccountId", accountId);
-                            Navigation.NavigateTo("/", true);
+                            await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo","Tài khoản không có quyền truy cập");
                         }
                     }
                     else

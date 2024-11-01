@@ -59,7 +59,7 @@ namespace DATN.Server.Service
             existing.ReservationDate = update.ReservationDate;
             existing.NumberGuest = update.NumberGuest;
             existing.Tables = update.Tables;
-            existing.Is_Payment = update.Is_Payment;
+            existing.IsPayment = update.IsPayment;
             existing.DepositPayment = update.DepositPayment;
             existing.PaymentMethod = update.PaymentMethod;
             existing.IsDeleted = update.IsDeleted;

@@ -29,6 +29,7 @@ namespace DATN.Client.Pages
         private int TotalQuantity;
         private decimal TotalAmount;
         private bool isProcessing = false;
+        private readonly string urlPayment = "/food-ordered";
         private string messageText { get; set; }
         private string note;
 
@@ -67,7 +68,9 @@ namespace DATN.Client.Pages
                 menus = await menuTask ?? new List<Menu>();
                 accounts = await accountTask ?? new List<Account>();
 
-                if (accounts != null)
+                var accountType = await CheckTypeAccount();
+
+                if (accounts != null && (accountType != "customer"))
                 {
                     loginUser.Email = "no account";
                     loginUser.Password = "123456";
@@ -195,8 +198,6 @@ namespace DATN.Client.Pages
 
         private Task UpdateCartTotals(decimal priceChange, int quantityChange)
         {
-
-
             TotalQuantity += quantityChange;
 
             if(priceChange < 0) 
@@ -299,6 +300,29 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return int.Parse(userId?.Value);
         }
+        private async Task<string> CheckTypeAccount()
+        {
+            var token = await _localStorageService.GetItemAsync("authToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+
+                if (handler.ReadToken(token) is JwtSecurityToken jwtToken)
+                {
+                    var accountTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type.Equals("AccountType"));
+                    return accountTypeClaim?.Value;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                }
+            }
+            return null;
+        }
+        //private async void Navbar(bool isClose)
+        //{
+        //    await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);
+        //}
 
         //private string GetGridColumnClass()
         //{

@@ -63,7 +63,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 SetDefaultTableProperties();
                 var response = await httpClient.PostAsJsonAsync("api/Table/AddTable", tableModel);
-                await HandleResponse(response, "Thành công", "Error add Table");
+                await HandleResponse(response, "Thành công", "Thêm bàn thành công");
             }
             catch (Exception ex)
             {
@@ -94,7 +94,7 @@ namespace DATN.Client.Pages.AdminManager
         {
             if (response.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("showAlert", "success", "Thành công", errorMessage);
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành công", successMessage);
                 await LoadAll();
             }
             else

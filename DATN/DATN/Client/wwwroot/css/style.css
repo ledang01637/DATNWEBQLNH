@@ -1,34 +1,4 @@
-﻿
-.line4-31-group3119-31-iphone13,
-.line5-31-group3119-31-iphone13,
-.line6-31-group3119-31-iphone13 {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-top: 2px solid var(--color-black);
-    box-sizing: border-box;
-    width: 20px;
-    height: 2px;
-}
-
-.line5-31-group3119-31-iphone13,
-.line6-31-group3119-31-iphone13 {
-    top: 9px;
-    width: 26px;
-}
-
-.line6-31-group3119-31-iphone13 {
-    top: 18px;
-    width: 20px;
-}
-
-.line4-31-group3119-31-iphone13-parent {
-    width: 24px;
-    height: 20px;
-    position: relative;
-}
-
-.frame-div {
+﻿.frame-div {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -68,7 +38,7 @@
     align-self: stretch;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: var(--gap-xl);
 }

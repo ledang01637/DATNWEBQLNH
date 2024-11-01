@@ -33,7 +33,7 @@ namespace DATN.Server.Controllers
                 ReservationDate = Reservation.ReservationDate,
                 NumberGuest = Reservation.NumberGuest,
                 Tables = Reservation.Tables,
-                Is_Payment = Reservation.Is_Payment,
+                IsPayment = Reservation.IsPayment,
                 DepositPayment = Reservation.DepositPayment,
                 PaymentMethod = Reservation.PaymentMethod
             });

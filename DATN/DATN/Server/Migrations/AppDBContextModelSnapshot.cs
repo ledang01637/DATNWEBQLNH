@@ -83,7 +83,11 @@ namespace DATN.Server.Migrations
             modelBuilder.Entity("DATN.Shared.Customer", b =>
                 {
                     b.Property<int>("CustomerId")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
@@ -213,10 +217,12 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.EmployeeShifte", b =>
                 {
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
                     b.Property<int>("EmployeeShifteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -228,7 +234,9 @@ namespace DATN.Server.Migrations
                     b.Property<int>("ShifteId")
                         .HasColumnType("int");
 
-                    b.HasKey("EmployeeId");
+                    b.HasKey("EmployeeShifteId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("ShifteId");
 
@@ -266,6 +274,9 @@ namespace DATN.Server.Migrations
                     b.Property<string>("MenuDescription")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<byte[]>("MenuImage")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("MenuName")
                         .IsRequired()
@@ -352,7 +363,7 @@ namespace DATN.Server.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CustomerVoucherId")
+                    b.Property<int?>("CustomerVoucherId")
                         .HasColumnType("int");
 
                     b.Property<int>("EmployeeId")
@@ -385,7 +396,8 @@ namespace DATN.Server.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("CustomerVoucherId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[CustomerVoucherId] IS NOT NULL");
 
                     b.HasIndex("EmployeeId");
 
@@ -492,7 +504,7 @@ namespace DATN.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("Is_Payment")
+                    b.Property<bool>("IsPayment")
                         .HasColumnType("bit");
 
                     b.Property<int>("NumberGuest")
@@ -521,7 +533,7 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.RewardPointe", b =>
                 {
-                    b.Property<int>("RewardPoint")
+                    b.Property<int>("RewardPointId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -535,13 +547,15 @@ namespace DATN.Server.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RewardPointId")
+                    b.Property<int>("RewardPoint")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("RewardPoint");
+                    b.HasKey("RewardPointId");
+
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("OrderId")
                         .IsUnique();
@@ -575,7 +589,7 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.RoleAccount", b =>
                 {
-                    b.Property<int>("RoleaccountId")
+                    b.Property<int>("RoleAccountId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -589,7 +603,7 @@ namespace DATN.Server.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-                    b.HasKey("RoleaccountId");
+                    b.HasKey("RoleAccountId");
 
                     b.HasIndex("AccountId");
 
@@ -600,7 +614,7 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.Shifte", b =>
                 {
-                    b.Property<int>("Shifte_Id")
+                    b.Property<int>("ShifteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -611,7 +625,7 @@ namespace DATN.Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Shifte_Name")
+                    b.Property<string>("ShifteName")
                         .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
@@ -619,7 +633,7 @@ namespace DATN.Server.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Shifte_Id");
+                    b.HasKey("ShifteId");
 
                     b.ToTable("Shiftes");
                 });
@@ -724,15 +738,7 @@ namespace DATN.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DATN.Shared.RewardPointe", "RewardPoints")
-                        .WithOne("Customers")
-                        .HasForeignKey("DATN.Shared.Customer", "CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Accounts");
-
-                    b.Navigation("RewardPoints");
                 });
 
             modelBuilder.Entity("DATN.Shared.CustomerVoucher", b =>
@@ -831,8 +837,7 @@ namespace DATN.Server.Migrations
                     b.HasOne("DATN.Shared.CustomerVoucher", "CustomerVouchers")
                         .WithOne("Order")
                         .HasForeignKey("DATN.Shared.Order", "CustomerVoucherId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DATN.Shared.Employee", "Employee")
                         .WithMany("Orders")
@@ -906,11 +911,19 @@ namespace DATN.Server.Migrations
 
             modelBuilder.Entity("DATN.Shared.RewardPointe", b =>
                 {
+                    b.HasOne("DATN.Shared.Customer", "Customers")
+                        .WithMany("RewardPoints")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("DATN.Shared.Order", "Orders")
                         .WithOne("RewardPointes")
                         .HasForeignKey("DATN.Shared.RewardPointe", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Customers");
 
                     b.Navigation("Orders");
                 });
@@ -966,6 +979,8 @@ namespace DATN.Server.Migrations
                     b.Navigation("CustomerVouchers");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("RewardPoints");
                 });
 
             modelBuilder.Entity("DATN.Shared.CustomerVoucher", b =>
@@ -1002,11 +1017,6 @@ namespace DATN.Server.Migrations
                     b.Navigation("MenuItems");
 
                     b.Navigation("OrderItems");
-                });
-
-            modelBuilder.Entity("DATN.Shared.RewardPointe", b =>
-                {
-                    b.Navigation("Customers");
                 });
 
             modelBuilder.Entity("DATN.Shared.Role", b =>

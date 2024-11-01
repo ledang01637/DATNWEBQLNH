@@ -11,8 +11,37 @@ namespace DATN.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region PrimaryKey
+            modelBuilder.Entity<Account>().HasKey(b => b.AccountId);
+            modelBuilder.Entity<Role>().HasKey(l => l.RoleId);
+            modelBuilder.Entity<RoleAccount>().HasKey(l => l.RoleAccountId);
+
+            modelBuilder.Entity<Menu>().HasKey(c => c.MenuId);
+            modelBuilder.Entity<MenuItem>().HasKey(c => c.MenuItemId);
+            modelBuilder.Entity<Product>().HasKey(l => l.ProductId);
+            modelBuilder.Entity<Order>().HasKey(d => d.OrderId);
+            modelBuilder.Entity<OrderItem>().HasKey(e => e.OrderItemId);
+
+            modelBuilder.Entity<Voucher>().HasKey(l => l.VoucherId);
+            modelBuilder.Entity<Customer>().HasKey(e => e.CustomerId);
+            modelBuilder.Entity<CustomerVoucher>().HasKey(l => l.CustomerVoucherId);
+
+            modelBuilder.Entity<Category>().HasKey(k => k.CategoryId);
+            modelBuilder.Entity<Unit>().HasKey(l => l.UnitId);
+
+            modelBuilder.Entity<Employee>().HasKey(l => l.EmployeeId);
+            modelBuilder.Entity<Shifte>().HasKey(l => l.ShifteId);
+            modelBuilder.Entity<EmployeeShifte>().HasKey(l => l.EmployeeShifteId);
+
+            modelBuilder.Entity<Reservation>().HasKey(l => l.ReservationId);
+            modelBuilder.Entity<Table>().HasKey(l => l.TableId);
+            modelBuilder.Entity<RewardPointe>().HasKey(l => l.RewardPointId);
+
+            modelBuilder.Entity<Message>().HasKey(l => l.MessageId);
+            #endregion
+
             #region Custom DataType
-           
+
             modelBuilder.Entity<Employee>().Property(d => d.Salary).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Menu>().Property(f => f.PriceCombo).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Order>().Property(f => f.TotalAmount).HasColumnType("decimal(18,2)");
@@ -21,9 +50,10 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Product>().Property(f => f.Price).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Voucher>().Property(f => f.DiscountValue).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Reservation>().Property(f => f.DepositPayment).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Customer>().Property(o => o.CustomerId).ValueGeneratedOnAdd().UseIdentityColumn();
 
             //Shifte
-            modelBuilder.Entity<Shifte>().Property(e => e.Shifte_Name)
+            modelBuilder.Entity<Shifte>().Property(e => e.ShifteName)
                 .HasColumnType("nvarchar(15)")
                 .HasMaxLength(15)
                 .IsRequired();
@@ -61,6 +91,7 @@ namespace DATN.Server.Data
             modelBuilder.Entity<EmployeeShifte>().Property(e => e.IsDeleted)
                 .HasColumnType("bit")
                 .IsRequired();
+
 
             //Role
             modelBuilder.Entity<Role>().Property(e => e.RoleName)
@@ -183,6 +214,7 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Product>().Property(e => e.IsDeleted)
                 .HasColumnType("bit")
                 .IsRequired();
+
             //Category
             modelBuilder.Entity<Category>().Property(e => e.CategoryName)
                 .HasColumnType("nvarchar(30)")
@@ -277,36 +309,9 @@ namespace DATN.Server.Data
                 .IsRequired();
                 
             #endregion
+
             #region Custom RelationShip
-            modelBuilder.Entity<Account>().HasKey(b => b.AccountId);
-            modelBuilder.Entity<Role>().HasKey(l => l.RoleId);
-            modelBuilder.Entity<RoleAccount>().HasKey(l => l.RoleaccountId);
-
-            modelBuilder.Entity<Menu>().HasKey(c => c.MenuId);
-            modelBuilder.Entity<MenuItem>().HasKey(c => c.MenuItemId);
-            modelBuilder.Entity<Product>().HasKey(l => l.ProductId);
-            modelBuilder.Entity<Order>().HasKey(d => d.OrderId);
-            modelBuilder.Entity<OrderItem>().HasKey(e => e.OrderItemId);
-
-            modelBuilder.Entity<Customer>().HasKey(e => e.CustomerId);
-            modelBuilder.Entity<Voucher>().HasKey(l => l.VoucherId);
-            modelBuilder.Entity<CustomerVoucher>().HasKey(l => l.CustomerVoucherId);
-
-            modelBuilder.Entity<Category>().HasKey(k => k.CategoryId);
-            modelBuilder.Entity<Unit>().HasKey(l => l.UnitId);
-
-            modelBuilder.Entity<Employee>().HasKey(l => l.EmployeeId);
-            modelBuilder.Entity<Shifte>().HasKey(l => l.Shifte_Id);
-            modelBuilder.Entity<EmployeeShifte>().HasKey(l => l.EmployeeId);
-
-            modelBuilder.Entity<Reservation>().HasKey(l => l.ReservationId);
-            modelBuilder.Entity<Table>().HasKey(l => l.TableId);
-            modelBuilder.Entity<RewardPointe>().HasKey(l => l.RewardPoint);
-
-            modelBuilder.Entity<Message>().HasKey(l => l.MessageId);
             
-            
-
             //Account
             modelBuilder.Entity<Account>()
                .HasOne(a => a.Employees)
@@ -338,12 +343,6 @@ namespace DATN.Server.Data
                 .HasOne(c => c.Accounts)
                 .WithOne(a => a.Customers)
                 .HasForeignKey<Customer>(c => c.AccountId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Customer>()
-                .HasOne(c => c.RewardPoints)
-                .WithOne(r => r.Customers)
-                .HasForeignKey<RewardPointe>(r => r.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             //CustomerVoucher
@@ -410,6 +409,7 @@ namespace DATN.Server.Data
                 .HasOne(o => o.CustomerVouchers)
                 .WithOne(cv => cv.Order)
                 .HasForeignKey<Order>(o => o.CustomerVoucherId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
@@ -454,8 +454,8 @@ namespace DATN.Server.Data
             //RewardPoints
             modelBuilder.Entity<RewardPointe>()
                 .HasOne(o => o.Customers)
-                .WithOne(cv => cv.RewardPoints)
-                .HasForeignKey<Customer>(o => o.CustomerId)
+                .WithMany(cv => cv.RewardPoints)
+                .HasForeignKey(o => o.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<RewardPointe>()

@@ -15,11 +15,9 @@
             <div class="frame-group">
                 <div class="frame-container">
                     <div class="frame-div">
-                        <div class="line4-31-group3119-31-iphone13-parent">
-                            <div class="line4-31-group3119-31-iphone13"></div>
-                            <div class="line5-31-group3119-31-iphone13"></div>
-                            <div class="line6-31-group3119-31-iphone13"></div>
-                        </div>
+                        <a class="nav-link" href="/order-list">
+                            <i class="fas fa-arrow-left fs-2"></i>
+                        </a>
                     </div>
                     <h1 class="foodgo">Foodgo</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
@@ -36,16 +34,23 @@
     <h4 style="text-align: center;">Danh sách đã gọi</h4>
     @if (carts == null)
     {
-        <p>Loading...</p>
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     }
     else if (!carts.Any())
     {
-        <p>Cart rỗng...</p>
+        <div class="card my-3 p-3 text-center">
+            <span class="text-center">Không có món ăn</span>
+        </div>
     }
     else
     {
         @foreach (var item in carts)
         {
+
             <div class="card my-3 p-3">
                 <div class="d-flex justify-content-between">
                     <div class="d-flex">
@@ -53,22 +58,22 @@
                              style="width: 100px; height: 70px; background-image: url(data:image/png;base64,@Convert.ToBase64String(item.ProductImage)); background-size: cover;">
                         </div>
                         <div class="ms-3">
-                            <p class="mb-0" style="font-family: 'Poppins'; font-weight: 700;">@item.ProductName</p>
-                            <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">@item.Price.ToString("###,0##") VND</p>
-                            <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">Số lượng: @item.Quantity </p>
+                            <p class="mb-0 fw-blod">@item.ProductName</p>
+                            <p class="mb-0 text-secondary text-danger">@item.Price.ToString("###,0##") VND</p>
+                            <p class="mb-0 text-secondary">Số lượng: @item.Quantity </p>
                         </div>
                     </div>
-                    <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+@*                     <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
                         <img src="/images/vectors/icons8-tick-30.png" alt="Tick" style="width: 20px; height: 14.7px;" />
-                    </div>
+                    </div> *@
                 </div>
             </div>
         }
     }
-    <div class="total-section">
+    <div class="total-section" style="display: @(!carts.Any() ? "none" : "")">
         <div class="d-flex justify-content-between">
             <p class="mb-0">Tổng tiền</p>
-            <p class="mb-0"><strong>@Total.ToString("N0") VND</strong></p>
+            <p class="mb-0"><strong>@order.TotalAmount.ToString("N0") VND</strong></p>
         </div>
 @*         @{
             foreach (var cv in customerVouchers)

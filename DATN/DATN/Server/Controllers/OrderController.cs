@@ -23,6 +23,14 @@ namespace DATN.Server.Controllers
             return _OrderService.GetOrder();
         }
 
+        [HttpPost("GetOrderStatus")]
+        public ActionResult<Order> GetOrderStatus([FromBody] int tableId)
+        {
+            if (tableId <= 0) {return BadRequest("Value must be...");}
+
+            return Ok(_OrderService.GetOrderStatus(tableId));
+        }
+
         [HttpPost("AddOrder")]
         public Order AddOrder(Order Order)
         {
@@ -35,7 +43,9 @@ namespace DATN.Server.Controllers
                 PaymentMethod = Order.PaymentMethod,
                 CustomerId = Order.CustomerId,
                 CustomerVoucherId = Order.CustomerVoucherId,
-
+                EmployeeId = Order.EmployeeId,
+                Note = Order.Note,
+                IsDeleted = Order.IsDeleted
             });
         }
 

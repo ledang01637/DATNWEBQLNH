@@ -23,6 +23,14 @@ namespace DATN.Server.Controllers
             return _OrderItemService.GetOrderItem();
         }
 
+        [HttpPost("GetOrderItemInclude")]
+        public List<OrderItem> GetOrderItemInclude([FromBody] int orderId)
+        {
+            if(orderId < 0) { return null; }
+
+            return _OrderItemService.GetOrderItemInclude(orderId);
+        }
+
         [HttpPost("AddOrderItem")]
         public OrderItem AddOrderItem(OrderItem OrderItem)
         {
