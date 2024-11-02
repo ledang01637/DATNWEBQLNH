@@ -19,7 +19,6 @@ namespace DATN.Client.Pages
         private Order order = new();
         private List<OrderItem> orderItems = new();
         private List<Cart> carts = new();
-
         private decimal Total;
         private bool isSaveOrder = false;
         private bool isUseVoucher = false;
@@ -39,9 +38,9 @@ namespace DATN.Client.Pages
                 await LoadInit();
                 //await LoadCustomerVouchers();
             }
-            catch (Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Vui lòng thêm món");
             }
         }
 
@@ -113,6 +112,11 @@ namespace DATN.Client.Pages
             }
         }
 
+        private async Task ChoosePayMenthodAsync(char isCash)
+        {
+            await JS.InvokeVoidAsync("selectPaymentMethod", isCash, "cashBtnId", "transferBtnId");
+        }
+
         private async Task<Order> GetOrderForTable(int tableId)
         {
             var response = await httpClient.PostAsJsonAsync("api/Order/GetOrderStatus", tableId);
@@ -150,7 +154,7 @@ namespace DATN.Client.Pages
                    
                     string accountType = await CheckTypeAccount();
 
-                    await hubConnection.SendAsync("SendMessage", "paymentReq");
+                    await hubConnection.SendAsync("SendPay", "payReq",numberTable);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
                 }
                 else

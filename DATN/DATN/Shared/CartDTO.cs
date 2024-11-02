@@ -3,6 +3,7 @@
     public class CartDTO
     {
         public int ProductId { get; set; }
+        public int TableId {  get; set; }
         public int TableNumber {  get; set; }
         public int UnitId { get; set; }
         public string ProductName { get; set; }

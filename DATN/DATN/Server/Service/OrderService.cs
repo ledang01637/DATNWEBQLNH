@@ -51,6 +51,23 @@ namespace DATN.Server.Service
             }
             return order;
         }
+
+        public List<Order> GetOC()
+        {
+            var orders = _context.Orders.Where(o => o.Status.Equals("Đang xử lý")).ToList();
+            if (orders == null )
+            {
+                return new List<Order>
+                {
+                    new()
+                    {
+                        OrderId = 0,
+                        IsDeleted = false
+                    }
+                };
+            }
+            return orders;
+        }
         public Order GetIdOrder(int id)
         {
             var order = _context.Orders.Find(id);

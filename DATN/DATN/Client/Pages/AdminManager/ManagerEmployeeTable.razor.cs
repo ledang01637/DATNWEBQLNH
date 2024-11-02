@@ -19,6 +19,7 @@ namespace DATN.Client.Pages.AdminManager
         private List<Table> tables = new();
         private List<Floor> floors = new();
         private List<Product> products = new();
+        private List<Order> orders = new();
         private HubConnection hubConnection;
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
         public static List<RequestCustomer> requests = new();
@@ -33,7 +34,7 @@ namespace DATN.Client.Pages.AdminManager
         private bool IsUsing = false;
         private int selectedTableNumber;
         private static int nextRequestId = 1;
-        private string getMessage;
+        private string numberTable;
         private string getReq;
         private string token;
         private string from;
@@ -89,10 +90,11 @@ namespace DATN.Client.Pages.AdminManager
                 await InvokeAsync(StateHasChanged);
             });
 
-            hubConnection.On<string, List<CartDTO>, string>("UpdateTable", async (numTable, carts, note) =>
+            hubConnection.On<string, List<CartDTO>, string>("UpdateTable", async (_numTable, carts, note) =>
             {
-                getMessage = numTable;
-                if (int.TryParse(getMessage, out int tableNumber))
+                numberTable = _numTable;
+
+                if (int.TryParse(numberTable, out int tableNumber))
                 {
                     await UpdateCartNoteAsync(tableNumber, carts, note);
                     await InitializeButtonVisibilityAsync(tableNumber);
@@ -105,7 +107,41 @@ namespace DATN.Client.Pages.AdminManager
 
             return Task.CompletedTask;
         }
+        //InitLoad
+        private async Task LoadAll()
+        {
+            try
+            {
+                tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+                if (tables.Any())
+                {
+                    tables = tables.Where(a => !a.IsDeleted).ToList();
+                }
 
+                floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
+                if (floors.Any())
+                {
+                    floors = floors.Where(a => !a.IsDeleted).ToList();
+                }
+
+                products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+                if (products.Any())
+                {
+                    products = products.Where(a => !a.IsDeleted).ToList();
+                }
+
+                orders = await httpClient.GetFromJsonAsync<List<Order>>("api/Order/GetOC");
+
+                if (orders.Any())
+                {
+                    orders = orders.Where(a => !a.IsDeleted).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                await HandleError(ex);
+            }
+        }
         private async Task UpdateCartNoteAsync(int tableNumber, List<CartDTO> carts, string note)
         {
             if (!cartsByTable.TryGetValue(tableNumber, out var existingCartNote))
@@ -136,11 +172,10 @@ namespace DATN.Client.Pages.AdminManager
                 numtables.Add(tableNumber);
                 await _localStorageService.SetListAsync("numtables", numtables);
             }
-
+            IsUsing = true;
             await _localStorageService.SetAsync("_cartNote", existingCartNote);
             await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
         }
-
 
         //Modal
 
@@ -172,8 +207,6 @@ namespace DATN.Client.Pages.AdminManager
         {
             try
             {
-                IsUsing = true;
-
                 _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote") ?? new CartNote();
 
                 if (_cartNote.CartDTOs is null || !_cartNote.CartDTOs.Any())
@@ -219,6 +252,8 @@ namespace DATN.Client.Pages.AdminManager
                     existingCartNote.CartDTOs = new List<CartDTO>();
 
                 }
+                IsUsing = true;
+                numberTable = null;
                 await _localStorageService.SetAsync("_cartNote", existingCartNote);
                 await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                 await GetTableColorAsync(selectedTableNumber);
@@ -250,14 +285,18 @@ namespace DATN.Client.Pages.AdminManager
             {
                 cartsByTable[selectedTableNumber] = new CartNote
                 {
-                    PreviousCartDTOs = new List<CartDTO>(_cartNote.CartDTOs),
+                    PreviousCartDTOs = new List<CartDTO>(),
                     CartDTOs = new List<CartDTO>(),
                     Note = _cartNote.Note
                 };
                 existingCartNote.CartDTOs = new List<CartDTO>();
+                existingCartNote.PreviousCartDTOs = new List<CartDTO>();
 
             }
-
+            TotalAmount = 0;
+            IsUsing = false;
+            numberTable = null;
+            await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
             await JS.InvokeVoidAsync("closeModal", "tableModal");
             await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
             await InitializeButtonVisibilityAsync(selectedTableNumber);
@@ -284,38 +323,37 @@ namespace DATN.Client.Pages.AdminManager
         }
 
         //Visibility&Color
-
         private async Task GetTableColorAsync(int tableNumber)
         {
             try
             {
-
                 if (!tableColorsCache.ContainsKey(tableNumber))
                 {
                     tableColorsCache[tableNumber] = new ColorTable();
                 }
+
                 var color = tableColorsCache[tableNumber];
                 string previousColor = color.Color;
 
                 if (!string.IsNullOrEmpty(getReq) && numtables.Contains(tableNumber) && IsUsing)
                 {
                     color.Color = "#FFD700";
-                    color.IsUse = true;
                 }
-                else if (IsUsing && numtables.Contains(tableNumber))
-                {
-                    color.Color = "#FFA500";
-                    color.IsUse = IsUsing;
-                }
-                else if (!string.IsNullOrEmpty(getMessage) && numtables.Contains(tableNumber))
+                else if (IsUsing && !string.IsNullOrEmpty(numberTable))
                 {
                     color.Color = "#ADD8E6";
-                    color.IsUse = IsUsing;
+                }
+                else if (IsUsing)
+                {
+                    color.Color = "#FFA500";
+                }
+                else if (!string.IsNullOrEmpty(numberTable))
+                {
+                    color.Color = "#ADD8E6";
                 }
                 else
                 {
                     color.Color = "#32CD32";
-                    color.IsUse = false;
                 }
 
                 if (previousColor != color.Color)
@@ -357,35 +395,6 @@ namespace DATN.Client.Pages.AdminManager
             await _localStorageService.SetDictionaryAsync("tableButtonVisibility", tableButtonVisibility);
             StateHasChanged();
         }
-
-        //InitLoad
-        private async Task LoadAll()
-        {
-            try
-            {
-                tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-                if (tables.Any())
-                {
-                    tables = tables.Where(a => !a.IsDeleted).ToList();
-                }
-                floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
-                if (floors.Any())
-                {
-                    floors = floors.Where(a => !a.IsDeleted).ToList();
-                }
-                products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
-                if (products.Any())
-                {
-                    products = products.Where(a => !a.IsDeleted).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                await HandleError(ex);
-            }
-        }
-
-
         private async Task HandleError(Exception ex)
         {
             var query = $"[C#] fix error: {ex.Message}";
@@ -480,8 +489,6 @@ namespace DATN.Client.Pages.AdminManager
         }
         #endregion
 
-
-
         public void Dispose()
         {
             dotNetObjectReference?.Dispose();
@@ -509,6 +516,5 @@ namespace DATN.Client.Pages.AdminManager
     public class ColorTable
     {
         public string Color { get; set; }
-        public bool IsUse { get; set; }
     }
 }

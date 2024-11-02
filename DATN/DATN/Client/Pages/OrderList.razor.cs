@@ -116,6 +116,8 @@ namespace DATN.Client.Pages
         }
 
         #endregion
+
+        #region
         private async Task Order()
         {
             if (Carts != null && Carts.Count > 0)
@@ -195,6 +197,7 @@ namespace DATN.Client.Pages
                             var cartDto = new CartDTO
                             {
                                 TableNumber = table.TableNumber,
+                                TableId = table.TableId,
                                 ProductId = Carts[i].ProductId,
                                 UnitId = Carts[i].UnitId,
                                 ProductName = Carts[i].ProductName,
@@ -392,7 +395,7 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return int.Parse(userId?.Value);
         }
-
+        #endregion Order
         public async ValueTask DisposeAsync()
         {
             if (hubConnection is not null)

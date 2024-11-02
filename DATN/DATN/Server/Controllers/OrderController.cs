@@ -31,6 +31,12 @@ namespace DATN.Server.Controllers
             return Ok(_OrderService.GetOrderStatus(tableId));
         }
 
+        [HttpGet("GetOC")]
+        public ActionResult<List<Order>> GetOC()
+        {
+            return Ok(_OrderService.GetOC());
+        }
+
         [HttpPost("AddOrder")]
         public Order AddOrder(Order Order)
         {

@@ -32,6 +32,10 @@ namespace DATN.Server.Hubs
         {
             await Clients.All.SendAsync("ReqMessage", message);
         }
+        public async Task SendPay(string message, int numberTable, int voucherId)
+        {
+            await Clients.All.SendAsync("ReqMessage", message, numberTable, voucherId);
+        }
         public async Task SendOrderUpdate(Order order)
         {
             if (order == null) { Console.WriteLine("Order is null"); return; }
