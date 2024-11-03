@@ -33,9 +33,12 @@ namespace DATN.Server
         {
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
 
             //Authentication
-
             var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(

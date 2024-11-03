@@ -19,10 +19,13 @@ namespace DATN.Client.Pages
         private Order order = new();
         private List<OrderItem> orderItems = new();
         private List<Cart> carts = new();
+        private List<CustomerVoucher> customerVouchers = new();
         private decimal Total;
         private bool isSaveOrder = false;
         private bool isUseVoucher = false;
         private int vcId;
+        private bool isHasAccount = false;
+        private string Code;
 
         private HubConnection hubConnection;
 
@@ -36,17 +39,92 @@ namespace DATN.Client.Pages
 
                 await hubConnection.StartAsync();
                 await LoadInit();
-                //await LoadCustomerVouchers();
+
+                string accountType = await CheckTypeAccount();
+
+                if (!string.IsNullOrEmpty(accountType) && accountType.ToLower().Equals("no account"))
+                {
+                    isHasAccount = false;
+                }
+                else
+                {
+                    isHasAccount = true;
+                    string accountId = await CheckAccountId();
+                    if(string.IsNullOrEmpty(accountId)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại tài khoản"); return ; }
+
+                    Customer customer = await GetCustomerByAccount(int.Parse(accountId));
+
+                    if (customer != null) 
+                    {
+                        customerVouchers = await GetCustomerVoucherByCustomerId(customer.CustomerId);
+                    }
+                    Console.WriteLine(customerVouchers);
+                }
             }
-            catch
+            catch(Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Vui lòng thêm món");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Vui lòng thêm món: " + ex.Message);
             }
+        }
+
+        private void UseVoucher(string voucherCode)
+        {
+
+        }
+
+        private async Task<List<CustomerVoucher>> GetCustomerVoucherByCustomerId(int customerId)
+        {
+            var response = await httpClient.PostAsJsonAsync("api/CustomerVoucher/GetCustomerVoucherByCustomerId", customerId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadFromJsonAsync<List<CustomerVoucher>>();
+
+                if (responseContent != null)
+                {
+                    return responseContent;
+                }
+                return null;
+            }
+            else
+            {
+                customerVouchers = null;
+            }
+
+            return null;
+        }
+
+        private async Task<Customer> GetCustomerByAccount(int accountId)
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Customer/GetCustomerByAccountId", accountId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadFromJsonAsync<Customer>();
+
+
+                if (responseContent != null)
+                {
+                    return responseContent;
+                }
+                return null;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
+            }
+
+            return null;
         }
 
         private async Task LoadInit()
         {
-            int tableId = int.Parse(await _localStorageService.GetItemAsync("tbid"));
+            var tbid = await _localStorageService.GetItemAsync("tbid");
+            if(tbid == null) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui thêm món ăn"); return; }
+            int tableId = int.Parse(tbid);
+
+            if(tableId <= 0) {  }
 
             order = await GetOrderForTable(tableId);
 
@@ -151,8 +229,6 @@ namespace DATN.Client.Pages
                     if(string.IsNullOrEmpty(token)) { await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR"); return ; }
 
                     int numberTable = GetTableNumberFromToken(token);
-                   
-                    string accountType = await CheckTypeAccount();
 
                     await hubConnection.SendAsync("SendPay", "payReq",numberTable);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
@@ -168,11 +244,6 @@ namespace DATN.Client.Pages
             }
         }
 
-        //private async Task<Customer> GetCustomerNoAccount()
-        //{
-        //    customers = await httpClient.GetFromJsonAsync<List<Customer>>("api/Customer/GetCustomerInclude");
-        //    return customers.FirstOrDefault(a => a.Accounts.AccountType.ToLower().Equals("no account"));
-        //}
         private int GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -257,6 +328,17 @@ namespace DATN.Client.Pages
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
                 return jwtToken.Claims.FirstOrDefault(c => c.Type == "AccountType")?.Value;
+            }
+            return null;
+        }
+        private async Task<string> CheckAccountId()
+        {
+            var token = await _localStorageService.GetItemAsync("authToken");
+            if (!String.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+                return jwtToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
             }
             return null;
         }

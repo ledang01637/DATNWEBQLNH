@@ -3,6 +3,7 @@ using DATN.Shared;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using DATN.Server.Service;
+using System;
 
 namespace DATN.Server.Controllers
 {
@@ -22,6 +23,33 @@ namespace DATN.Server.Controllers
         {
             return _CustomerService.GetCustomer();
         }
+
+        [HttpPost("GetCustomerByAccountId")]
+        public ActionResult<Customer> GetCustomerByAccountId([FromBody] int accountId)
+        {
+            try
+            {
+                if (accountId <= 0)
+                {
+                    return BadRequest(new { message = "Account ID must be greater than zero." });
+                }
+
+                var customer = _CustomerService.GetCustomerByAccountId(accountId);
+                if (customer == null)
+                {
+                    return NotFound(new { message = "Customer not found." });
+                }
+
+                return Ok(customer);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+
+
         [HttpGet("GetCustomerInclude")]
         public List<Customer> GetCustomerInclude()
         {

@@ -3,6 +3,7 @@ using DATN.Shared;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using DATN.Server.Service;
+using System;
 
 namespace DATN.Server.Controllers
 {
@@ -21,6 +22,26 @@ namespace DATN.Server.Controllers
         public List<CustomerVoucher> GetCustomerVoucher()
         {
             return _CustomerVoucherService.GetCustomerVoucher();
+        }
+
+        [HttpPost("GetCustomerVoucherByCustomerId")]
+        public ActionResult<List<CustomerVoucher>> GetCustomerVoucherByCustomerId([FromBody] int customerId)
+        {
+            try
+            {
+                if (customerId <= 0)
+                {
+                    return BadRequest(new { message = "Customer ID must be greater than zero." });
+                }
+
+                var lstVoucher = _CustomerVoucherService.GetCustomerVoucherByCustomerId(customerId);
+
+                return Ok(lstVoucher);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpPost("AddCustomerVoucher")]

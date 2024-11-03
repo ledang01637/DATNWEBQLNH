@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -17,6 +18,16 @@ namespace DATN.Server.Service
         public List<CustomerVoucher> GetCustomerVoucher()
         {
             return _context.CustomerVouchers.ToList();
+        }
+        public List<CustomerVoucher> GetCustomerVoucherByCustomerId(int customerId)
+        {
+            var now = DateTime.Now;
+            var lstVoucher = _context.CustomerVouchers
+                                    .Include(a => a.Vouchers)
+                                    .Where(a => a.CustomerId == customerId && !a.IsDeleted && a.ExpirationDate >= now)
+                                    .ToList();
+
+            return lstVoucher.Any() ? lstVoucher : new List<CustomerVoucher>();
         }
         public CustomerVoucher AddCustomerVoucher(CustomerVoucher CustomerVoucher)
         {

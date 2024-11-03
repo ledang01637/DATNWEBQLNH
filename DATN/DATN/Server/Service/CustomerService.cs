@@ -19,6 +19,13 @@ namespace DATN.Server.Service
         {
             return _context.Customers.ToList();
         }
+        public Customer GetCustomerByAccountId(int accountId)
+        {
+            var customer = _context.Customers.FirstOrDefault(a => a.AccountId == accountId);
+
+            return customer;
+        }
+
         public List<Customer> GetCustomerInclude()
         {
             return _context.Customers.Include(c => c.Accounts).ToList();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -8,7 +9,6 @@ namespace DATN.Shared
     {
         [Key]
         public int CustomerId { get; set; }
-
         public string CustomerName { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
@@ -17,9 +17,16 @@ namespace DATN.Shared
         public int TotalRewardPoint { get; set; }
         public bool IsDeleted { get; set; }
 
+        [JsonIgnore]
         public virtual Account Accounts { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<RewardPointe> RewardPoints { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<Order> Orders { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<CustomerVoucher> CustomerVouchers { get; set; }
     }
 }

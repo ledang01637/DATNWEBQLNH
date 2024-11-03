@@ -40,11 +40,6 @@
         color: #ff7043;
     }
 
-    .modal-footer .btn {
-        background-color: #6c757d;
-        color: #fff;
-    }
-
     .payment-button {
         border-radius: 0px !important;
     }
@@ -53,6 +48,10 @@
             border-color: #ef4c2b !important;
             color: #ef4c2b !important;
         }
+
+    .form-check-custom:checked {
+        background-color: #f0800af5 !important;
+    }
 
 </style>
 
@@ -130,18 +129,21 @@
     {
 
         <div class="card">
-            <div class="card-title">
-                <div class="d-flex justify-content-between p-3">
-                    <span class="text-dark fw-bold">
-                        <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Thêm voucher:
-                    </span>
-                    <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
-                        Chọn voucher <i class="fa-solid fa-chevron-right"></i>
-                    </a>
+            @if (isHasAccount)
+            {
+                <div class="card-title">
+                    <div class="d-flex justify-content-between p-3">
+                        <span class="text-dark fw-bold">
+                            <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Thêm voucher:
+                        </span>
+                        <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                            Chọn voucher <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <hr/>
-            <div class="card-body pt-0">
+                <hr />
+            }
+            <div class="card-body pt-3">
                 <div class="d-flex justify-content-between">
                     <button class="btn border w-50 me-2 text-muted payment-button" id="transferBtnId" @onclick="() => ChoosePayMenthodAsync('t')">Chuyển khoản</button>
                     <button class="btn border w-50 text-muted payment-button" id="cashBtnId" @onclick="() => ChoosePayMenthodAsync('c')">Tiền mặt</button>
@@ -175,30 +177,34 @@
                 <div class="mb-3">
                     <label for="voucherInput" class="form-label">Mã Voucher</label>
                     <div class="input-group">
-                        <input type="text" id="voucherInput" class="form-control" placeholder="Nhập mã voucher tại đây">
-                        <button class="btn btn-secondary">Áp dụng</button>
+                        <input type="text" id="voucherInput" @bind-value="Code" class="form-control" placeholder="Nhập mã voucher tại đây">
+                        <button class="btn text-white btn-sm" style="background: #ff7043" @onclick="() => UseVoucher(Code)">Áp dụng</button>
                     </div>
                 </div>
                 <div class="voucher-item">
-                    <div class="voucher-icon"><i class="fas fa-ticket-alt"></i></div>
-                    <div class="voucher-content">
-                        <div class="voucher-code">MAGIAM50%</div>
-                        <div>Giảm 50%</div>
-                    </div>
-                    <a href="#" class="voucher-action">Dùng ngay ></a>
+                    @if (customerVouchers != null && customerVouchers.Count > 0)
+                    {
+                        @foreach (var cv in customerVouchers)
+                        {
+                            <div class="voucher-icon"><i class="fas fa-ticket-alt"></i></div>
+                            <div class="voucher-content">
+                                <div class="voucher-code">@cv.Vouchers.VoucherCode</div>
+                                <div>Giảm @(cv.Vouchers.DiscountValue * 100)%</div>
+                            </div>
+                            @*                     <input class="form-check-input form-check-custom" type="radio" name="a" value="b" /> *@
+                            <a href="#" class="voucher-action" @onclick="() => UseVoucher(cv.Vouchers.VoucherCode)">Dùng ngay</a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="voucher-content">
+                            <div class="voucher-code text-center">Bạn không có voucher nào</div>
+                        </div>
+                    }
                 </div>
-                @* <div class="voucher-item">
-                    <div class="voucher-icon"><i class="fas fa-ticket-alt"></i></div>
-                    <div class="voucher-content">
-                        <div class="voucher-code">MAGIAM100$</div>
-                        <div>Giảm ₫50,000<br>Giảm tới đa ₫50,000</div>
-                        <div class="text-danger">Đã dùng 16.7%</div>
-                    </div>
-                    <a href="#" class="voucher-action">Dùng ngay ></a>
-                </div> *@
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Hủy</button>
             </div>
         </div>
     </div>
