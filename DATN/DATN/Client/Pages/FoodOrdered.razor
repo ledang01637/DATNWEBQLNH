@@ -51,6 +51,7 @@
 
     .form-check-custom:checked {
         background-color: #f0800af5 !important;
+        border-color: orange;
     }
 
 </style>
@@ -133,12 +134,25 @@
             {
                 <div class="card-title">
                     <div class="d-flex justify-content-between p-3">
-                        <span class="text-dark fw-bold">
-                            <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Thêm voucher:
-                        </span>
-                        <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
-                            Chọn voucher <i class="fa-solid fa-chevron-right"></i>
-                        </a>
+                        @if (!isCorrectVoucher)
+                        {
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Thêm voucher:
+                            </span>
+                            <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                                Chọn voucher <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Mã voucher: @Code
+                            </span>
+                            <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                                Thay đổi voucher
+                            </a>
+                        }
+
                     </div>
                 </div>
                 <hr />
@@ -178,30 +192,38 @@
                     <label for="voucherInput" class="form-label">Mã Voucher</label>
                     <div class="input-group">
                         <input type="text" id="voucherInput" @bind-value="Code" class="form-control" placeholder="Nhập mã voucher tại đây">
-                        <button class="btn text-white btn-sm" style="background: #ff7043" @onclick="() => UseVoucher(Code)">Áp dụng</button>
+                        <button class="btn text-white btn-sm" style="background: #ff7043" @onclick="() => UseVoucher(Code,true)">Áp dụng</button>
                     </div>
                 </div>
-                <div class="voucher-item">
-                    @if (customerVouchers != null && customerVouchers.Count > 0)
+
+                @if (customerVouchers != null && customerVouchers.Count > 0)
+                {
+                    @foreach (var cv in customerVouchers)
                     {
-                        @foreach (var cv in customerVouchers)
-                        {
+                        bool isDisabled = cv.Vouchers.VoucherCode.Equals(Code);
+
+                        <div class="voucher-item">
                             <div class="voucher-icon"><i class="fas fa-ticket-alt"></i></div>
                             <div class="voucher-content">
                                 <div class="voucher-code">@cv.Vouchers.VoucherCode</div>
-                                <div>Giảm @(cv.Vouchers.DiscountValue * 100)%</div>
+                                <div>Giảm @(Math.Round(cv.Vouchers.DiscountValue * 100))%</div>
                             </div>
-                            @*                     <input class="form-check-input form-check-custom" type="radio" name="a" value="b" /> *@
-                            <a href="#" class="voucher-action" @onclick="() => UseVoucher(cv.Vouchers.VoucherCode)">Dùng ngay</a>
-                        }
-                    }
-                    else
-                    {
-                        <div class="voucher-content">
-                            <div class="voucher-code text-center">Bạn không có voucher nào</div>
+                            <a class="voucher-action nav-link @(isDisabled ? "disabled" : "")"
+                               style="cursor: @(isDisabled ? "not-allowed" : "pointer");"
+                               @onclick="@(isDisabled ? null : (() => UseVoucher(cv.Vouchers.VoucherCode, false)))">
+                                Dùng ngay
+                            </a>
                         </div>
                     }
-                </div>
+                }
+                else
+                {
+                    <div class="voucher-content">
+                        <div class="voucher-code text-center">Bạn không có voucher nào</div>
+                    </div>
+                }
+
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Hủy</button>

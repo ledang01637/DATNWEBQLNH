@@ -17,15 +17,14 @@ namespace DATN.Client.Pages
     public partial class FoodOrdered
     {
         private Order order = new();
+        private Voucher voucher = new();
         private List<OrderItem> orderItems = new();
         private List<Cart> carts = new();
         private List<CustomerVoucher> customerVouchers = new();
-        private decimal Total;
-        private bool isSaveOrder = false;
-        private bool isUseVoucher = false;
-        private int vcId;
         private bool isHasAccount = false;
         private string Code;
+        private bool isCorrectVoucher = false;
+        private decimal originalTotalAmount;
 
         private HubConnection hubConnection;
 
@@ -67,9 +66,54 @@ namespace DATN.Client.Pages
             }
         }
 
-        private void UseVoucher(string voucherCode)
+        private async Task UseVoucher(string voucherCode, bool isInput)
         {
+            if (isInput && string.IsNullOrEmpty(voucherCode))
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng nhập voucher");
+                return;
+            }
+            var a = Code;
+            voucher = await GetCustomerVoucherByCustomerId(voucherCode);
 
+            if (voucher == null || voucher.VoucherId <= 0)
+            {
+                Code = null;
+                await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Voucher không hợp lệ");
+                return;
+            }
+            Code = voucherCode;
+            isCorrectVoucher = true;
+            if (originalTotalAmount == 0)
+            {
+                originalTotalAmount = order.TotalAmount;
+            }
+
+            order.TotalAmount = originalTotalAmount - (originalTotalAmount * voucher.DiscountValue);
+            await JS.InvokeVoidAsync("closeModal", "voucherModal");
+        }
+
+         
+        private async Task<Voucher> GetCustomerVoucherByCustomerId(string voucherCode)
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Voucher/GetVoucherByCode", voucherCode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadFromJsonAsync<Voucher>();
+
+                if (responseContent != null)
+                {
+                    return responseContent;
+                }
+                return null;
+            }
+            else
+            {
+                voucher = null;
+            }
+
+            return null;
         }
 
         private async Task<List<CustomerVoucher>> GetCustomerVoucherByCustomerId(int customerId)
@@ -229,6 +273,13 @@ namespace DATN.Client.Pages
                     if(string.IsNullOrEmpty(token)) { await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR"); return ; }
 
                     int numberTable = GetTableNumberFromToken(token);
+
+                    if (voucher == null || voucher.VoucherId <= 0 && Code != null)
+                    {
+                        Code = null;
+                        await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Voucher không hợp lệ kiểm tra lại voucher");
+                        return;
+                    }
 
                     await hubConnection.SendAsync("SendPay", "payReq",numberTable);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
