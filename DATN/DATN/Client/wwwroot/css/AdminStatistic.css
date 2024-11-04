@@ -1,0 +1,46 @@
+﻿h3, h4 {
+    color: #333333; /* Màu chữ đậm nhẹ để dễ đọc hơn */
+}
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Bootstrap có thể dùng col nhưng grid giúp linh hoạt hơn */
+    grid-gap: 20px;
+    padding: 50px;
+    background-color: #F4F7FA; /* Nền màu nhạt */
+}
+
+.dashboard-item {
+    background: linear-gradient(135deg, #FFFFFF, #E0F7FA); /* Gradient nhẹ */
+    padding: 20px;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ */
+}
+
+    .dashboard-item:hover {
+        transform: translateY(-5px); /* Hiệu ứng hover */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Bóng đổ đậm hơn khi hover */
+    }
+
+.chart-container {
+    width: 100%;
+    height: 350px !important; /* Giảm chiều cao cho biểu đồ */
+    margin-bottom:30px;
+}
+
+h3 {
+    font-size: 26px; /* Tăng kích thước tiêu đề */
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+h4 {
+    font-size: 22px; /* Tăng kích thước tiêu đề nhỏ */
+    margin-bottom: 20px;
+    color: #1F5B85; /* Màu xanh đậm hơn */
+}
+
+p {
+    font-size: 16px;
+    color: #666666;
+}
