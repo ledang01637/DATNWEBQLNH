@@ -18,6 +18,7 @@ namespace DATN.Client.Pages
     {
         private Order order = new();
         private Voucher voucher = new();
+        private CustomerVoucher customerVoucher = new();
         private List<OrderItem> orderItems = new();
         private List<Cart> carts = new();
         private List<CustomerVoucher> customerVouchers = new();
@@ -57,7 +58,6 @@ namespace DATN.Client.Pages
                     {
                         customerVouchers = await GetCustomerVoucherByCustomerId(customer.CustomerId);
                     }
-                    Console.WriteLine(customerVouchers);
                 }
             }
             catch(Exception ex)
@@ -73,8 +73,8 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng nhập voucher");
                 return;
             }
-            var a = Code;
-            voucher = await GetCustomerVoucherByCustomerId(voucherCode);
+
+            voucher = await GetCustomerVoucherByVoucherCode(voucherCode);
 
             if (voucher == null || voucher.VoucherId <= 0)
             {
@@ -82,19 +82,48 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Voucher không hợp lệ");
                 return;
             }
+
+            if (customerVouchers != null && customerVouchers.Count > 0)
+            {
+                customerVoucher = customerVouchers.FirstOrDefault(a => a.VoucherId == voucher.VoucherId);
+
+                if (customerVoucher == null && isInput)
+                {
+                    Code = null;
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Voucher này không phải của bạn");
+                    return;
+                }
+
+                var now = DateTime.Now;
+                if (customerVoucher.ExpirationDate <= now)
+                {
+                    Code = null;
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Voucher này đã hết hạn");
+                    return;
+                }
+
+                if (customerVoucher.IsUsed)
+                {
+                    Code = null;
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Voucher này đã được sử dụng");
+                    return;
+                }
+            }
+
             Code = voucherCode;
             isCorrectVoucher = true;
+
             if (originalTotalAmount == 0)
             {
                 originalTotalAmount = order.TotalAmount;
             }
 
             order.TotalAmount = originalTotalAmount - (originalTotalAmount * voucher.DiscountValue);
+
             await JS.InvokeVoidAsync("closeModal", "voucherModal");
         }
 
-         
-        private async Task<Voucher> GetCustomerVoucherByCustomerId(string voucherCode)
+        private async Task<Voucher> GetCustomerVoucherByVoucherCode(string voucherCode)
         {
             var response = await httpClient.PostAsJsonAsync("api/Voucher/GetVoucherByCode", voucherCode);
 
@@ -274,12 +303,33 @@ namespace DATN.Client.Pages
 
                     int numberTable = GetTableNumberFromToken(token);
 
-                    if (voucher == null || voucher.VoucherId <= 0 && Code != null)
+                    if (voucher != null)
                     {
-                        Code = null;
-                        await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Voucher không hợp lệ kiểm tra lại voucher");
-                        return;
+                        order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
+                        var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}",order);
+                        if(response.IsSuccessStatusCode)
+                        {
+                            customerVoucher.IsUsed = true;
+                            customerVoucher.Status = "Đã dùng";
+                            var a = customerVoucher;
+                            var res = await httpClient.PutAsJsonAsync($"api/CustomerVoucher/{customerVoucher.CustomerVoucherId}", customerVoucher);
+                            if (res.IsSuccessStatusCode)
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể dùng voucher này");
+                                return;
+                            }
+                        }else
+                        {
+                            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể dùng voucher này");
+                            return;
+                        }
                     }
+
+
 
                     await hubConnection.SendAsync("SendPay", "payReq",numberTable);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");

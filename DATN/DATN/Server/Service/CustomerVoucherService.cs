@@ -21,10 +21,9 @@ namespace DATN.Server.Service
         }
         public List<CustomerVoucher> GetCustomerVoucherByCustomerId(int customerId)
         {
-            var now = DateTime.Now;
             var lstVoucher = _context.CustomerVouchers
                                     .Include(a => a.Vouchers)
-                                    .Where(a => a.CustomerId == customerId && !a.IsDeleted && a.ExpirationDate >= now)
+                                    .Where(a => a.CustomerId == customerId && !a.IsDeleted)
                                     .ToList();
 
             return lstVoucher.Any() ? lstVoucher : new List<CustomerVoucher>();
@@ -70,6 +69,8 @@ namespace DATN.Server.Service
             existing.Status = update.Status;
             existing.RedeemDate = update.RedeemDate;
             existing.ExpirationDate = update.ExpirationDate;
+            existing.IsDeleted = update.IsDeleted;
+            existing.IsUsed = update.IsUsed;
 
             _context.Update(existing);
             _context.SaveChanges();

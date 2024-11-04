@@ -54,6 +54,12 @@
         border-color: orange;
     }
 
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+
 </style>
 
 <section class="iphone-13-mini-2-inner">
@@ -202,15 +208,17 @@
                     {
                         bool isDisabled = cv.Vouchers.VoucherCode.Equals(Code);
 
-                        <div class="voucher-item">
+                        <div class="voucher-item" style="background: @(cv.IsUsed ? "#c6c6c6" : "")">
                             <div class="voucher-icon"><i class="fas fa-ticket-alt"></i></div>
                             <div class="voucher-content">
                                 <div class="voucher-code">@cv.Vouchers.VoucherCode</div>
-                                <div>Giảm @(Math.Round(cv.Vouchers.DiscountValue * 100))%</div>
+                                <div>Giảm: @(Math.Round(cv.Vouchers.DiscountValue * 100))%</div>
+                                <div>HSD: @cv.ExpirationDate.ToShortDateString()</div>
+                                <div>Trạng thái: @cv.Status</div>
                             </div>
-                            <a class="voucher-action nav-link @(isDisabled ? "disabled" : "")"
-                               style="cursor: @(isDisabled ? "not-allowed" : "pointer");"
-                               @onclick="@(isDisabled ? null : (() => UseVoucher(cv.Vouchers.VoucherCode, false)))">
+                            <a class="voucher-action nav-link @(isDisabled || cv.IsUsed ? "disabled" : "")"
+                               style="cursor: @(isDisabled || cv.IsUsed ? "not-allowed" : "pointer");"
+                               @onclick="@(isDisabled || cv.IsUsed ? null : (() => UseVoucher(cv.Vouchers.VoucherCode, false)))">
                                 Dùng ngay
                             </a>
                         </div>
