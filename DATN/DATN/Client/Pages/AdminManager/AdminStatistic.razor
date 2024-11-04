@@ -57,19 +57,13 @@
         </div>
         <div class="dashboard-item shadow-lg">
             <h5>Món ăn phổ biến nhất</h5>
-                <div class="chart-container">
-                    <canvas @ref="popularDishesChartRef"></canvas>
-                </div>
+            <div class="chart-container">
+                <canvas @ref="popularDishesChartRef"></canvas>
+            </div>
         </div>
         <div class="dashboard-item shadow-lg">
             <h5>Số lượng khách hàng</h5>
             <div class="chart-container">
-                <select id="customerYear" @onchange="OnCustomerYearSelected" class="form-select">
-                    @foreach (var year in availableCustomerYears)
-                    {
-                        <option value="@year" selected="@(year == selectedCustomerYear)">@year</option>
-                    }
-                </select>
                 <canvas @ref="customerCountChartRef"></canvas>
             </div>
         </div>
