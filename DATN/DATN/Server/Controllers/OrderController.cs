@@ -31,10 +31,18 @@ namespace DATN.Server.Controllers
             return Ok(_OrderService.GetOrderStatus(tableId));
         }
 
-        [HttpGet("GetOC")]
-        public ActionResult<List<Order>> GetOC()
+        [HttpPost("GetOrderInvoice")]
+        public ActionResult<Order> GetOrderInvoice([FromBody] int orderId)
         {
-            return Ok(_OrderService.GetOC());
+            if (orderId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_OrderService.GetOrderInvoice(orderId));
+        }
+
+        [HttpGet("GetOrderLstInclude")]
+        public ActionResult<List<Order>> GetOrderLstInclude()
+        {
+            return Ok(_OrderService.GetOrderLstInclude());
         }
 
         [HttpPost("AddOrder")]
@@ -58,7 +66,7 @@ namespace DATN.Server.Controllers
         [HttpGet("{id}")]
         public ActionResult<Order> GetIdOrder(int id)
         {
-            if (id == 0)
+            if (id <= 0)
             {
                 return BadRequest("Value must be...");
 

@@ -5,7 +5,9 @@
     justify-content: flex-start;
     padding: var(--padding-2xl) 0 0;
 }
-
+.nice-select {
+    display: none !important;
+}
 .foodgo {
     margin: 0;
     position: relative;

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Text.Json;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -20,6 +21,9 @@ namespace DATN.Client.Pages.AdminManager
         private List<Floor> floors = new();
         private List<Product> products = new();
         private List<Order> orders = new();
+        private Order order = new();
+        private Order orderIncludeItem = new();
+        private Employee employee = new();
         private HubConnection hubConnection;
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
         public static List<RequestCustomer> requests = new();
@@ -35,7 +39,9 @@ namespace DATN.Client.Pages.AdminManager
         private int selectedTableNumber;
         private static int nextRequestId = 1;
         private string numberTable;
-        private string getReq;
+        private string messagePay;
+        private int orderIdPay;
+        private int numberTablePay;
         private string token;
         private string from;
         private string to;
@@ -103,7 +109,14 @@ namespace DATN.Client.Pages.AdminManager
                 }
             });
 
-            hubConnection.On<string>("ReqMessage", message => getReq = message);
+            hubConnection.On<string, int, int>("ReqPay", async (message, _numberTable, _orderId) =>
+            {
+                messagePay = message;
+                numberTablePay = _numberTable;
+                orderIdPay = _orderId;
+                order = await GetOrderInvoice(orderIdPay);
+                await GetTableColorAsync(numberTablePay);
+            });
 
             return Task.CompletedTask;
         }
@@ -130,12 +143,26 @@ namespace DATN.Client.Pages.AdminManager
                     products = products.Where(a => !a.IsDeleted).ToList();
                 }
 
-                orders = await httpClient.GetFromJsonAsync<List<Order>>("api/Order/GetOC");
+                orders = await httpClient.GetFromJsonAsync<List<Order>>("api/Order/GetOrderLstInclude");
 
-                if (orders.Any())
+                if (orders != null && orders.Count > 0)
                 {
                     orders = orders.Where(a => !a.IsDeleted).ToList();
                 }
+                var accountId = await CheckTypeAccountId();
+                if (accountId != null)
+                {
+                    employee = await GetEmployeeByAccountId(int.Parse(accountId));
+                    if(employee == null || employee.EmployeeId <= 0 )
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Vui lòng đăng nhập bằng tài khoản nhân viên");
+                        
+                        await Task.Delay(1000);
+                        Navigation.NavigateTo("/login-admin");
+                        return;
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -176,9 +203,7 @@ namespace DATN.Client.Pages.AdminManager
             await _localStorageService.SetAsync("_cartNote", existingCartNote);
             await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
         }
-
         //Modal
-
         private void ShowModalForTable(int numberTable)
         {
             selectedTableNumber = numberTable;
@@ -200,6 +225,7 @@ namespace DATN.Client.Pages.AdminManager
                     Note = string.Empty
                 };
             }
+
             StateHasChanged();
         }
 
@@ -272,6 +298,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private async void ProcessPayment()
         {
+            if (string.IsNullOrEmpty(messagePay))
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Khách hàng chưa yêu cầu thanh toán");
+                return;
+            }
+
             cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
 
             if (cartsByTable is null) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!"); return; }
@@ -293,16 +325,62 @@ namespace DATN.Client.Pages.AdminManager
                 existingCartNote.PreviousCartDTOs = new List<CartDTO>();
 
             }
-            TotalAmount = 0;
-            IsUsing = false;
-            numberTable = null;
-            await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
-            await JS.InvokeVoidAsync("closeModal", "tableModal");
-            await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
-            await InitializeButtonVisibilityAsync(selectedTableNumber);
-            await GetTableColorAsync(selectedTableNumber);
-            tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
-            StateHasChanged();
+
+            if (order != null && order.OrderId > 0)
+            {
+                order.Status = "Đã thanh toán";
+                order.EmployeeId = employee.EmployeeId;
+                order.TotalAmount = TotalAmount;
+                order.Note = _cartNote.Note;
+
+                var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+
+                if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
+
+
+                TotalAmount = 0;
+                IsUsing = false;
+                messagePay = null;
+                orderIdPay = 0;
+                numberTablePay = 0;
+                numberTable = null;
+
+                await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
+                await JS.InvokeVoidAsync("closeModal", "tableModal");
+                await JS.InvokeVoidAsync("closeModal", "invoiceModal");
+                await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
+                await InitializeButtonVisibilityAsync(selectedTableNumber);
+                await GetTableColorAsync(selectedTableNumber);
+                tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
+                StateHasChanged();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi");
+            }
+
+        }
+
+        private async Task<Order> GetOrderInvoice(int orderId)
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Order/GetOrderInvoice", orderId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadFromJsonAsync<Order>();
+
+                if (responseContent != null)
+                {
+                    return responseContent;
+                }
+                return null;
+            }
+            else
+            {
+                order = null;
+                return null;
+            }
+
         }
 
         private void CancelOrder()
@@ -321,7 +399,6 @@ namespace DATN.Client.Pages.AdminManager
                 StateHasChanged();
             }
         }
-
         //Visibility&Color
         private async Task GetTableColorAsync(int tableNumber)
         {
@@ -335,7 +412,7 @@ namespace DATN.Client.Pages.AdminManager
                 var color = tableColorsCache[tableNumber];
                 string previousColor = color.Color;
 
-                if (!string.IsNullOrEmpty(getReq) && numtables.Contains(tableNumber) && IsUsing)
+                if (!string.IsNullOrEmpty(messagePay) && numtables.Contains(tableNumber) && IsUsing)
                 {
                     color.Color = "#FFD700";
                 }
@@ -367,7 +444,6 @@ namespace DATN.Client.Pages.AdminManager
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
             }
         }
-
         private async Task InitializeButtonVisibilityAsync(int tableNumber)
         {
             if (!tableButtonVisibility.ContainsKey(tableNumber))
@@ -488,6 +564,48 @@ namespace DATN.Client.Pages.AdminManager
             await JS.InvokeVoidAsync("callButtonManager", isClose);
         }
         #endregion
+
+        private async Task<Employee> GetEmployeeByAccountId(int accountId)
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Employee/GetEmployeeByAccountId", accountId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadFromJsonAsync<Employee>();
+
+                if (responseContent != null)
+                {
+                    return responseContent;
+                }
+                return null;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
+            }
+
+            return null;
+        }
+        private async Task<string> CheckTypeAccountId()
+        {
+            var token = await _localStorageService.GetItemAsync("authToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+
+                if (handler.ReadToken(token) is JwtSecurityToken jwtToken)
+                {
+                    var accountTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type.Equals("AccountId"));
+                    return accountTypeClaim?.Value;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                }
+            }
+            return null;
+        }
 
         public void Dispose()
         {

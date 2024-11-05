@@ -26,6 +26,7 @@ namespace DATN.Client.Pages
         private string Code;
         private bool isCorrectVoucher = false;
         private decimal originalTotalAmount;
+        private char payMenthod;
 
         private HubConnection hubConnection;
 
@@ -197,16 +198,17 @@ namespace DATN.Client.Pages
             if(tbid == null) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui thêm món ăn"); return; }
             int tableId = int.Parse(tbid);
 
-            if(tableId <= 0) {  }
+            if(tableId <= 0) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng quét mã QR trên bàn"); return; }
 
             order = await GetOrderForTable(tableId);
 
             if(order == null) {
+
                 order = new Order()
                 {
                     TotalAmount = 0,
                 };
-                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng đặt món ăn", ""); 
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo" ,"Vui lòng đặt món ăn"); 
 
                 return; 
             }
@@ -218,10 +220,11 @@ namespace DATN.Client.Pages
                 try
                 {
                     var responseContent = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
-
+                    Console.Write(responseContent);
                     if (responseContent != null && responseContent.Count > 0)
                     {
                         orderItems = responseContent;
+
                         foreach (var item in orderItems)
                         {
                             var existingCartItem = carts.FirstOrDefault(c => c.ProductId == item.ProductId);
@@ -244,7 +247,6 @@ namespace DATN.Client.Pages
                             }
                         }
                     }
-
                     else
                     {
                         await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy bàn");
@@ -263,9 +265,10 @@ namespace DATN.Client.Pages
             }
         }
 
-        private async Task ChoosePayMenthodAsync(char isCash)
+        private async Task ChoosePayMenthodAsync(char Cash)
         {
-            await JS.InvokeVoidAsync("selectPaymentMethod", isCash, "cashBtnId", "transferBtnId");
+            payMenthod = Cash;
+            await JS.InvokeVoidAsync("selectPaymentMethod", Cash, "cashBtnId", "transferBtnId");
         }
 
         private async Task<Order> GetOrderForTable(int tableId)
@@ -297,42 +300,64 @@ namespace DATN.Client.Pages
             {
                 if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
                 {
+                    // Lấy mã token
                     string token = await _localStorageService.GetItemAsync("n");
-
-                    if(string.IsNullOrEmpty(token)) { await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR"); return ; }
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Vui lòng quét mã QR");
+                        return;
+                    }
 
                     int numberTable = GetTableNumberFromToken(token);
 
-                    if (voucher != null)
+                    if (payMenthod != 'c' && payMenthod != 't')
                     {
-                        order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
-                        var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}",order);
-                        if(response.IsSuccessStatusCode)
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng chọn phương thức thanh toán");
+                        return;
+                    }
+                    else
+                    {
+                        order.PaymentMethod = (payMenthod == 'c') ? "Tiền mặt" : "Chuyển khoản";
+
+                        if (voucher != null && voucher.VoucherId > 0)
                         {
-                            customerVoucher.IsUsed = true;
-                            customerVoucher.Status = "Đã dùng";
-                            var a = customerVoucher;
-                            var res = await httpClient.PutAsJsonAsync($"api/CustomerVoucher/{customerVoucher.CustomerVoucherId}", customerVoucher);
-                            if (res.IsSuccessStatusCode)
+                            order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
+                            var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+
+                            if (response.IsSuccessStatusCode)
                             {
-                                return;
+                                customerVoucher.IsUsed = true;
+                                customerVoucher.Status = "Đã dùng";
+
+                                var res = await httpClient.PutAsJsonAsync($"api/CustomerVoucher/{customerVoucher.CustomerVoucherId}", customerVoucher);
+                                if (!res.IsSuccessStatusCode)
+                                {
+                                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật trạng thái voucher");
+                                    return;
+                                }
                             }
                             else
                             {
-                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể dùng voucher này");
+                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật đơn hàng với voucher này");
                                 return;
                             }
-                        }else
+                        }
+                        else
                         {
-                            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể dùng voucher này");
-                            return;
+                            var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật đơn hàng không thành công");
+                                return;
+                            }
                         }
                     }
 
-
-
-                    await hubConnection.SendAsync("SendPay", "payReq",numberTable);
+                    await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
+
+                    carts.Clear();
+                    Navigation.NavigateTo("/");
                 }
                 else
                 {
@@ -344,6 +369,7 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán", ex.Message);
             }
         }
+
 
         private int GetTableNumberFromToken(string token)
         {

@@ -48,12 +48,15 @@ namespace DATN.Server.Controllers
             }
         }
 
-
-
         [HttpGet("GetCustomerInclude")]
-        public List<Customer> GetCustomerInclude()
+        public ActionResult<List<Customer>> GetCustomerInclude()
         {
-            return _CustomerService.GetCustomerInclude();
+            var customers = _CustomerService.GetCustomerInclude();
+            if(customers == null)
+            {
+                return BadRequest();
+            }
+            return Ok(customers);
         }
 
         [HttpPost("AddCustomer")]

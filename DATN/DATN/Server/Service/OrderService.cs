@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -52,30 +53,37 @@ namespace DATN.Server.Service
             return order;
         }
 
-        public List<Order> GetOC()
+        public Order GetOrderInvoice(int orderId)
         {
-            var orders = _context.Orders.Where(o => o.Status.Equals("Đang xử lý")).ToList();
-            if (orders == null )
-            {
-                return new List<Order>
-                {
-                    new()
-                    {
-                        OrderId = 0,
-                        IsDeleted = false
-                    }
-                };
-            }
-            return orders;
+            var order = _context.Orders
+                .Include(a => a.OrderItems)
+                .ThenInclude(b => b.Products)
+                .FirstOrDefault(o => o.OrderId == orderId);
+
+            return order ?? new Order();
+        }
+
+        public Order GetOrderByTable(int orderId)
+        {
+            var order = _context.Orders.Where(o => o.OrderId == orderId).FirstOrDefault();
+            return order ?? new Order();
+        }
+
+        public List<Order> GetOrderLstInclude()
+        {
+            const string ProcessingStatus = "Đang xử lý";
+
+            return _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Products)
+                .Where(o => o.Status == ProcessingStatus)
+                .ToList();
         }
         public Order GetIdOrder(int id)
         {
             var order = _context.Orders.Find(id);
-            if (order == null)
-            {
-                return null;
-            }
-            return order;
+
+            return order ?? new Order();
         }
         public Order UpdateOrder(int id, Order update)
         {

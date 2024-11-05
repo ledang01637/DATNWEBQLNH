@@ -27,6 +27,14 @@ namespace DATN.Server.Service
                 .ToList();
         }
 
+        public OrderItem GetByOrderIdAndProductId(int orderId, int productId)
+        {
+            var orderItem = _context.OrderItems
+                           .FirstOrDefault(o => o.OrderId == orderId && o.ProductId == productId);
+            return orderItem ?? new OrderItem();
+        }
+
+
         public OrderItem AddOrderItem(OrderItem OrderItem)
         {
             _context.Add(OrderItem);

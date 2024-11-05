@@ -153,7 +153,7 @@ namespace DATN.Client.Pages
                 }
                 catch (Exception ex)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hẹ Admin: " + ex.Message);
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin: " + ex.Message);
                 }
             }
             else
@@ -306,15 +306,26 @@ namespace DATN.Client.Pages
             {
                 foreach (var item in Carts)
                 {
-                    await SaveOrderItem(new OrderItem
+                    var existingOrderItem = await GetOrderItemByProductAndOrderId(order.OrderId, item.ProductId);
+
+                    if (existingOrderItem != null && existingOrderItem.OrderItemId > 0)
                     {
-                        ProductId = item.ProductId,
-                        OrderId = order.OrderId,
-                        Quantity = item.Quantity,
-                        Price = item.Price,
-                        TotalPrice = item.Quantity * item.Price,
-                        IsDeleted = false
-                    });
+                        existingOrderItem.Quantity += item.Quantity;
+                        existingOrderItem.TotalPrice = existingOrderItem.Quantity * existingOrderItem.Price;
+                        await UpdateOrderItem(existingOrderItem,existingOrderItem.OrderItemId);
+                    }
+                    else
+                    {
+                        await SaveOrderItem(new OrderItem
+                        {
+                            ProductId = item.ProductId,
+                            OrderId = order.OrderId,
+                            Quantity = item.Quantity,
+                            Price = item.Price,
+                            TotalPrice = item.Quantity * item.Price,
+                            IsDeleted = false
+                        });
+                    }
                 }
                 await _cartService.ClearCart();
             }
@@ -354,6 +365,23 @@ namespace DATN.Client.Pages
             catch (Exception ex)
             {
                 throw new Exception("Lỗi khi thêm sản phẩm vào đơn hàng: " + ex.Message);
+            }
+        }
+        private async Task<OrderItem> GetOrderItemByProductAndOrderId(int orderId, int productId)
+        {
+            var response = await httpClient.GetFromJsonAsync<OrderItem>($"api/OrderItem/GetByOrderIdAndProductId?orderId={orderId}&productId={productId}");
+            return response;
+        }
+
+        private async Task UpdateOrderItem(OrderItem orderItem,int idOrderItem)
+        {
+            try
+            {
+                await httpClient.PutAsJsonAsync($"api/OrderItem/{idOrderItem}", orderItem);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi cập nhật sản phẩm trong đơn hàng: " + ex.Message);
             }
         }
         private async Task LoadTables()

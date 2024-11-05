@@ -16,8 +16,6 @@ namespace DATN.Shared
         public int AccountId { get; set; }
         public int TotalRewardPoint { get; set; }
         public bool IsDeleted { get; set; }
-
-        [JsonIgnore]
         public virtual Account Accounts { get; set; }
 
         [JsonIgnore]
