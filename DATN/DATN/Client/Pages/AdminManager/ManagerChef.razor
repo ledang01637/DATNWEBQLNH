@@ -6,55 +6,67 @@
 @inject LocalStorageService _localStorageService
 @inject NavigationManager Navigation
 
-<ul class="list-group" id="cart-items">
-    @* @if ((_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0) || (_cartNote.CartDTOs is not null && _cartNote.CartDTOs.Count > 0))
-    {
-        <!-- Hiển thị danh sách món ăn trước đó -->
-        @if (_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0)
-        {
-            <li class="list-group-item text-center bg-light">Danh sách món đã gọi</li>
-            foreach (var item in _cartNote.PreviousCartDTOs)
-            {
-                var prod = products.FirstOrDefault(a => a.ProductId == item.ProductId);
-                <li class="list-group-item d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
-                             alt="Image"
-                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">@item.ProductName</div>
-                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @item.Quantity</div>
-                        </div>
-                    </div>
-                    <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
-                </li>
-                TotalAmount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
-            }
+<style>
+    .food-item {
+        position: relative;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+        .food-item.removing {
+            transition: none;
         }
-        @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
+
+    .food-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .food-description {
+        color: #6c757d;
+    }
+
+    .food-list {
+        max-width: 600px;
+        margin: 20px auto;
+    }
+</style>
+
+<div class="container">
+    <h2 class="text-center my-4">Food List</h2>
+    <div class="food-list" id="foodList">
+        @if (cartDTOs != null && cartDTOs.Count > 0)
         {
-            <!-- Hiển thị danh sách món ăn mới -->
-            <li class="list-group-item text-center bg-light">Danh sách món mới gọi</li>
-            foreach (var c in _cartNote.CartDTOs)
-            {
-                var prod = products.FirstOrDefault(a => a.ProductId == c.ProductId);
-                <li class="list-group-item d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
-                             alt="Image"
-                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">@c.ProductName</div>
-                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @c.Quantity</div>
+            <div class="card">
+                <div class="card-header">
+                    Bàn số: @numberTable
+                </div>
+                <div class="card-body">
+                    @foreach (var item in cartDTOs)
+                    {
+                        <div class="food-item shadow-sm p-3 rounded">
+                            <div class="food-name">@item.ProductName</div>
+                            <div class="food-description">@item.Quantity</div>
                         </div>
-                    </div>
-                    <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
-                </li>
-            }
-        } *@
-    }
-    else
-    {
-        <li class="list-group-item text-center">Bàn không có món ăn</li>
-    }
-</ul>
+                    }
+                </div>
+                <div class="card-footer">
+                    Ghi chú: @Note
+                </div>
+            </div>
+
+        }
+        else
+        {
+            <div class="food-item shadow-sm p-3 rounded">
+                <div class="food-name">
+                    Chưa có món ăn
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

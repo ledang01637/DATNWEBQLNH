@@ -265,6 +265,15 @@ namespace DATN.Client.Pages.AdminManager
                             });
                         }
                     }
+                    if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
+                    {
+                        await hubConnection.SendAsync("SendChef", selectedTableNumber.ToString(), _cartNote.CartDTOs, _cartNote.Note);
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
+                        return;
+                    }
                     existingCartNote.CartDTOs = new List<CartDTO>();
                 }
                 else
@@ -278,11 +287,14 @@ namespace DATN.Client.Pages.AdminManager
                     existingCartNote.CartDTOs = new List<CartDTO>();
 
                 }
+                
+
                 IsUsing = true;
                 numberTable = null;
                 await _localStorageService.SetAsync("_cartNote", existingCartNote);
                 await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                 await GetTableColorAsync(selectedTableNumber);
+
                 await JS.InvokeVoidAsync("closeModal", "tableModal");
                 await JS.InvokeVoidAsync("showAlert", "success", "Đã gửi đầu bếp");
                 await InitializeButtonVisibilityAsync(selectedTableNumber);

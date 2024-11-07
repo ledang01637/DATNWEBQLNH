@@ -17,6 +17,7 @@ namespace DATN.Client.Pages.AdminManager
         private List<Table> tables = new();
         private List<Table> tablesChanges = new();
         private List<Floor> floors = new();
+        private QR qrModel = new();
         public DotNetObjectReference<TablePage> dotNetObjectReference;
         private int selectTableId;
         private bool isMoveTable = false;
@@ -25,9 +26,11 @@ namespace DATN.Client.Pages.AdminManager
         private string row { get; set; }
         private string column { get; set; }
 
+
         protected override async Task OnInitializedAsync()
         {
             dotNetObjectReference = DotNetObjectReference.Create(this);
+            qrModel.Url = "https://localhost:44328/";
             await LoadAll();
         }
 
@@ -236,6 +239,19 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
+        private async Task GenerateQrCode()
+        {
+            var mD5Hash = await GenerateMD5Hash(qrModel.NumberTable.ToString());
+            var urlCode = $"{qrModel.Url}demoIndex?n={mD5Hash}";
+
+            await _localStorageService.SetItemAsync("ss", urlCode);
+            await JS.InvokeVoidAsync("clearQrCode");
+            await JS.InvokeVoidAsync("generateQrCode", urlCode);
+        }
+        private async Task<string> GenerateMD5Hash(string input)
+        {
+            return await JS.InvokeAsync<string>("generateMD5Hash", input);
+        }
 
         private async Task HandleError(Exception ex)
         {

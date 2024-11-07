@@ -24,6 +24,11 @@ namespace DATN.Server.Hubs
         {
             await Clients.All.SendAsync("UpdateTable", message, carts, note);
         }
+        public async Task SendChef(string message, List<CartDTO> carts, string note)
+        {
+            await Clients.All.SendAsync("ReqChef", message, carts, note);
+        }
+
         public async Task SendMessageTable(string message, int numberTable)
         {
             await Clients.All.SendAsync("RequidTable", message, numberTable);

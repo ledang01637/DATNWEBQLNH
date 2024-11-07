@@ -19,7 +19,7 @@
     }
 
     .grid-item {
-        cursor: move;
+        cursor: pointer;
         height: auto;
     }
 
@@ -34,7 +34,6 @@
 </style>
 
 <div class="container my-4">
-    <h1 class="text-center">Floor Management</h1>
     <div class="btn-create mb-2">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateModel">Thêm mới bàn</button>
         <button class="btn btn-secondary" @onclick="() => ActivateMoveTable(false)">Chỉnh sửa vị trí bàn</button>
@@ -64,7 +63,7 @@
                              data-id="@table.TableId" 
                              data-position="@table.Position"
                              style="@(isMoveTable ? "col-md-2" : $"grid-column: {GetColumnFromPosition(table.Position)}; grid-row: {GetRowFromPosition(table.Position)};")">
-                            <div class="card table-card" style="background-color:@(isDuplicatePosition ? "red" : "transparent");">
+                            <div class="card table-card" style="background-color:@(isDuplicatePosition ? "red" : "transparent");" data-bs-toggle="modal" data-bs-target="#GenQRModal">
                                 <div class="card-body text-center position-relative">
                                     <img src="/images/png/table.png" class="img-fluid" alt="Table Image" style="height: 50px;">
                                     <div class="position-absolute top-0 end-0 fw-bold m-1">
@@ -99,7 +98,7 @@
 
 @* AddTable *@
 <div class="modal fade" id="CreateModel" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -243,6 +242,7 @@
         </div> 
     </div>
 </div>
+
 @* Delete *@
 <div class="modal fade" id="ConfirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -258,6 +258,84 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-danger" @onclick="DeleteTable">Xóa</button>
             </div>
+        </div>
+    </div>
+</div>
+
+@* GenQR *@
+<div class="modal fade" id="GenQRModal" aria-hidden="true" aria-labelledby="GenQRModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="UpdateModelLabel">Tạo mã QR</h5>
+                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <EditForm Model="@tableModel" OnValidSubmit="UpdateTable">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="tableNumber" class="form-label">Số bàn:</label>
+                        <InputNumber class="form-control" min="1" @bind-Value="tableModel.TableNumber" id="tableNumber" name="tableNumber" />
+                        <ValidationMessage For="@(() => tableModel.TableNumber)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="raw" class="form-label">Chọn hàng</label>
+                        <InputSelect class="form-control" @bind-Value="row" id="raw" name="raw">
+                            <option value="" disabled selected>Chọn hàng</option>
+                            @{
+                                for (int i = 0; i < rowCount; i++)
+                                {
+                                    <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
+                                }
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label for="column" class="form-label">Chọn cột</label>
+                        <InputSelect class="form-control" @bind-Value="column" id="column" name="column">
+                            <option value="" disabled selected>Chọn cột</option>
+                            @for (int i = 0; i <= 5; i++)
+                            {
+                                <option value="Cột @(i + 1)">Cột @(i + 1)</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label for="Status" class="form-label">Trạng thái</label>
+                        <InputSelect class="form-control" @bind-Value="tableModel.Status" id="Status" name="Status">
+                            @{
+                                <option value="" disabled selected>Chọn trạng thái</option>
+                                <option value="Bàn trống">Bàn trống</option>
+                                <option value="Đã đặt">Đã đặt</option>
+                                <option value="Đang dùng">Đang dùng</option>
+
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => tableModel.FloorId)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="seatingCapacity" class="form-label">Sức chứa</label>
+                        <InputNumber class="form-control" min="1" @bind-Value="tableModel.SeatingCapacity" id="seatingCapacity" name="seatingCapacity" />
+                        <ValidationMessage For="@(() => tableModel.SeatingCapacity)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="FloorId" class="form-label">Số tầng:</label>
+                        <InputSelect class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
+                            @{
+                                <option value="" disabled selected>Chọn tầng</option>
+                                foreach (var floor in floors)
+                                {
+                                    <option value="@floor.FloorId">@floor.NumberFloor</option>
+                                }
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => tableModel.FloorId)" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Tạo</button>
+                </div>
+            </EditForm>
         </div>
     </div>
 </div>
