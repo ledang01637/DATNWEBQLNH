@@ -1,37 +1,79 @@
-﻿function renderFoodList() {
-    let startX = 0;
-    let currentX = 0;
+﻿function renderFoodList(card) {
+    const foodItems = document.querySelectorAll(card);
 
-    foodItem.addEventListener("mousedown", e => {
-        startX = e.clientX;
-        foodItem.classList.add("removing");
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
-    });
+    if (foodItems.length === 0) {
+        const observer = new MutationObserver((mutationsList, observer) => {
+            const newFoodItems = document.querySelectorAll(card);
+            if (newFoodItems.length > 0) {
+                observer.disconnect();
+                addSwipeEvents(newFoodItems);
+            }
+        });
 
-    function onMouseMove(e) {
-        currentX = e.clientX - startX;
-        foodItem.style.transform = `translateX(${currentX}px)`;
+        observer.observe(document.getElementById("foodList"), { childList: true, subtree: true });
+    } else {
+        addSwipeEvents(foodItems);
     }
-
-    function onMouseUp() {
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-        foodItem.classList.remove("removing");
-
-        if (Math.abs(currentX) > 100) {
-            foodItem.style.transform = `translateX(${currentX > 0 ? 100 : -100}%)`;
-            removeFoodItem(food.id);
-        } else {
-            foodItem.style.transform = "translateX(0)";
-        }
-    }
+    console.log(foodItems);
 }
 
-function removeFoodItem(id) {
+function addSwipeEvents(foodItems) {
+    foodItems.forEach(foodItem => {
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        function startDrag(clientX) {
+            startX = clientX;
+            foodItem.classList.add("removing");
+            isDragging = true;
+        }
+
+        function onDrag(clientX) {
+            if (!isDragging) return;
+            currentX = clientX - startX;
+            foodItem.style.transform = `translateX(${currentX}px)`;
+        }
+
+        function endDrag() {
+            if (!isDragging) return;
+            foodItem.classList.remove("removing");
+            isDragging = false;
+
+            if (Math.abs(currentX) > 100) {
+                foodItem.style.transform = `translateX(${currentX > 0 ? 100 : -100}%)`;
+                const tableNumber = foodItem.getAttribute("data-id");
+                removeFoodCard(tableNumber);
+            } else {
+                foodItem.style.transform = "translateX(0)";
+            }
+
+            startX = 0;
+            currentX = 0;
+        }
+
+        // Sự kiện chuột
+        foodItem.addEventListener("mousedown", e => startDrag(e.clientX));
+        window.addEventListener("mousemove", e => onDrag(e.clientX));
+        window.addEventListener("mouseup", () => endDrag());
+
+        // Sự kiện cảm ứng
+        foodItem.addEventListener("touchstart", e => startDrag(e.touches[0].clientX));
+        window.addEventListener("touchmove", e => onDrag(e.touches[0].clientX));
+        window.addEventListener("touchend", () => endDrag());
+    });
+}
+
+async function removeFoodCard(tableNumber) {
     setTimeout(() => {
-        const index = foods.findIndex(food => food.id === id);
-        if (index !== -1) foods.splice(index, 1);
-        renderFoodList();
+        const card = document.querySelector(`.card[data-id="${tableNumber}"]`);
+        if (card) {
+            card.remove();
+        }
     }, 300);
+
+    // Xóa `NoteProdReq` khỏi `localStorage`
+    const noteProdReqs = await _localStorageService.GetAsync("noteProdReqs");
+    const updatedNoteProdReqs = noteProdReqs.filter(req => req.TableNumber !== tableNumber);
+    await _localStorageService.SetAsync("noteProdReqs", updatedNoteProdReqs);
 }

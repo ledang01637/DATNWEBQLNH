@@ -27,6 +27,7 @@ namespace DATN.Client.Pages.AdminManager
         private HubConnection hubConnection;
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
         public static List<RequestCustomer> requests = new();
+        //public static List<RequestCustomer> voiecalls = new();
 
         private Dictionary<int, ButtonVisibility> tableButtonVisibility = new();
         private Dictionary<int, ColorTable> tableColorsCache = new();
@@ -550,8 +551,6 @@ namespace DATN.Client.Pages.AdminManager
             {
                 await JS.InvokeVoidAsync("showAlert", "error", ex);
             }
-
-
         }
         private async Task setupVideo()
         {
@@ -631,6 +630,8 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
+
+
     }
     public class CartNote
     {
@@ -646,5 +647,11 @@ namespace DATN.Client.Pages.AdminManager
     public class ColorTable
     {
         public string Color { get; set; }
+    }
+    public class Voiecall
+    {
+        public string NumberTable { get; set; }
+        public DateTime Time { get; set; }
+        public static List<Voiecall> VoiecallList { get; set;}
     }
 }

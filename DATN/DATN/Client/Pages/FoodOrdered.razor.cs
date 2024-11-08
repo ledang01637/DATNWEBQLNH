@@ -185,11 +185,8 @@ namespace DATN.Client.Pages
             }
             else
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
+                return null;
             }
-
-            return null;
         }
 
         private async Task LoadInit()
@@ -289,9 +286,9 @@ namespace DATN.Client.Pages
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
-            }
+                return null;
 
-            return null;
+            }
         }
 
         private async Task Payment()

@@ -33,17 +33,20 @@ namespace DATN.Client.Pages
                 if (token is null)
                 {
                     await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                    Navigation.NavigateTo("/");
                     return;
                 }
                 from = GetTableNumberFromToken(token);
                 if (from is null)
                 {
                     await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                    Navigation.NavigateTo("/");
                     return;
                 }
                 if(to is null)
                 {
                     await JS.InvokeVoidAsync("showAlert", "error", "To is null");
+                    Navigation.NavigateTo("/");
                     return;
                 }
                 await SetupCall(token, from.ToLower(), to.ToLower());
@@ -53,6 +56,7 @@ namespace DATN.Client.Pages
             {
                 Console.WriteLine($"Không thể kết nối: {ex.Message}");
                 await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
+                Navigation.NavigateTo("/");
                 return;
             }
         }

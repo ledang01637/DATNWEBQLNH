@@ -249,10 +249,38 @@
         </table>
     </div>
 
+    @* @if (false)
+    {
+        <div class="custom-table mb-2">
+            <h5 class="mb-2">Các cuộc gọi chưa nhận</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Số bàn</th>
+                        <th>Thời gian</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in requests)
+                    {
+                        <tr class="@(r.IsCompleted ? "table-success" : "table-danger")">
+                            <td>@r.TableNumbe</td>
+                            <td>@r.RequestText</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    } *@
+    
+
     <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
         <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
     </div>
 </div>
+
 <div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -463,7 +491,6 @@
     </div>
 </div>
 
-
 <div class="box" id="call-box">
     <div id="particles-js"></div>
     <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
@@ -478,6 +505,7 @@
         <video id="remoteVideo" autoplay></video>
     </div>
     <div id="call-message" class="call-message text-center"></div>
+
     <div class="call-actions" id="call-actions">
         <button class="btn-action btn-end" id="btn-end">
             <i class="bi bi-telephone-x-fill" style="font-size: 10px;"></i>

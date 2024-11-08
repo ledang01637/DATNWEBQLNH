@@ -1,0 +1,36 @@
+﻿@page "/chef-demo"
+@layout InitLayout
+
+@using System.Collections.Generic
+@inject IJSRuntime JS
+<style>
+    .food-item {
+        position: relative;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .food-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .food-description {
+        color: #6c757d;
+    }
+
+    .food-list {
+        max-width: 600px;
+        margin: 20px auto;
+    }
+</style>
+
+<div class="container">
+    <h2 class="text-center my-4">Food List</h2>
+    <div class="container">
+        <div id="foodList" class="food-list"></div>
+    </div>
+</div>

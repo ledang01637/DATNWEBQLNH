@@ -1,5 +1,12 @@
 ﻿@page "/userinfo"
 @layout MainLayout
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject CartService _cartService
+
+
 <body>
     <div class="container container-custom">
         <div class="profile-section">

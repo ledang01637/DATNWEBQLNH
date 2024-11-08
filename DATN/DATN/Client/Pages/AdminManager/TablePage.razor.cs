@@ -19,6 +19,7 @@ namespace DATN.Client.Pages.AdminManager
         private List<Floor> floors = new();
         private QR qrModel = new();
         public DotNetObjectReference<TablePage> dotNetObjectReference;
+
         private int selectTableId;
         private bool isMoveTable = false;
         private int numcol = 6;
@@ -108,13 +109,18 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task LoadTableForEdit(int tableId)
         {
+            await JS.InvokeVoidAsync("clearQrCode");
             tableModel = await httpClient.GetFromJsonAsync<Table>($"api/Table/{tableId}");
             selectTableId = tableModel.TableId;
+            qrModel.NumberTable = tableModel.TableNumber;
+
             var parts = tableModel.Position.Split('-');
             row = parts[0].Trim();
             column = parts[1].Trim();
             isMoveTable = true;
             await JS.InvokeVoidAsync("MoveTable");
+
+            StateHasChanged();
         }
 
         private async Task UpdateTable()
@@ -138,7 +144,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 await JS.InvokeVoidAsync("closeModal", "ConfirmDeleteModal");
                 tableModel.IsDeleted = true;
-                await UpdateTable(); // Tái sử dụng logic cập nhật cho việc xóa
+                await UpdateTable();
             }
             catch (Exception ex)
             {
