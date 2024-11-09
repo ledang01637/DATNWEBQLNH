@@ -19,6 +19,7 @@ namespace DATN.Client.Pages
         private Order order = new();
         private Voucher voucher = new();
         private CustomerVoucher customerVoucher = new();
+        private Customer customer = new();
         private List<OrderItem> orderItems = new();
         private List<Cart> carts = new();
         private List<CustomerVoucher> customerVouchers = new();
@@ -53,7 +54,7 @@ namespace DATN.Client.Pages
                     string accountId = await CheckAccountId();
                     if(string.IsNullOrEmpty(accountId)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại tài khoản"); return ; }
 
-                    Customer customer = await GetCustomerByAccount(int.Parse(accountId));
+                    customer = await GetCustomerByAccount(int.Parse(accountId));
 
                     if (customer != null) 
                     {
@@ -86,7 +87,7 @@ namespace DATN.Client.Pages
 
             if (customerVouchers != null && customerVouchers.Count > 0)
             {
-                customerVoucher = customerVouchers.FirstOrDefault(a => a.VoucherId == voucher.VoucherId);
+                customerVoucher = customerVouchers.FirstOrDefault(a => a.VoucherId == voucher.VoucherId && !a.IsUsed);
 
                 if (customerVoucher == null && isInput)
                 {
@@ -350,7 +351,7 @@ namespace DATN.Client.Pages
                         }
                     }
 
-                    await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId);
+                    await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
 
                     carts.Clear();
@@ -375,75 +376,7 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return int.Parse(userId?.Value);
         }
-        //private async Task SaveRewarPointes(Order _order)
-        //{
-        //    try
-        //    {
-        //        customers = await httpClient.GetFromJsonAsync<List<Customer>>("api/Customer/GetCustomer");
-        //        rewardPointes = await httpClient.GetFromJsonAsync<List<RewardPointe>>("api/RewardPointe/GetRewardPointe");
 
-        //        if (customers != null)
-        //        {
-        //            var accountId = await CheckAccountId();
-        //            var customer = customers.FirstOrDefault(c => c.AccountId == accountId);
-
-        //            if (customer != null)
-        //            {
-        //                int newRewardPoints = (int)(_order.TotalAmount / 100000);
-
-        //                var existingRewardPoints = rewardPointes.FirstOrDefault(rp => rp.CustomerId == customer.CustomerId);
-
-        //                if (existingRewardPoints != null)
-        //                {
-        //                    existingRewardPoints.RewardPoint += newRewardPoints;
-        //                    existingRewardPoints.OrderId = _order.OrderId;
-        //                    existingRewardPoints.UpdateDate = DateTime.Now;
-
-        //                    var res = await httpClient.PutAsJsonAsync($"api/RewardPointe/{existingRewardPoints.RewardPointId}", existingRewardPoints);
-        //                    if (!res.IsSuccessStatusCode)
-        //                    {
-        //                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật điểm thưởng");
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    rewardPointe = new RewardPointe()
-        //                    {
-        //                        CustomerId = customer.CustomerId,
-        //                        RewardPoint = newRewardPoints,
-        //                        UpdateDate = DateTime.Now,
-        //                        IsDeleted = false,
-        //                        OrderId = _order.OrderId,
-        //                    };
-
-        //                    var response = await httpClient.PostAsJsonAsync("api/RewardPointe/AddRewardPointe", rewardPointe);
-        //                    if (response.IsSuccessStatusCode)
-        //                    {
-        //                        var createdRewardPoint = await response.Content.ReadFromJsonAsync<RewardPointe>();
-        //                        customer.TotalRewardPoint = createdRewardPoint.RewardPoint;
-        //                        await httpClient.PutAsJsonAsync($"api/Customer/{customer.CustomerId}", customer);
-        //                    }
-        //                    else
-        //                    {
-        //                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Điểm chưa được thêm");
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Khách hàng không tìm thấy");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Khách hàng không tìm thấy");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", ex.Message);
-        //    }
-        //}
         private async Task<string> CheckTypeAccount()
         {
             var token = await _localStorageService.GetItemAsync("authToken");

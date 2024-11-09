@@ -72,6 +72,7 @@ namespace DATN.Server.Service
             existing.Email = update.Email;
             existing.IsDeleted = update.IsDeleted;
             existing.AccountId = update.AccountId;
+            existing.TotalRewardPoint = update.TotalRewardPoint;
 
             _context.Update(existing);
             _context.SaveChanges();

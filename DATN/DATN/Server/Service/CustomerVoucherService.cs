@@ -28,6 +28,13 @@ namespace DATN.Server.Service
 
             return lstVoucher.Any() ? lstVoucher : new List<CustomerVoucher>();
         }
+
+        public CustomerVoucher GetCustomerVoucherExist(int customerId, int voucherId)
+        {
+            var customerVoucher = _context.CustomerVouchers.FirstOrDefault(a => a.CustomerId == customerId &&  a.VoucherId == voucherId && !a.IsUsed);
+            return customerVoucher ?? new CustomerVoucher();
+        }
+
         public CustomerVoucher AddCustomerVoucher(CustomerVoucher CustomerVoucher)
         {
             _context.Add(CustomerVoucher);

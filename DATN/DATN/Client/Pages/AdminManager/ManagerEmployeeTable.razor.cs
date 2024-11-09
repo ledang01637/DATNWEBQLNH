@@ -27,7 +27,7 @@ namespace DATN.Client.Pages.AdminManager
         private HubConnection hubConnection;
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
         public static List<RequestCustomer> requests = new();
-        //public static List<RequestCustomer> voiecalls = new();
+        public Customer customer = new();
 
         private Dictionary<int, ButtonVisibility> tableButtonVisibility = new();
         private Dictionary<int, ColorTable> tableColorsCache = new();
@@ -110,17 +110,21 @@ namespace DATN.Client.Pages.AdminManager
                 }
             });
 
-            hubConnection.On<string, int, int>("ReqPay", async (message, _numberTable, _orderId) =>
+            hubConnection.On<string, int, int, int>("ReqPay", async (message, _numberTable, _orderId, _customerId) =>
             {
                 messagePay = message;
                 numberTablePay = _numberTable;
                 orderIdPay = _orderId;
-                order = await GetOrderInvoice(orderIdPay);
+                order = await GetOrderInvoice(orderIdPay) ?? new Order();
+                customer = await GetCustomerById(_customerId) ?? new Customer();
                 await GetTableColorAsync(numberTablePay);
             });
 
             return Task.CompletedTask;
         }
+
+
+
         //InitLoad
         private async Task LoadAll()
         {
@@ -346,6 +350,11 @@ namespace DATN.Client.Pages.AdminManager
                 order.TotalAmount = TotalAmount;
                 order.Note = _cartNote.Note;
 
+                if(customer != null && customer.CustomerId > 0)
+                {
+                    await SaveRewarPointes(order);
+                }
+
                 var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 
                 if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
@@ -372,6 +381,66 @@ namespace DATN.Client.Pages.AdminManager
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi");
             }
 
+        }
+
+        private async Task SaveRewarPointes(Order _order)
+        {
+            try
+            {
+                if (customer != null)
+                {
+                    int newRewardPoints = (int)(_order.TotalAmount / 100000);
+
+                    var rewardPointe = new RewardPointe()
+                    {
+                        CustomerId = customer.CustomerId,
+                        RewardPoint = newRewardPoints,
+                        UpdateDate = DateTime.Now,
+                        IsDeleted = false,
+                        OrderId = _order.OrderId
+                    };
+
+                    var response = await httpClient.PostAsJsonAsync("api/RewardPointe/AddRewardPointe", rewardPointe);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var createdRewardPoint = await response.Content.ReadFromJsonAsync<RewardPointe>();
+                        if(createdRewardPoint != null)
+                        {
+                            customer.TotalRewardPoint += createdRewardPoint.RewardPoint;
+                            Console.WriteLine(customer.TotalRewardPoint);
+                            var res = await httpClient.PutAsJsonAsync($"api/Customer/{customer.CustomerId}", customer);
+                            if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Điểm chưa được thêm"); return; }
+                        }
+                        else
+                        {
+                            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Điểm chưa được thêm");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Điểm chưa được thêm");
+                        return;
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Khách hàng không tìm thấy");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", ex.Message);
+                return;
+            }
+        }
+
+        private async Task<Customer> GetCustomerById(int customerId)
+        {
+            var customer = await httpClient.GetFromJsonAsync<Customer>($"api/Customer/{customerId}");
+            if(customer == null) { return null; }
+            return customer;
         }
 
         private async Task<Order> GetOrderInvoice(int orderId)

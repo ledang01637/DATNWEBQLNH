@@ -24,6 +24,14 @@ namespace DATN.Server.Controllers
             return _CustomerVoucherService.GetCustomerVoucher();
         }
 
+        [HttpGet("GetCustomerVoucherExist")]
+        public ActionResult<CustomerVoucher> GetCustomerVoucherExist([FromQuery] int voucherId, [FromQuery] int customerId)
+        {
+            if(voucherId <= 0 || customerId <= 0) { return BadRequest(); }
+
+            return Ok(_CustomerVoucherService.GetCustomerVoucherExist( customerId, voucherId));
+        }
+
         [HttpPost("GetCustomerVoucherByCustomerId")]
         public ActionResult<List<CustomerVoucher>> GetCustomerVoucherByCustomerId([FromBody] int customerId)
         {

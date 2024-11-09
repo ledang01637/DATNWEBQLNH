@@ -1,4 +1,8 @@
-﻿.frame-div {
+﻿*{
+    margin: 0px;
+    padding: 0px;
+}
+.frame-div {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
