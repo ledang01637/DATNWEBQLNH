@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using System.Dynamic;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -21,6 +22,7 @@ namespace DATN.Client.Pages.AdminManager
         private List<Floor> floors = new();
         private List<Product> products = new();
         private List<Order> orders = new();
+        private List<CallInfo> callInfos = new();
         private Order order = new();
         private Order orderIncludeItem = new();
         private Employee employee = new();
@@ -637,6 +639,18 @@ namespace DATN.Client.Pages.AdminManager
         {
 
         }
+
+        [JSInvokable("LstCall")]
+        public void LstCall(List<CallInfo> numberCall)
+        {
+            if(numberCall.Count > 0)
+            {
+                callInfos = numberCall.ToList();
+            }
+            StateHasChanged();
+            JS.InvokeVoidAsync("showAler", "success", callInfos.Count);
+        }
+
         private string GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -727,5 +741,10 @@ namespace DATN.Client.Pages.AdminManager
         public string NumberTable { get; set; }
         public DateTime Time { get; set; }
         public static List<Voiecall> VoiecallList { get; set;}
+    }
+    public class CallInfo
+    {
+        public string FromNumber { get; set; }
+        public string Time { get; set; }
     }
 }

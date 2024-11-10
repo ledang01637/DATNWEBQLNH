@@ -5,6 +5,7 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http.Json;
@@ -107,6 +108,13 @@ namespace DATN.Client.Pages
             await JS.InvokeVoidAsync("showAlert","warning","Thông báo","Nhân viên đang có cuộc gọi khác");
             await Task.Delay(500);
         }
+
+        [JSInvokable("LstCall")]
+
+        public async Task LstCall(List<CallInfo> numberCall)
+        {
+
+        }
         private static string GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -114,5 +122,10 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return userId?.Value;
         }
+    }
+    public class CallInfo
+    {
+        public string FromNumber { get; set; }
+        public string Time { get; set; }
     }
 }

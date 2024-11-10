@@ -162,9 +162,8 @@
     .floor-section {
         padding: 20px;
         border: 2px solid #dee2e6;
-        border-radius: 12px;
+        border-radius: 5px;
         background-color: #fff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
 
@@ -211,7 +210,7 @@
     <!-- Bảng yêu cầu bàn -->
     <div class="col-md-4 custom-table mb-2">
         <h5 class="mb-2">Quản lý yêu cầu</h5>
-        <table class="table table-sm">
+        <table class="table table-sm mb-4 table-bordered">
             <thead>
                 <tr>
                     <th>Số bàn</th>
@@ -247,34 +246,32 @@
 
             </tbody>
         </table>
-    </div>
 
-    @* @if (false)
-    {
-        <div class="custom-table mb-2">
+        @if (callInfos.Count > 0)
+        {
             <h5 class="mb-2">Các cuộc gọi chưa nhận</h5>
-            <table class="table table-sm">
+            <table class="table table-sm mb-2 table-bordered">
                 <thead>
                     <tr>
                         <th>Số bàn</th>
                         <th>Thời gian</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var r in requests)
+                    @foreach (var item in callInfos)
                     {
-                        <tr class="@(r.IsCompleted ? "table-success" : "table-danger")">
-                            <td>@r.TableNumbe</td>
-                            <td>@r.RequestText</td>
+                        <tr>
+                            <td>@item.FromNumber</td>
+                            <td>@item.Time</td>
                         </tr>
                     }
 
                 </tbody>
             </table>
-        </div>
-    } *@
-    
+        }
+    </div>
+
+
 
     <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
         <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
@@ -494,7 +491,7 @@
 <div class="box" id="call-box">
     <div id="particles-js"></div>
     <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
-        <i class="far fa-window-close text-danger fs-4"></i>
+        <i class="far fa-window-close text-danger fs-4" style="margin: 4px 0px"></i>
     </button>
     <div class="caller-info">
         <div id="caller-name" class="caller-name text-center"></div>

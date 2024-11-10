@@ -106,11 +106,13 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
 
     // RECEIVE CALL
     client.on('incomingcall', function (incomingcall) {
-
-        console.log(isProcessingCall);
         if (isProcessingCall) {
             incomingcall.reject();
-            callQueue.push(incomingcall);
+            callQueue.push({
+                fromNumber: incomingcall.fromNumber,
+                time: new Date().toLocaleString()
+            });
+            lstCallFromJs(dotNetObjectReference, callQueue);
             return;
         }
         isProcessingCall = true;
@@ -211,6 +213,11 @@ function endCallFromJs(dotNetHelper) {
     dotNetHelper.invokeMethodAsync('EndCall');
     $('#btn-answer').hide();
 }
+
+function lstCallFromJs(dotNetHelper, numberCall) {
+    dotNetHelper.invokeMethodAsync('LstCall', numberCall);
+}
+
 
 function busyCallFromJs(dotNetHelper) {
     dotNetHelper.invokeMethodAsync('BusyCall');
