@@ -618,7 +618,7 @@ namespace DATN.Client.Pages.AdminManager
             }
             catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "error", ex);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi",ex.Message);
             }
         }
         private async Task setupVideo()
@@ -628,6 +628,12 @@ namespace DATN.Client.Pages.AdminManager
 
         [JSInvokable("EndCall")]
         public void EndCall()
+        {
+
+        }
+
+        [JSInvokable("BusyCall")]
+        public void BusyCall()
         {
 
         }
@@ -698,7 +704,6 @@ namespace DATN.Client.Pages.AdminManager
                 await hubConnection.DisposeAsync();
             }
         }
-
 
 
     }

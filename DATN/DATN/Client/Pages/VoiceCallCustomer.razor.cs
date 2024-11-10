@@ -100,6 +100,13 @@ namespace DATN.Client.Pages
         {
             Navigation.NavigateTo("/");
         }
+
+        [JSInvokable("BusyCall")]
+        public async void BusyCall()
+        {
+            await JS.InvokeVoidAsync("showAlert","warning","Thông báo","Nhân viên đang có cuộc gọi khác");
+            await Task.Delay(500);
+        }
         private static string GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
