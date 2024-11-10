@@ -319,7 +319,9 @@ namespace DATN.Client.Pages
 
                         if (voucher != null && voucher.VoucherId > 0)
                         {
+                            if(order.Status.Equals("Đang chờ xác nhận")){ await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hóa đơn đang chờ nhân viên xác nhận bạn vui lòng đợi tý nhé"); return; }
                             order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
+                            order.Status = "Đang chờ xác nhận";
                             var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 
                             if (response.IsSuccessStatusCode)
