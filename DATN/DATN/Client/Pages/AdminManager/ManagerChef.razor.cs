@@ -12,9 +12,12 @@ namespace DATN.Client.Pages.AdminManager
     {
         private HubConnection hubConnection;
         public static List<NoteProdReq> noteProdReqs = new();
+        public DotNetObjectReference<ManagerChef> dotNetObjectReference;
 
         protected override async Task OnInitializedAsync()
         {
+            dotNetObjectReference = DotNetObjectReference.Create(this);
+
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
                 .Build();
@@ -25,27 +28,32 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (carts != null && carts.Count > 0)
                 {
-                    foreach (var c in carts.Where(a => a.UnitId != 1))
+                    foreach (var c in carts)
                     {
                         prodReqs.Add(new ProdReq
                         {
                             ProductId = c.ProductId,
                             ProductName = c.ProductName,
                             Quantity = c.Quantity,
-                            IsComplete = false
+                            IsComplete = false,
+                            UnitName = c.UnitName,
                         });
                     }
                 }
+                var filteredProdReqs = prodReqs.Where(a => a.UnitName.ToLower() != "chai").ToList();
 
-                noteProdReqs.Add(new NoteProdReq
+                if (filteredProdReqs.Any())
                 {
-                    TableNumber = _numTable,
-                    ProdReqs = prodReqs,
-                    Note = note
-                });
+                    noteProdReqs.Add(new NoteProdReq
+                    {
+                        TableNumber = _numTable,
+                        ProdReqs = filteredProdReqs,
+                        Note = note
+                    });
+                }
 
                 await _localStorageService.SetAsync("noteProdReqs", noteProdReqs);
-                await JS.InvokeVoidAsync("renderFoodList", ".card");
+                await JS.InvokeVoidAsync("renderFoodList", ".card", dotNetObjectReference);
                 StateHasChanged();
             });
 
@@ -70,6 +78,14 @@ namespace DATN.Client.Pages.AdminManager
             StateHasChanged();
         }
 
+        [JSInvokable]
+        public async Task RemoveNoteProdReq(string tableNumber)
+        {
+            noteProdReqs = noteProdReqs.Where(req => req.TableNumber != tableNumber).ToList();
+            await _localStorageService.SetAsync("noteProdReqs", noteProdReqs);
+            StateHasChanged();
+        }
+
         public async ValueTask DisposeAsync()
         {
             if (hubConnection is not null)
@@ -77,12 +93,17 @@ namespace DATN.Client.Pages.AdminManager
                 await hubConnection.DisposeAsync();
             }
         }
+        public void Dispose()
+        {
+            dotNetObjectReference?.Dispose();
+        }
     }
 
     public class ProdReq
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
+        public string UnitName {  get; set; }
         public int Quantity { get; set; }
         public bool IsComplete { get; set; }
     }

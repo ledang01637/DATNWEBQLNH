@@ -218,7 +218,7 @@ namespace DATN.Client.Pages
                 try
                 {
                     var responseContent = await response.Content.ReadFromJsonAsync<List<OrderItem>>();
-                    Console.Write(responseContent);
+
                     if (responseContent != null && responseContent.Count > 0)
                     {
                         orderItems = responseContent;
@@ -239,7 +239,7 @@ namespace DATN.Client.Pages
                                     Price = item.Price,
                                     Quantity = item.Quantity,
                                     ProductName = item.Products.ProductName,
-                                    UnitId = item.Products.UnitId,
+                                    UnitName = item.Products.Units.UnitName,
                                     ProductImage = item.Products.ProductImage
                                 });
                             }

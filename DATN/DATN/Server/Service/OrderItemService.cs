@@ -19,12 +19,16 @@ namespace DATN.Server.Service
         {
             return _context.OrderItems.ToList();
         }
+
         public List<OrderItem> GetOrderItemInclude(int orderId)
         {
-            return _context.OrderItems
+            var orderItems = _context.OrderItems
                 .Where(oi => oi.OrderId == orderId)
                 .Include(oi => oi.Products)
+                    .ThenInclude(p => p.Units)
                 .ToList();
+
+            return orderItems ?? new List<OrderItem>();
         }
 
         public OrderItem GetByOrderIdAndProductId(int orderId, int productId)

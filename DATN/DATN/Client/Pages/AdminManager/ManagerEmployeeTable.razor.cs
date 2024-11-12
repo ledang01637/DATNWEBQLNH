@@ -24,7 +24,6 @@ namespace DATN.Client.Pages.AdminManager
         private List<Order> orders = new();
         private List<CallInfo> callInfos = new();
         private Order order = new();
-        private Order orderIncludeItem = new();
         private Employee employee = new();
         private HubConnection hubConnection;
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
@@ -116,16 +115,14 @@ namespace DATN.Client.Pages.AdminManager
             {
                 messagePay = message;
                 numberTablePay = _numberTable;
+                await GetTableColorAsync(numberTablePay);
                 orderIdPay = _orderId;
                 order = await GetOrderInvoice(orderIdPay) ?? new Order();
                 customer = await GetCustomerById(_customerId) ?? new Customer();
-                await GetTableColorAsync(numberTablePay);
             });
 
             return Task.CompletedTask;
         }
-
-
 
         //InitLoad
         private async Task LoadAll()
@@ -471,6 +468,7 @@ namespace DATN.Client.Pages.AdminManager
         {
             
         }
+
         private async Task ConfirmRequestAsync(int RequestId)
         {
             var requestToConfirm = requests.FirstOrDefault(r => r.RequestId == RequestId);
@@ -483,8 +481,9 @@ namespace DATN.Client.Pages.AdminManager
                 StateHasChanged();
             }
         }
+
         //Visibility&Color
-        private async Task GetTableColorAsync(int tableNumber)
+        private async Task GetTableColorAsync(int tableNumber) 
         {
             try
             {

@@ -29,7 +29,6 @@ namespace DATN.Client.Pages
         private int TotalQuantity;
         private decimal TotalAmount;
         private bool isProcessing = false;
-        private readonly string urlPayment = "/food-ordered";
         private string messageText { get; set; }
         private string note;
 
@@ -56,7 +55,7 @@ namespace DATN.Client.Pages
         {
             try
             {
-                var productTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+                var productTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProductInclude");
                 var categoryTask = httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
                 var menuTask = httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
                 var accountTask = httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
@@ -154,13 +153,14 @@ namespace DATN.Client.Pages
             }
             else
             {
-                Cart newCart = new Cart
+                Cart newCart = new()
                 {
                     ProductId = product.ProductId,
                     ProductName = product.ProductName,
                     Price = product.Price,
                     ProductImage = product.ProductImage,
                     Quantity = 1,
+                    UnitName = product.Units.UnitName,
                 };
                 carts.Add(newCart);
             }
@@ -319,6 +319,7 @@ namespace DATN.Client.Pages
             }
             return null;
         }
+
         //private async void Navbar(bool isClose)
         //{
         //    await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);

@@ -117,7 +117,7 @@ namespace DATN.Client.Pages
 
         #endregion
 
-        #region
+        #region Order
         private async Task Order()
         {
             if (Carts != null && Carts.Count > 0)
@@ -199,7 +199,7 @@ namespace DATN.Client.Pages
                                 TableNumber = table.TableNumber,
                                 TableId = table.TableId,
                                 ProductId = Carts[i].ProductId,
-                                UnitId = Carts[i].UnitId,
+                                UnitName = Carts[i].UnitName,
                                 ProductName = Carts[i].ProductName,
                                 Price = Carts[i].Price,
                                 Quantity = Carts[i].Quantity
@@ -423,7 +423,7 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return int.Parse(userId?.Value);
         }
-        #endregion Order
+        #endregion
         public async ValueTask DisposeAsync()
         {
             if (hubConnection is not null)

@@ -373,7 +373,24 @@
         <div class="modal-content">
             @if (order == null || order.OrderId <= 0)
             {
-                <div class="text-center">Khách hàng chưa yêu cầu thanh toán</div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 500px !important">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nội dung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Khách hàng chưa yêu cầu thanh toán</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             }
             else
             {

@@ -1,4 +1,4 @@
-﻿function renderFoodList(card) {
+﻿function renderFoodList(card, dotNetObjectReference) {
     const foodItems = document.querySelectorAll(card);
 
     if (foodItems.length === 0) {
@@ -6,18 +6,17 @@
             const newFoodItems = document.querySelectorAll(card);
             if (newFoodItems.length > 0) {
                 observer.disconnect();
-                addSwipeEvents(newFoodItems);
+                addSwipeEvents(newFoodItems, dotNetObjectReference);
             }
         });
 
         observer.observe(document.getElementById("foodList"), { childList: true, subtree: true });
     } else {
-        addSwipeEvents(foodItems);
+        addSwipeEvents(foodItems, dotNetObjectReference);
     }
-    console.log(foodItems);
 }
 
-function addSwipeEvents(foodItems) {
+function addSwipeEvents(foodItems, dotNetObjectReference) {
     foodItems.forEach(foodItem => {
         let startX = 0;
         let currentX = 0;
@@ -27,11 +26,14 @@ function addSwipeEvents(foodItems) {
             startX = clientX;
             foodItem.classList.add("removing");
             isDragging = true;
+
+            window.addEventListener("pointermove", onDrag);
+            window.addEventListener("pointerup", endDrag);
         }
 
-        function onDrag(clientX) {
+        function onDrag(event) {
             if (!isDragging) return;
-            currentX = clientX - startX;
+            currentX = event.clientX - startX;
             foodItem.style.transform = `translateX(${currentX}px)`;
         }
 
@@ -41,39 +43,30 @@ function addSwipeEvents(foodItems) {
             isDragging = false;
 
             if (Math.abs(currentX) > 100) {
+                foodItem.style.transition = "transform 0.3s ease";
                 foodItem.style.transform = `translateX(${currentX > 0 ? 100 : -100}%)`;
                 const tableNumber = foodItem.getAttribute("data-id");
-                removeFoodCard(tableNumber);
+                setTimeout(() => removeFoodCard(tableNumber, dotNetObjectReference), 300);
             } else {
                 foodItem.style.transform = "translateX(0)";
             }
 
             startX = 0;
             currentX = 0;
+            window.removeEventListener("pointermove", onDrag);
+            window.removeEventListener("pointerup", endDrag);
         }
 
-        // Sự kiện chuột
-        foodItem.addEventListener("mousedown", e => startDrag(e.clientX));
-        window.addEventListener("mousemove", e => onDrag(e.clientX));
-        window.addEventListener("mouseup", () => endDrag());
-
-        // Sự kiện cảm ứng
-        foodItem.addEventListener("touchstart", e => startDrag(e.touches[0].clientX));
-        window.addEventListener("touchmove", e => onDrag(e.touches[0].clientX));
-        window.addEventListener("touchend", () => endDrag());
+        foodItem.addEventListener("pointerdown", e => startDrag(e.clientX));
     });
 }
 
-async function removeFoodCard(tableNumber) {
-    setTimeout(() => {
-        const card = document.querySelector(`.card[data-id="${tableNumber}"]`);
-        if (card) {
-            card.remove();
-        }
-    }, 300);
-
-    // Xóa `NoteProdReq` khỏi `localStorage`
-    const noteProdReqs = await _localStorageService.GetAsync("noteProdReqs");
-    const updatedNoteProdReqs = noteProdReqs.filter(req => req.TableNumber !== tableNumber);
-    await _localStorageService.SetAsync("noteProdReqs", updatedNoteProdReqs);
+async function removeFoodCard(tableNumber, dotNetObjectReference) {
+    const card = document.querySelector(`.card[data-id="${tableNumber}"]`);
+    if (card) {
+        card.style.transition = "opacity 0.5s ease";
+        card.style.opacity = "0";
+        setTimeout(() => card.remove(), 500);
+    }
+    await dotNetObjectReference.invokeMethodAsync("RemoveNoteProdReq", tableNumber);
 }
