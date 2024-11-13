@@ -1,6 +1,5 @@
-﻿@page "/createcategory"
 
-
+@page "/editunit/{UnitId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -10,30 +9,30 @@
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Category</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Add Unit</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@cate" OnValidSubmit="CreateCate">
+                    <EditForm Model="@unit" OnValidSubmit="EditUnit">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="CategoryName" class="control-label"><strong>CategoryName</strong></label>
-                            <input id="CategoryName" @bind="cate.CategoryName" class="form-control" placeholder="CategoryName" />
-                            <ValidationMessage For="@(() => cate.CategoryName)" />
+                            <label for="UnitName" class="control-label"><strong>UnitName</strong></label>
+                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" />
+                            <ValidationMessage For="@(() => unit.UnitName)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="CategoryDescription" class="control-label"><strong>CategoryDescription</strong></label>
-                            <input id="CategoryDescription" @bind="cate.CategoryDescription" class="form-control" placeholder="CategoryDescription" />
-                            <ValidationMessage For="@(() => cate.CategoryDescription)" />
+                            <label for="UnitDescription" class="control-label"><strong>UnitDescription</strong></label>
+                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" />
+                            <ValidationMessage For="@(() => unit.UnitDescription)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
-                            <button type="submit" class="btn btn-danger mx-2">Add</button>
-                            <a href="/admincategory" class="btn btn-secondary mx-2">Back</a>
+                            <button type="submit" class="btn btn-danger mx-2">Edit</button>
+                            <a href="/adminunit" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
@@ -60,33 +59,55 @@
 </div>
 
 @code {
+    [Parameter] public int UnitId { get; set; }
+
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Category cate = new DATN.Shared.Category();
-    private IBrowserFile selectedFile;
+    private DATN.Shared.Unit unit = new DATN.Shared.Unit();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadEditUnit();
         isLoaded = true;
     }
 
-    private async Task CreateCate()
+    private async Task LoadEditUnit()
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync("api/Category/AddCategory", cate);
+            var response = await httpClient.GetFromJsonAsync<Unit>($"api/Unit/{UnitId}");
+            if (response != null)
+            {
+                unit = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy món ăn.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditUnit()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Unit/{UnitId}", unit);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Thêm thành công!";
+                successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/admincategory");
+                Navigation.NavigateTo("/adminunit");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
             }
         }
         catch (Exception ex)
@@ -96,10 +117,5 @@
         }
 
         StateHasChanged();
-    }
-
-    private void HandleFileSelected(InputFileChangeEventArgs e)
-    {
-        selectedFile = e.File;
     }
 }

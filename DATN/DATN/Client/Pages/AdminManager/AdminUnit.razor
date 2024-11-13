@@ -22,11 +22,11 @@
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateUnit()">Thêm</button>
+    <button class="btn btn-success" @onclick="() => CreateUnit()">Add Unit</button>
     <hr />
-    <h4>Quản lý danh mục</h4>
+    <h4>Unit</h4>
     <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="Filter" />
+        <input type="text" class="form-control" placeholder="Search Unit..." @oninput="Filter" />
     </div>
     <div class="product-table-container">
         <table class="table table-striped">
@@ -46,8 +46,8 @@
                             <td>@unit.UnitName</td>
                             <td>@unit.UnitDescription</td>
                             <td class="text-center">
-                                <button class="btn btn-primary" @onclick="() => EditUnit(unit.UnitId)">Sửa</button>
-                                <button class="btn btn-danger" @onclick="() => DeleteUnit(unit.UnitId)">Xóa</button>
+                                <button class="btn btn-primary" @onclick="() => EditUnit(unit.UnitId)">Edit</button>
+                                <button class="btn btn-danger" @onclick="() => DeleteUnit(unit.UnitId)">Delete</button>
                             </td>
                         </tr>
                     }
