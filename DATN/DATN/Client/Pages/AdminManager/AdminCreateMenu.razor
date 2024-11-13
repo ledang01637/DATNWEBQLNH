@@ -1,6 +1,4 @@
-﻿@page "/createcategory"
-
-
+﻿@page "/createmenu"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -10,30 +8,36 @@
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Category</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Add Unit</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@cate" OnValidSubmit="CreateCate">
+                    <EditForm Model="@menu" OnValidSubmit="CreateMenu">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="CategoryName" class="control-label"><strong>CategoryName</strong></label>
-                            <input id="CategoryName" @bind="cate.CategoryName" class="form-control" placeholder="CategoryName" />
-                            <ValidationMessage For="@(() => cate.CategoryName)" />
+                            <label for="MenuName" class="control-label"><strong>MenuName</strong></label>
+                            <input id="MenuName" @bind="menu.MenuName" class="form-control" placeholder="MenuName" />
+                            <ValidationMessage For="@(() => menu.MenuName)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="CategoryDescription" class="control-label"><strong>CategoryDescription</strong></label>
-                            <input id="CategoryDescription" @bind="cate.CategoryDescription" class="form-control" placeholder="CategoryDescription" />
-                            <ValidationMessage For="@(() => cate.CategoryDescription)" />
+                            <label for="PriceCombo" class="control-label"><strong>PriceCombo</strong></label>
+                            <input type="number" id="PriceCombo" @bind="menu.PriceCombo" class="form-control" placeholder="PriceCombo" />
+                            <ValidationMessage For="@(() => menu.PriceCombo)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="MenuDescription" class="control-label"><strong>MenuDescription</strong></label>
+                            <input id="MenuDescription" @bind="menu.MenuDescription" class="form-control" placeholder="MenuDescription" />
+                            <ValidationMessage For="@(() => menu.MenuDescription)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
                             <button type="submit" class="btn btn-danger mx-2">Add</button>
-                            <a href="/admincategory" class="btn btn-secondary mx-2">Back</a>
+                            <a href="/adminmenu" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
@@ -62,7 +66,7 @@
 @code {
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Category cate = new DATN.Shared.Category();
+    private DATN.Shared.Menu menu = new DATN.Shared.Menu();
     private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
@@ -71,17 +75,17 @@
         isLoaded = true;
     }
 
-    private async Task CreateCate()
+    private async Task CreateMenu()
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync("api/Category/AddCategory", cate);
+            var response = await httpClient.PostAsJsonAsync("api/Menu/AddMenu", menu);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Thêm thành công!";
+                successMessage = "Success";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/admincategory");
+                Navigation.NavigateTo("/adminmenu");
             }
             else
             {
@@ -98,8 +102,4 @@
         StateHasChanged();
     }
 
-    private void HandleFileSelected(InputFileChangeEventArgs e)
-    {
-        selectedFile = e.File;
-    }
 }

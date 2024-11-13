@@ -1,44 +1,44 @@
-﻿@page "/createshifte"
+
+@page "/editmenu/{MenuId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Shifte</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Add Menu</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@shifte" OnValidSubmit="CreateShifte">
+                    <EditForm Model="@menu" OnValidSubmit="EditMenu">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="Shifte_Name" class="control-label"><strong>Shifte_Name</strong></label>
-                            <input id="Shifte_Name" @bind="shifte.Shifte_Name" class="form-control" placeholder="Shifte_Name" />
-                            <ValidationMessage For="@(() => shifte.Shifte_Name)" />
+                            <label for="MenuName" class="control-label"><strong>MenuName</strong></label>
+                            <input id="MenuName" @bind="menu.MenuName" class="form-control" placeholder="MenuName" />
+                            <ValidationMessage For="@(() => menu.MenuName)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="StartTime" class="control-label"><strong>StartTime</strong></label>
-                            <input id="StartTime" type="time" @bind="shifte.StartTime" class="form-control" placeholder="StartTime" />
-                            <ValidationMessage For="@(() => shifte.StartTime)" />
+                            <label for="PriceCombo" class="control-label"><strong>PriceCombo</strong></label>
+                            <input type="number" id="PriceCombo" @bind="menu.PriceCombo" class="form-control" placeholder="PriceCombo" />
+                            <ValidationMessage For="@(() => menu.PriceCombo)" />
                         </div>
 
-                        <div class="form-group col-md-12 p-3">
-                            <label for="EndTime" class="control-label"><strong>EndTime</strong></label>
-                            <input id="EndTime" type="time" @bind="shifte.EndTime" class="form-control" placeholder="EndTime" />
-                            <ValidationMessage For="@(() => shifte.EndTime)" />
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="MenuDescription" class="control-label"><strong>MenuDescription</strong></label>
+                            <input id="MenuDescription" @bind="menu.MenuDescription" class="form-control" placeholder="MenuDescription" />
+                            <ValidationMessage For="@(() => menu.MenuDescription)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
                             <button type="submit" class="btn btn-danger mx-2">Add</button>
-                            <a href="/adminshifte" class="btn btn-secondary mx-2">Back</a>
+                            <a href="/adminmenu" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
@@ -65,53 +65,60 @@
 </div>
 
 @code {
+    [Parameter] public int MenuId { get; set; }
+
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Shifte shifte = new DATN.Shared.Shifte();
+    private DATN.Shared.Menu menu = new DATN.Shared.Menu();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadEditMenu();
         isLoaded = true;
     }
 
-    private async Task CreateShifte()
+    private async Task LoadEditMenu()
     {
-        // Ensure dates are selected
-        if (shifte.StartTime == default || shifte.EndTime == default)
-        {
-            errorMessage = "Please select both start and end dates.";
-            successMessage = string.Empty;
-            return;
-        }
-
-        // Check that StartTime does not exceed EndTime at the day, month, and year level
-        if (shifte.StartTime.Date > shifte.EndTime.Date)
-        {
-            errorMessage = "The start date must not be later than the end date.";
-            successMessage = string.Empty;
-            return;
-        }
-
         try
         {
-            var response = await httpClient.PostAsJsonAsync("api/Shifte/AddShifte", shifte);
-
-            if (response.IsSuccessStatusCode)
+            var response = await httpClient.GetFromJsonAsync<Menu>($"api/Menu/{MenuId}");
+            if (response != null)
             {
-                successMessage = "Successfully added!";
-                errorMessage = string.Empty;
-                Navigation.NavigateTo("/adminshifte");
+                menu = response;
             }
             else
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Error: {errorContent}";
+                errorMessage = "Không tìm thấy món ăn.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"An error occurred: {ex.Message}";
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditMenu()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Menu/{MenuId}", menu);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminmenu");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
         }
 

@@ -71,7 +71,7 @@ namespace DATN.Client.Pages.AdminManager
                             }
                             CurrentLayout = typeof(LayoutAdmin);
                             await JS.InvokeVoidAsync("showAlert", "success", "Thành công");
-                            Navigation.NavigateTo("/admin", true);
+                            Navigation.NavigateTo("/information", true);
                         }
                         else
                         {
