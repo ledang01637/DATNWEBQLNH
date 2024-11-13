@@ -1,16 +1,17 @@
-﻿@page "/createproduct"
+﻿
+@page "/createproduct"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">add Product</h5>
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-12">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add Product</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
                     <EditForm Model="@prod" OnValidSubmit="CreateProd" Context="editFormContext">
@@ -19,59 +20,82 @@
                             <ValidationSummary />
                         </div>
 
-                        <div class="form-group">
-                            <label for="UnitId" class="control-label"><strong>Unit</strong></label>
-                            <input id="UnitId" @bind="prod.UnitId" class="form-control" placeholder="UnitId" />
-                            <ValidationMessage For="@(() => prod.UnitId)" />
+                        <div class="row text-black m-auto">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="UnitId" class="control-label"><strong>UnitId</strong></label>
+                                <select id="UnitId" @bind="prod.UnitId" class="form-control text-white">
+                                    <option value="">Chọn UnitId</option>
+                                    @if (listunit != null && listunit.Any())
+                                    {
+                                        @foreach (var unit in listunit)
+                                        {
+                                            <option value="@unit.UnitId">@unit.UnitName</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => prod.UnitId)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="ProductName" class="control-label"><strong>Product Name</strong></label>
+                                <input id="ProductName" @bind="prod.ProductName" class="form-control p-3 text-white" placeholder="Product Name" />
+                                <ValidationMessage For="@(() => prod.ProductName)" />
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="ProductName" class="control-label"><strong>ProductName</strong></label>
-                            <input id="ProductName" @bind="prod.ProductName" class="form-control" placeholder="ProductName" />
-                            <ValidationMessage For="@(() => prod.ProductName)" />
+                        <div class="row text-black m-auto">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="Price" class="control-label"><strong>Price</strong></label>
+                                <input type="number" id="Price" @bind="prod.Price" class="form-control p-3 text-white" placeholder="Price" />
+                                <ValidationMessage For="@(() => prod.Price)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="CategoryId" class="control-label"><strong>CategoryId</strong></label>
+                                <select id="CategoryId" @bind="prod.CategoryId" class="form-control text-white">
+                                    <option value="">Chọn CategoryId</option>
+                                    @if (listcategory != null && listcategory.Any())
+                                    {
+                                        @foreach (var category in listcategory)
+                                        {
+                                            <option value="@category.CategoryId">@category.CategoryName</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => prod.UnitId)" />
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="Price" class="control-label"><strong>Price</strong></label>
-                            <input type="number" id="Price" @bind="prod.Price" class="form-control" placeholder="Price" />
-                            <ValidationMessage For="@(() => prod.Price)" />
+                        <div class="form-group col-md-3 p-3">
+                            <label for="ProductImage" class="control-label"><strong>Choose Image</strong></label>
+                            <InputFile OnChange="HandleFileSelected" class="" />
+                            <ValidationMessage For="@(() => prod.ProductImage)" />
                         </div>
 
-                        <div class="form-group">
-                            <label for="CategoryId" class="control-label"><strong>CategoryId</strong></label>
-                            <input id="CategoryId" @bind="prod.CategoryId" class="form-control" placeholder="CategoryId" />
-                            <ValidationMessage For="@(() => prod.CategoryId)" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ProductDescripntion" class="control-label"><strong>Product Description</strong></label>
-                            <textarea id="ProductDescripntion" @bind="prod.ProductDescription" class="form-control" placeholder="Enter product description"></textarea>
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ProductDescription" class="control-label"><strong>Product Description</strong></label>
+                            <textarea id="ProductDescription" @bind="prod.ProductDescription" class="form-control p-3 text-white" placeholder="Enter product description" style="height: 200px;"></textarea>
                             <ValidationMessage For="@(() => prod.ProductDescription)" />
                         </div>
 
 
-                        <div class="form-group">
-                            <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
-                            <InputFile OnChange="HandleFileSelected" />
-                            <ValidationMessage For="@(() => prod.ProductImage)" />
-                        </div>
-
-                        <div class="form-group text-center">
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                                <a href="/admincategory" class="btn btn-secondary mx-2">Quay Về</a>
+                        <div class="form-group text-center mt-3">
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-danger mx-2">Add</button>
+                                <a href="/admincategory" class="btn btn-secondary mx-2">Back</a>
                             </div>
                         </div>
                     </EditForm>
+
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -89,12 +113,28 @@
     private string errorMessage;
     private string successMessage;
     private DATN.Shared.Product prod = new DATN.Shared.Product();
+    private List<DATN.Shared.Unit> listunit = new List<DATN.Shared.Unit>();
+    private List<DATN.Shared.Category> listcategory = new List<DATN.Shared.Category>();
     private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadUnits();
         isLoaded = true;
+    }
+
+    private async Task LoadUnits()
+    {
+        try
+        {
+            listunit = await httpClient.GetFromJsonAsync<List<DATN.Shared.Unit>>("api/Unit/GetUnit");
+            listcategory = await httpClient.GetFromJsonAsync<List<DATN.Shared.Category>>("api/Category/GetCategories");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
     }
 
     private async Task CreateProd()
@@ -105,19 +145,19 @@
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Thêm thành công!";
+                successMessage = "Product added successfully!";
                 errorMessage = string.Empty;
                 Navigation.NavigateTo("/adminproduct");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Error : {errorContent}";
+                errorMessage = $"Error: {errorContent}";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            errorMessage = $"An error occurred: {ex.Message}";
             successMessage = string.Empty;
         }
 
