@@ -77,8 +77,19 @@ namespace DATN.Server.Service
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Products)
                 .Where(o => o.Status == ProcessingStatus)
-                .ToList();
+                .ToList() ?? new List<Order> ();
         }
+        public List<Order> GetOrderLstByCustomer(int customerId)
+        {
+            return _context.Orders
+                .Include(o => o.RewardPointes)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Products)
+                .Where(o => o.CustomerId == customerId)
+                .OrderByDescending(o => o.CreateDate)
+                .ToList() ?? new List<Order>();
+        }
+
         public Order GetIdOrder(int id)
         {
             var order = _context.Orders.Find(id);

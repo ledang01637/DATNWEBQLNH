@@ -23,6 +23,14 @@ namespace DATN.Server.Controllers
             return _RewardPointeService.GetRewardPointe();
         }
 
+        [HttpGet("GetRewardPointeLstByCustomer")]
+        public ActionResult<List<RewardPointe>> GetRewardPointeLstByCustomer([FromQuery] int cusstomerId)
+        {
+            if (cusstomerId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_RewardPointeService.GetRewardPointeLstByCustomer(cusstomerId));
+        }
+
         [HttpPost("AddRewardPointe")]
         public RewardPointe AddRewardPointe(RewardPointe RewardPointe)
         {

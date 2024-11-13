@@ -45,6 +45,15 @@ namespace DATN.Server.Controllers
             return Ok(_OrderService.GetOrderLstInclude());
         }
 
+        [HttpGet("GetOrderLstByCustomer")]
+        public ActionResult<List<Order>> GetOrderLstByCustomer([FromQuery] int customerId)
+        {
+            if (customerId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_OrderService.GetOrderLstByCustomer(customerId));
+        }
+
+
         [HttpPost("AddOrder")]
         public Order AddOrder(Order Order)
         {

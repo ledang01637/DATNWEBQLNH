@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -17,6 +18,14 @@ namespace DATN.Server.Service
         public List<RewardPointe> GetRewardPointe()
         {
             return _context.RewardPointes.ToList();
+        }
+
+        public List<RewardPointe> GetRewardPointeLstByCustomer(int cusstomerId)
+        {
+
+            return _context.RewardPointes
+                .Where(o => o.CustomerId == cusstomerId)
+                .ToList() ?? new List<RewardPointe>();
         }
         public RewardPointe AddRewardPointe(RewardPointe RewardPointe)
         {
