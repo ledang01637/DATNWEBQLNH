@@ -46,7 +46,7 @@ namespace DATN.Client.Pages.AdminManager
                 var voucher = listVoucher.FirstOrDefault(p => p.VoucherId == voucherId);
                 if (voucher != null)
                 {
-                    voucher.IsActive = true;
+                    voucher.IsAcctive = true;
                     await httpClient.PutAsJsonAsync($"api/Voucher/{voucherId}", voucher);
                     await LoadVouchers();
                     StateHasChanged();
@@ -65,7 +65,7 @@ namespace DATN.Client.Pages.AdminManager
                 var voucher = listVoucher.FirstOrDefault(p => p.VoucherId == voucherId);
                 if (voucher != null)
                 {
-                    voucher.IsActive = false;
+                    voucher.IsAcctive = false;
                     await httpClient.PutAsJsonAsync($"api/Voucher/{voucherId}", voucher);
                     await LoadVouchers();
                     StateHasChanged();

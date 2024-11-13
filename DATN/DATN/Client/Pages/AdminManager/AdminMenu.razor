@@ -53,7 +53,7 @@
                                         <td>@item.MenuDescription</td>
                                         <td>@item.PriceCombo</td>
                                         <td class="text-center">
-                                            @if (!item.IsDelete)
+                                            @if (!item.IsDeleted)
                                             {
                                                 <button class="btn btn-primary" @onclick="() => EditMenu(item.MenuId)">Sửa</button>
                                                 <button class="btn btn-danger" @onclick="() => Hide(item.MenuId)">Ẩn</button>

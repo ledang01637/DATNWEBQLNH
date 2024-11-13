@@ -22,6 +22,12 @@ namespace DATN.Server.Controllers
         {
             return _ProductService.GetProduct();
         }
+
+        [HttpGet("GetProductInclude")]
+        public ActionResult<List<Product>> GetProductInclude()
+        {
+            return Ok(_ProductService.GetProductInclude());
+        }
         [HttpPost("AddProduct")]
         public Product AddProduct(Product Product)
         {
@@ -31,10 +37,9 @@ namespace DATN.Server.Controllers
                 ProductName = Product.ProductName,
                 Price = Product.Price,
                 CategoryId = Product.CategoryId,
-                ProductDescripntion = Product.ProductDescripntion,
+                ProductDescription = Product.ProductDescription,
                 ProductImage = Product.ProductImage,
-                IsDelete = Product.IsDelete,
-
+                IsDeleted = Product.IsDeleted
             });
         }
 

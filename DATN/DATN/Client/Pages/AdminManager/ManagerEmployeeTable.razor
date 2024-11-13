@@ -1,0 +1,542 @@
+﻿@page "/manager"
+
+@layout EmployeeLayout
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+
+<style>
+    #video-container {
+        position: relative;
+        margin: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+
+    #localVideo {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 120px;
+        height: 90px;
+        z-index: 10;
+        display: block;
+        opacity: 1;
+    }
+
+    #remoteVideo {
+        width: 100%;
+        height: 100%;
+        display: block;
+        opacity: 1;
+    }
+
+    video {
+        display: none;
+    }
+
+
+    #action-buttons {
+        margin: auto;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .box {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 250px;
+        background-color: #333;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px #333;
+        z-index: 1000;
+        padding: 10px;
+        display: none;
+        font-size: 10px !important;
+    }
+
+    #btn-end, #btn-answer, #btn-call, #btn-reject {
+        width: 50px;
+        height: 50px;
+    }
+
+    #btn-end {
+        background-color: #dc3545;
+        color: white;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    #btn-answer {
+        background-color: #28a745;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    #btn-reject {
+        background-color: #643421;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    #btn-call {
+        background-color: #45a14f;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    #btn-end:hover {
+        background-color: #c82333;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+        cursor: pointer;
+    }
+
+    #btn-answer:hover {
+        background-color: #218838;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        cursor: pointer;
+    }
+
+    #btn-reject:hover {
+        background-color: #593421;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px #45a14f;
+        cursor: pointer;
+    }
+
+    #btn-call:hover {
+        background-color: #25a14f;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    #particles-js {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    .floor {
+        margin-bottom: 30px;
+    }
+
+    .table-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+
+        .table-card:hover {
+            transform: scale(1.05);
+            background: #dee2e6;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+    .custom-table {
+        font-size: 11px;
+    }
+
+    th, td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    tbody {
+        max-height: 350px;
+        overflow-y: auto;
+        display: block;
+    }
+
+    table thead, table tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .floor-section {
+        padding: 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+</style>
+
+<div class="row position-relative">
+    <div class="col-md-8">
+        @if(tables == null || floors == null)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var f in floors)
+            {
+                <h3>Tầng @f.NumberFloor</h3>
+                <div class="floor floor-section" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                    @foreach (var table in tables.Where(t => t.FloorId == f.FloorId).OrderBy(t => t.Position))
+                    {
+                        var tableColor = tableColorsCache.ContainsKey(table.TableNumber) ? tableColorsCache[table.TableNumber].Color : "#32CD32";
+                        <div id="sortable-floor1">
+                            <div class="mt-2">
+                                <div class="card table-card" style="background-color: @(tableColor)"
+                                     @onclick="() => ShowModalForTable(table.TableNumber)" data-bs-toggle="modal" data-bs-target="#tableModal">
+                                    <div class="card-body text-center position-relative">
+                                        <img src="/Image/dinner-table.png" height="50px" alt="Table Image">
+                                        <div class="position-absolute top-0 end-0 fw-bold m-1">
+                                            <div class="card" style="width: 25px; height: 25px;">@table.TableNumber</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+        }
+
+    </div>
+
+    <!-- Bảng yêu cầu bàn -->
+    <div class="col-md-4 custom-table mb-2">
+        <h5 class="mb-2">Quản lý yêu cầu</h5>
+        <table class="table table-sm mb-4 table-bordered">
+            <thead>
+                <tr>
+                    <th>Số bàn</th>
+                    <th>Yêu cầu</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (requests.Count == 0)
+                {
+                    <tr class="table-light">
+                        <td class="fw-bold">Không có yêu cầu</td>
+                    </tr>
+                }else
+                {
+                    foreach(var r in requests)
+                    {
+                        <tr class="@(r.IsCompleted ? "table-success" : "table-danger")">
+                            <td>@r.TableNumbe</td>
+                            <td>@r.RequestText</td>
+                            <td>@(r.IsCompleted ? "Hoàng thành" : "Đang xử lý")</td>
+                            <td>@r.Time</td>
+                            <td>
+                                <button disabled="@r.IsCompleted" class="btn btn-sm fw-bold custom-table btn-success" @onclick="() => ConfirmRequestAsync(r.RequestId)">
+                                    Xác nhận
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+
+        @if (callInfos.Count > 0)
+        {
+            <h5 class="mb-2">Các cuộc gọi chưa nhận</h5>
+            <table class="table table-sm mb-2 table-bordered">
+                <thead>
+                    <tr>
+                        <th>Số bàn</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in callInfos)
+                    {
+                        <tr>
+                            <td>@item.FromNumber</td>
+                            <td>@item.Time</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        }
+    </div>
+
+
+
+    <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
+        <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+    </div>
+</div>
+
+<div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tableModal">Bàn số: @selectedTableNumber</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="cart-items">
+                    @if ((_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0) || (_cartNote.CartDTOs is not null && _cartNote.CartDTOs.Count > 0))
+                    {
+                        <!-- Hiển thị danh sách món ăn trước đó -->
+                        @if (_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0)
+                        {
+                            <li class="list-group-item text-center bg-light">Danh sách món đã gọi</li>
+                            foreach (var item in _cartNote.PreviousCartDTOs)
+                            {
+                                var prod = products.FirstOrDefault(a => a.ProductId == item.ProductId);
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
+                                             alt="Image"
+                                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">@item.ProductName</div>
+                                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @item.Quantity</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
+                                </li>
+                                TotalAmount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
+                            }
+                        }
+                        @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
+                        {
+                            <!-- Hiển thị danh sách món ăn mới -->
+                            <li class="list-group-item text-center bg-light">Danh sách món mới gọi</li>
+                            foreach (var c in _cartNote.CartDTOs)
+                            {
+                                var prod = products.FirstOrDefault(a => a.ProductId == c.ProductId);
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
+                                             alt="Image"
+                                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">@c.ProductName</div>
+                                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @c.Quantity</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
+                                </li>
+                            }
+                        }
+
+                        <li class="list-group-item">
+                            <div class="fw-bold">Ghi chú</div>
+                            <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>
+                        </li>
+
+                        <li class="list-group-item">
+                            <div class="fw-bold text-end text-danger">Tổng tiền: @TotalAmount.ToString("N0") VND</div>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-center">Bàn không có khách</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="modal-footer">
+                @if (tableButtonVisibility.ContainsKey(selectedTableNumber))
+                {
+                    var visibility = tableButtonVisibility[selectedTableNumber];
+                    @if (visibility.IsConfirmVisible)
+                    {
+                        <button class="checkout-btn-model bg-danger" @onclick="CancelOrder">Hủy</button>
+                        <button class="checkout-btn-model" style="background: #28a745 !important" @onclick="ConfirmOrder">Xác nhận</button>
+                    }
+                    @if (visibility.IsCheckoutVisible)
+                    {
+                        <button class="checkout-btn-model" style="background: #007bff !important" data-bs-toggle="modal" data-bs-target="#invoiceModal">Thanh toán</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            @if (order == null || order.OrderId <= 0)
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 500px !important">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nội dung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Khách hàng chưa yêu cầu thanh toán</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 500px !important">
+                    <div class="invoice-container" id="invoice-preview">
+                        <div class="invoice-header">
+                            <h1>LHDMHHNTTLQVHHMNVT</h1>
+                            <h2 class="mb-2">NHÀ HÀNG 5 SAO</h2>
+                            <h4>HÓA ĐƠN</h4>
+                        </div>
+
+                        <div class="invoice-details">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>TIỆN NGHI NHÀ HÀNG CỦA CHÚNG TÔI</strong> <br />
+                                    @{
+                                        if (employee != null && employee.EmployeeId > 0)
+                                        {
+                                            <strong>Nhân viên: @employee.EmployeeName</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong>Nhân viên: hihi</strong>
+                                        }
+                                    }
+
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    Số bàn: @selectedTableNumber<br>
+                                    Thời gian vào: @order.CreateDate <br>
+                                    Thời gian ra: @DateTime.Now
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Ảnh</th>
+                                    <th>Tên</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (order == null || order.OrderId <= 0)
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center">Không tìm thấy sản phẩm</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var c in order.OrderItems)
+                                    {
+                                        <tr>
+                                            <td><img src="data:image/png;base64,@Convert.ToBase64String(c.Products.ProductImage)" alt="Product"></td>
+                                            <td>@c.Products.ProductName</td>
+                                            <td>@c.Quantity</td>
+                                            <td>@c.Products.Price.ToString("N0") VND</td>
+                                            <td>@c.TotalPrice.ToString("N0") VND</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td class="fw-samibold">Ghi chú: @order.Note</td>
+                                        <td class="fw-samibold">Phương thức thanh toán: @order.PaymentMethod</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="total-section-bill text-end">
+                            @{
+                                var totalAmount = order.TotalAmount;
+                                var totalTax = totalAmount * 0.1m;
+                                var serviceFee = totalAmount * 0.05m;
+                                var totalPayable = totalAmount + totalTax + serviceFee;
+                            }
+                            Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND<br>
+                            Thuế VAT (10%): @totalTax.ToString("N0") VND<br>
+                            Phí dịch vụ (5%): @serviceFee.ToString("N0") VND<br>
+                            <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>
+                        </div>
+
+                        <div class="footer-section">
+                            <div>
+                                <strong>Thông tin ngân hàng</strong>
+                                Ngân hàng: Tiên phong<br>
+                                Tên tài khoản: FFOOD<br>
+                                Số tài khoản: 123 456 7890
+                            </div>
+                            <div class="text-end">
+                                <strong>Thông tin liên hệ</strong>
+                                Email: ffood@teach.com<br>
+                                Điện thoại: +84 912 345 678<br>
+                                Địa chỉ: 3/2 Hưng Lợi, Ninh Kiều, Cần Thơ
+                            </div>
+                        </div>
+                        <footer class="mt-2" style="text-align: center;"><b>Xin cảm ơn và hẹn gặp lại.</b></footer>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary mt-3" @onclick="ProcessPayment">Xác nhận</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="box" id="call-box">
+    <div id="particles-js"></div>
+    <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
+        <i class="far fa-window-close text-danger fs-4" style="margin: 4px 0px"></i>
+    </button>
+    <div class="caller-info">
+        <div id="caller-name" class="caller-name text-center"></div>
+    </div>
+    <input id="toNumber" type="text" @bind-value="to" class="form-control bg-white text-dark" />
+    <div id="video-container">
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+    </div>
+    <div id="call-message" class="call-message text-center"></div>
+
+    <div class="call-actions" id="call-actions">
+        <button class="btn-action btn-end" id="btn-end">
+            <i class="bi bi-telephone-x-fill" style="font-size: 10px;"></i>
+            <span style="font-size: 10px">Kết thúc</span>
+        </button>
+        <button class="btn-action btn-answer" id="btn-answer">
+            <i class="bi bi-telephone-fill" style="font-size: 10px;"></i>
+            <span style="font-size: 10px">Nhận</span>
+        </button>
+        <button class="btn-action btn-reject" id="btn-reject">
+            <i class="bi bi-telephone-down-fill" style="font-size: 10px;"></i>
+            <span style="font-size: 10px">Từ chối</span>
+        </button>
+        <button class="btn-action btn-reject" id="btn-call">
+            <i class="bi bi-telephone-down-fill" style="font-size: 10px;"></i>
+            <span style="font-size: 10px">Gọi</span>
+        </button>
+    </div>
+</div>
+

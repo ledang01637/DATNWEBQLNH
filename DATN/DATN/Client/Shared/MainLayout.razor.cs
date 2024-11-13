@@ -8,28 +8,34 @@ namespace DATN.Client.Shared
 {
     public partial class MainLayout
     {
-        private LoginRequest loginRequest = new LoginRequest();
         private string wifiIpAddress;
         private bool isAcceptWifi;
+        private string errorMessage;
+        private bool isLoading;
 
         protected override async Task OnInitializedAsync()
         {
-            wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
-            if (wifiIpAddress.Equals("192.168.218.1") || wifiIpAddress.Equals("192.168.1.87"))
+            isLoading = true;
+            try
             {
-                isAcceptWifi = true;
-                loginRequest.Username = "Customer";
-                loginRequest.Password = "123@#$";
-                var respone = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginRequest);
-                if (respone.IsSuccessStatusCode)
-                {
-                    Console.Write("abc");
+                wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
+                if(string.IsNullOrEmpty(wifiIpAddress)) 
+                { 
+                    isAcceptWifi = false; 
+                    return; 
                 }
+                isAcceptWifi = true;
             }
-            else
+            catch (HttpRequestException ex)
             {
                 isAcceptWifi = false;
+                errorMessage = "Access denied: " + ex.Message;
+            }
+            finally
+            {
+                isLoading = false;
             }
         }
     }
+
 }

@@ -31,12 +31,11 @@ namespace DATN.Server.Controllers
                 CustomerName = Reservation.CustomerName,
                 CustomerPhone = Reservation.CustomerPhone,
                 ReservationDate = Reservation.ReservationDate,
-                ReservationTime = Reservation.ReservationTime,
-                Numberguest = Reservation.Numberguest,
+                NumberGuest = Reservation.NumberGuest,
                 Tables = Reservation.Tables,
-                CustomerId = Reservation.CustomerId,
-
-
+                IsPayment = Reservation.IsPayment,
+                DepositPayment = Reservation.DepositPayment,
+                PaymentMethod = Reservation.PaymentMethod
             });
         }
 

@@ -1,0 +1,17 @@
+﻿@page "/demoIndex"
+@using DATN.Client.Service
+@inject NavigationManager Navigation
+@inject HttpClient httpClient
+@inject CartService _cartService
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+@layout MainLayout
+
+<div class="w-100 h-100 bg-black">
+    <div class="layout-rain">
+        <div class="bubbles" id="bubbles">
+            <img src="images/shipper.png" class="shipper" alt="">
+        </div>
+    </div>
+</div>
+

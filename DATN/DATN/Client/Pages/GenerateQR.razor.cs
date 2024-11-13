@@ -43,22 +43,5 @@ namespace DATN.Client.Pages
         {
             return await JS.InvokeAsync<string>("generateMD5Hash", input);
         }
-
-        //private async Task GenerateQrCodeV1)
-        //{
-
-        //    var response = await httpClient.PostAsJsonAsync("api/AuthJWT/GenerateQrToken", qrModel);
-        //    var result = await response.Content.ReadFromJsonAsync<QRResponse>();
-
-        //    if (result != null)
-        //    {
-        //        var encodedToken = Uri.EscapeDataString(result.Token);
-        //        var urlCode = $"{qrModel.Url}demoIndex?token={encodedToken}";
-
-        //        await _localStorageService.SetItemAsync("ss", urlCode);
-        //        await JS.InvokeVoidAsync("clearQrCode");
-        //        await JS.InvokeVoidAsync("generateQrCode", urlCode);
-        //    }
-        //}
     }
 }

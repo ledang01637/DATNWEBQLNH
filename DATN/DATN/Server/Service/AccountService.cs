@@ -58,7 +58,7 @@ namespace DATN.Server.Service
             existing.CreateDate = update.CreateDate;
             existing.UpdateDate = update.UpdateDate;
             existing.IsActive = update.IsActive;
-            existing.UserName = update.UserName;
+            existing.Email = update.Email;
             existing.Password = update.Password;
 
             _context.Update(existing);

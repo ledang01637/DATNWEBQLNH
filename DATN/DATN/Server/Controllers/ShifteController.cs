@@ -18,7 +18,7 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("GetShifte")]
-        public List<Shifte> GetShiftes()
+        public List<Shifte> GetShifte()
         {
             return _ShifteService.GetShifte();
         }
@@ -28,7 +28,7 @@ namespace DATN.Server.Controllers
         {
             return _ShifteService.AddShifte(new Shifte
             {
-                Shifte_Name = Shifte.Shifte_Name,
+                ShifteName = Shifte.ShifteName,
                 StartTime = Shifte.StartTime,
                 EndTime = Shifte.EndTime,
                 IsDeleted = Shifte.IsDeleted,

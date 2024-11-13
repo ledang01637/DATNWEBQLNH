@@ -55,7 +55,7 @@ namespace DATN.Server.Service
                 return null;
             }
             existing.NumberFloor = update.NumberFloor;
-            existing.IsActive = update.IsActive;
+            existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);
             _context.SaveChanges();

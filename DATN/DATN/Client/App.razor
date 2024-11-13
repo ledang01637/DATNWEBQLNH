@@ -1,22 +1,52 @@
-﻿<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <CascadingAuthenticationState>
+            @if (IsLoading)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @if (IsAdmin)
+                {
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(LayoutAdmin)" />
+                }
+                else
+                {
+                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                }
+            }
+        </CascadingAuthenticationState>
     </Found>
     <NotFound>
         <CascadingAuthenticationState>
             <LayoutView Layout="@typeof(MainLayout)">
-                <div class="col-md-12 container mt-5">
-                    <img class="m-auto" src="./image/404.png" alt="Alternate Text" width="100%" />
-                    <h1 class="text-center col-md-12">Rất tiếc chúng tôi không tìm thấy trang này </h1>
-                    <p class="mt-3 text-center col-md-6 m-auto">
-                        Có vẻ như không có gì được tìm thấy ở vị trí này. Có thể cố gắng
-                        Tìm kiếm những gì bạn đang tìm kiếm?
-                    </p>
-                </div>
-                <div class="col-md-2 m-auto mt-3">
-                    <a href="" class="text-center btn btn-danger rounded col-md-12 mx-auto">Trở lại trang chủ</a>
+                <div class="container-fluid access-denied-container">
+                    <div class="access-denied-card">
+                        <h1>404</h1>
+                        <p><strong>Not Found</strong></p>
+                        <p>This page not found</p>
+                        <a href="/" class="btn btn-primary mt-3">Go to Homepage</a>
+                    </div>
                 </div>
             </LayoutView>
         </CascadingAuthenticationState>
     </NotFound>
 </Router>
+@code {
+    private bool IsAdmin { get; set; }
+    private bool IsLoading { get; set; } = true;
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        IsAdmin = user.Identity.IsAuthenticated && (user.IsInRole("admin") || user.IsInRole("no account") || user.IsInRole("customer"));
+        IsLoading = false;
+    }
+}

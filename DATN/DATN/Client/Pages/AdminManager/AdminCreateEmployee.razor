@@ -64,9 +64,19 @@
 
                         <div class="form-group">
                             <label for="AccountId" class="control-label"><strong>AccountId</strong></label>
-                            <input id="AccountId" @bind="employee.AccountId" class="form-control" placeholder="AccountId" />
+                            <select id="AccountId" @bind="employee.AccountId" class="form-control">
+                                <option value="">Chọn Account</option>
+                                @if (accounts != null && accounts.Any())
+                                {
+                                    @foreach (var account in accounts)
+                                    {
+                                        <option value="@account.AccountId">@account.Email</option>
+                                    }
+                                }
+                            </select>
                             <ValidationMessage For="@(() => employee.AccountId)" />
                         </div>
+
 
                         <div class="form-group text-center">
                             <div class="d-flex justify-content-center">
@@ -102,17 +112,36 @@
     private string errorMessage;
     private string successMessage;
     private DATN.Shared.Employee employee = new DATN.Shared.Employee();
-    private IBrowserFile selectedFile;
+    private List<Account> accounts = new List<Account>();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadAccounts();
         isLoaded = true;
+    }
+
+    private async Task LoadAccounts()
+    {
+        try
+        {
+            // Gọi API để lấy danh sách tài khoản
+            var response = await httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
+
+            if (response != null)
+            {
+                // Lọc danh sách tài khoản chỉ lấy những tài khoản có AccountType == "Employee"
+                accounts = response.Where(a => a.AccountType == "Employee").ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
     }
 
     private async Task CreateEmployee()
     {
-
         try
         {
             var response = await httpClient.PostAsJsonAsync("api/Employee/AddEmployee", employee);
@@ -121,7 +150,6 @@
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
-
             }
             else
             {
@@ -136,11 +164,6 @@
         }
 
         StateHasChanged();
-
-        Navigation.NavigateTo("/createemployeeshifte");
-        //--------------------------------
-
+        Navigation.NavigateTo("/adminemployee");
     }
-
-
 }

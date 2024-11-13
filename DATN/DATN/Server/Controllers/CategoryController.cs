@@ -29,7 +29,7 @@ namespace DATN.Server.Controllers
             {
                 CategoryName = Category.CategoryName,
                 CategoryDescription = Category.CategoryDescription,
-                IsDelete = Category.IsDelete
+                IsDeleted = Category.IsDeleted
 
             });
         }

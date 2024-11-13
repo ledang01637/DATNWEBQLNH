@@ -11,6 +11,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.Linq;
+using DATN.Server.Hubs;
+using DATN.Server.Hash;
 
 namespace DATN.Server
 {
@@ -27,13 +31,14 @@ namespace DATN.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
 
-            services.AddDbContext<AppDBContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
+            //Authentication
             var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
@@ -58,6 +63,10 @@ namespace DATN.Server
             })
             .AddCookie();
 
+            //ConnectDB
+            services.AddDbContext<AppDBContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddScoped<AccountService>();
             services.AddScoped<CategoryService>();
             services.AddScoped<CustomerService>();
@@ -78,16 +87,41 @@ namespace DATN.Server
             services.AddScoped<TableService>();
             services.AddScoped<UnitService>();
             services.AddScoped<VoucherService>();
+            services.AddScoped<FileEncryptionService>();
             services.AddScoped<NetworkService>();
+            services.AddScoped<MessageService>();
 
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
             );
+
+            //CORS 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
+
+            //Hubs
+            services.AddSignalR();
+            services.AddResponseCompression(options =>
+            {
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+                {
+                    "application/octet-stream"
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseResponseCompression();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -106,12 +140,14 @@ namespace DATN.Server
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseCors("AllowAllOrigins");
 
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHub<SockHub>("/ProcessHub");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

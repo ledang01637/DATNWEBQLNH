@@ -29,7 +29,7 @@ namespace DATN.Server.Controllers
             {
                 MenuName = Menu.MenuName,
                 MenuDescription = Menu.MenuDescription,
-                IsDelete = Menu.IsDelete,
+                IsDeleted = Menu.IsDeleted,
                 PriceCombo = Menu.PriceCombo,
 
             });

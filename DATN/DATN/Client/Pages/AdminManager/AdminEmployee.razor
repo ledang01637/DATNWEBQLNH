@@ -19,67 +19,73 @@
     }
 </style>
 
-@if (isLoaded)
-{
-    <div class="col-md-12 grid-margin stretch-card p-5">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Employee</h4>
-                <p class="card-description">
-                    <button class="btn btn-success" @onclick="() => CreateEmployee()">Add new employee</button>
-                </p>
-                <div class="search-bar">
-                    <input type="text" class="form-control" placeholder="Sreach employee..." @oninput="FilterEmployee" />
-                </div>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>EmployeeName</th>
-                                <th>Address</th>
-                                <th>PhoneNumber</th>
-                                <th>Email</th>
-                                <th>Position</th>
-                                <th>Hiredate</th>
-                                <th>Salary</th>
-                                <th>IsDelete</th>
-                                <th>AccountId</th>
-                                <th></th>
-                            </tr>
-                        </thead>
+<AuthorizeView Roles="1">
+    <Authorized>
+        @if (isLoaded)
+        {
+            <div class="col-md-12 grid-margin stretch-card p-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Employee</h4>
+                        <p class="card-description">
+                            <button class="btn btn-success" @onclick="() => CreateEmployee()">Add new employee</button>
+                        </p>
+                        <div class="search-bar">
+                            <input type="text" class="form-control" placeholder="Sreach employee..." @oninput="FilterEmployee" />
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>EmployeeName</th>
+                                        <th>Address</th>
+                                        <th>PhoneNumber</th>
+                                        <th>Email</th>
+                                        <th>Position</th>
+                                        <th>Hiredate</th>
+                                        <th>Salary</th>
+                                        <th>IsDelete</th>
+                                        <th>AccountId</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
 
-                        <tbody>
-                            @foreach (var employee in filter)
-                            {
-                                <tr>
-                                    <td>@employee.EmployeeName</td>
-                                    <td>@employee.Address</td>
-                                    <td>@employee.PhoneNumber</td>
-                                    <td>@employee.Email</td>
-                                    <td>@employee.Position</td>
-                                    <td>@employee.HireDate</td>
-                                    <td>@employee.Salary</td>
-                                    <td>@employee.IsDeleted</td>
-                                    <td>@employee.AccountId</td>
-                                    <td>
-                                        <button class="btn btn-primary" @onclick="() => EditEmployee(employee.EmployeeId)">Sửa</button>
-                                        <button class="btn btn-danger" @onclick="() => DeleteEmployee(employee.EmployeeId)">Ẩn</button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                <tbody>
+                                    @foreach (var employee in listEmployee)
+                                    {
+                                        <tr>
+                                            <td>@employee.EmployeeName</td>
+                                            <td>@employee.Address</td>
+                                            <td>@employee.PhoneNumber</td>
+                                            <td>@employee.Email</td>
+                                            <td>@employee.Position</td>
+                                            <td>@employee.HireDate</td>
+                                            <td>@employee.Salary</td>
+                                            <td>@employee.IsDeleted</td>
+                                            <td>@employee.AccountId</td>
+                                            <td>
+                                                <button class="btn btn-primary" @onclick="() => EditEmployee(employee.EmployeeId)">Sửa</button>
+                                                <button class="btn btn-danger" @onclick="() => DeleteEmployee(employee.EmployeeId)">Ẩn</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-}
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p class="text-danger">@errorMessage</p>
-}
-else
-{
-    <p>Loading...</p>
-}
-
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-danger">@errorMessage</p>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h3>Không có quyền truy cập</h3>
+    </NotAuthorized>
+</AuthorizeView>

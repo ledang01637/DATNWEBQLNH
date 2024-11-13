@@ -23,6 +23,30 @@ namespace DATN.Server.Controllers
             return _OrderItemService.GetOrderItem();
         }
 
+        [HttpPost("GetOrderItemInclude")]
+        public ActionResult<List<OrderItem>> GetOrderItemInclude([FromBody] int orderId)
+        {
+            if(orderId < 0) { return BadRequest("OrderId và ProductId phải lớn hơn 0."); }
+
+            var orderItems = _OrderItemService.GetOrderItemInclude(orderId);
+
+            return Ok(orderItems);
+        }
+
+        [HttpGet("GetByOrderIdAndProductId")]
+        public ActionResult<OrderItem> GetByOrderIdAndProductId([FromQuery] int orderId, [FromQuery] int productId)
+        {
+            if (orderId <= 0 || productId <= 0)
+            {
+                return BadRequest("OrderId và ProductId phải lớn hơn 0.");
+            }
+
+            var orderItem = _OrderItemService.GetByOrderIdAndProductId(orderId, productId);
+
+            return Ok(orderItem);
+        }
+
+
         [HttpPost("AddOrderItem")]
         public OrderItem AddOrderItem(OrderItem OrderItem)
         {

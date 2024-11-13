@@ -3,6 +3,7 @@ using DATN.Shared;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using DATN.Server.Service;
+using System;
 
 namespace DATN.Server.Controllers
 {
@@ -21,6 +22,14 @@ namespace DATN.Server.Controllers
         public List<Employee> GetEmployees()
         {
             return _EmployeeService.GetEmployee();
+        }
+
+        [HttpPost("GetEmployeeByAccountId")]
+        public ActionResult<Employee> GetEmployeeByAccountId([FromBody] int accountId)
+        {
+            if(accountId <= 0) { return BadRequest(); }
+            
+            return Ok(_EmployeeService.GetEmployeeByAccountId(accountId));
         }
 
         [HttpPost("AddEmployee")]

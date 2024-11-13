@@ -55,9 +55,9 @@
                                 </td>
                                 <td>@prod.ProductName</td>
                                 <td>@connectUnit.UnitName</td>
-                                <td>@prod.ProductDescripntion</td>
+                                <td>@prod.ProductDescription</td>
                                 <td class="text-center">
-                                    @if (!prod.IsDelete)
+                                    @if (!prod.IsDeleted)
                                     {
                                         <button class="btn btn-primary" @onclick="() => EditProduct(prod.ProductId)">Sửa</button>
                                         <button class="btn btn-danger" @onclick="() => HideProd(prod.ProductId)">Ẩn</button>

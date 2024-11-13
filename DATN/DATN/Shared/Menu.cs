@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DATN.Shared
 {
@@ -12,11 +8,12 @@ namespace DATN.Shared
         [Key]
         public int MenuId { get; set; }
         public string MenuName { get; set; }
-        public string? MenuDescription { get; set; }
+        public string MenuDescription { get; set; }
         public decimal PriceCombo { get; set; }
-        public bool IsDelete { get; set; }
+        public byte[] MenuImage { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public ICollection<MenuItem> MenuItems { get; set; }
+        public virtual ICollection<MenuItem> MenuItems { get; set; }
 
     }
 }

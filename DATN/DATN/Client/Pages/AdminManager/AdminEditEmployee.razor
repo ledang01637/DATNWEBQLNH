@@ -1,0 +1,154 @@
+﻿@page "/editemployee/{employeeId:int}"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">CHỈNH SỬA DANH MỤC</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@employee" OnValidSubmit="EditEmployee" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="EmployeeName" class="control-label"><strong>EmployeeName</strong></label>
+                            <input id="EmployeeName" @bind="employee.EmployeeName" class="form-control" placeholder="EmployeeName" />
+                            <ValidationMessage For="@(() => employee.EmployeeName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Address" class="control-label"><strong>Address</strong></label>
+                            <input id="Address" @bind="employee.Address" class="form-control" placeholder="Address" />
+                            <ValidationMessage For="@(() => employee.Address)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="PhoneNumber" class="control-label"><strong>PhoneNumber</strong></label>
+                            <input type="number" id="PhoneNumber" @bind="employee.PhoneNumber" class="form-control" placeholder="PhoneNumber" />
+                            <ValidationMessage For="@(() => employee.PhoneNumber)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Email" class="control-label"><strong>Email</strong></label>
+                            <input type="email" id="Email" @bind="employee.Email" class="form-control" placeholder="Email" />
+                            <ValidationMessage For="@(() => employee.Email)" />
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="Position" class="control-label"><strong>Position</strong></label>
+                            <input id="Position" @bind="employee.Position" class="form-control" placeholder="Position" />
+                            <ValidationMessage For="@(() => employee.Position)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="HireDate" class="control-label"><strong>HireDate</strong></label>
+                            <input type="date" id="HireDate" @bind="employee.HireDate" class="form-control" placeholder="HireDate" />
+                            <ValidationMessage For="@(() => employee.HireDate)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="TotalRewardPoint" class="control-label"><strong>Salary</strong></label>
+                            <input type="number" id="TotalRewardPoint" @bind="employee.Salary" class="form-control" placeholder="Salary" />
+                            <ValidationMessage For="@(() => employee.Salary)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Cập Nhật</button>
+                                <a href="/admincategorymanage" class="btn btn-secondary mx-2">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int employeeId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Employee employee = new DATN.Shared.Employee();
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEditEmployee();
+        isLoaded = true;
+    }
+
+    private async Task LoadEditEmployee()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<Employee>($"api/Employee/{employeeId}");
+            if (response != null)
+            {
+                employee = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy danh mục.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditEmployee()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Employee/{employeeId}", employee);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminemployee");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật danh mục: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+}

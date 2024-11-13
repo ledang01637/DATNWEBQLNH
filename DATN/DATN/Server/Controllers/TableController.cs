@@ -23,6 +23,12 @@ namespace DATN.Server.Controllers
             return _TableService.GetTable();
         }
 
+        [HttpPost("GetTableInclude")]
+        public Table GetTableInclude([FromBody] int tableId)
+        {
+            return _TableService.GetTableInclude(tableId);
+        }
+
         [HttpPost("AddTable")]
         public Table AddTable(Table Table)
         {

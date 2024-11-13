@@ -1,4 +1,5 @@
 ﻿@page "/genQR"
+@layout LayoutAdmin
 @inject IJSRuntime JS
 @inject HttpClient httpClient
 @inject LocalStorageService _localStorageService
@@ -13,7 +14,7 @@
         </div>
         <div class="form-group">
             <label for="numberTable" class="form-label">Số bàn</label>
-            <InputSelect class="form-control" @bind-Value="qrModel.NumberTable" id="numberTable" name="numberTable">
+            <InputSelect class="form-control text-white" @bind-Value="qrModel.NumberTable" id="numberTable" name="numberTable">
                 @{
                     <option value="0" disabled selected>Chọn số bàn</option>
                     foreach(var item in tables)

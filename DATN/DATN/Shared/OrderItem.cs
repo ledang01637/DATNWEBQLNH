@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -16,9 +12,11 @@ namespace DATN.Shared
         public int Quantity { get; set; }
         public decimal Price { get; set; }
         public decimal TotalPrice { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public Order Orders { get; set; }
-        public Product Products { get; set; }
+        [JsonIgnore]
+        public virtual Order Orders { get; set; }
+        public virtual Product Products { get; set; }
 
     }
 }

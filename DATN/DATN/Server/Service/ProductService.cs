@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -18,6 +19,14 @@ namespace DATN.Server.Service
         {
             return _context.Products.ToList();
         }
+
+        public List<Product> GetProductInclude()
+        {
+            var listPro = _context.Products
+                .Include(a => a.Units).ToList();
+            return listPro ?? new List<Product>();
+        }
+
         public Product AddProduct(Product Product)
         {
             _context.Add(Product);
@@ -58,9 +67,9 @@ namespace DATN.Server.Service
             existing.ProductName = update.ProductName;
             existing.Price = update.Price;
             existing.CategoryId = update.CategoryId;
-            existing.ProductDescripntion = update.ProductDescripntion;
+            existing.ProductDescription = update.ProductDescription;
             existing.ProductImage = update.ProductImage;
-            existing.IsDelete = update.IsDelete;
+            existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);
             _context.SaveChanges();

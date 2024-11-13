@@ -1,33 +1,7 @@
-﻿
-.line4-31-group3119-31-iphone13,
-.line5-31-group3119-31-iphone13,
-.line6-31-group3119-31-iphone13 {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-top: 2px solid var(--color-black);
-    box-sizing: border-box;
-    width: 20px;
-    height: 2px;
+﻿*{
+    margin: 0px;
+    padding: 0px;
 }
-
-.line5-31-group3119-31-iphone13,
-.line6-31-group3119-31-iphone13 {
-    top: 9px;
-    width: 26px;
-}
-
-.line6-31-group3119-31-iphone13 {
-    top: 18px;
-    width: 20px;
-}
-
-.line4-31-group3119-31-iphone13-parent {
-    width: 24px;
-    height: 20px;
-    position: relative;
-}
-
 .frame-div {
     display: flex;
     flex-direction: column;
@@ -35,7 +9,9 @@
     justify-content: flex-start;
     padding: var(--padding-2xl) 0 0;
 }
-
+.nice-select {
+    display: none !important;
+}
 .foodgo {
     margin: 0;
     position: relative;
@@ -45,6 +21,7 @@
     font-family: inherit;
     display: inline-block;
     min-width: 129px;
+    font-family: 'Dancing Script', cursive;
 }
 
 .ellipse4-31-iphone13mini-1-icon {
@@ -67,7 +44,7 @@
     align-self: stretch;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: var(--gap-xl);
 }
@@ -105,7 +82,6 @@
     justify-content: flex-start;
     padding: 1px 0 0;
     box-sizing: border-box;
-    font-family: var(--font-roboto);
     font-weight: 500;
     font-size: var(--font-size-lg);
     color: var(--color-darkslategray);
@@ -140,7 +116,7 @@
 .frame-wrapper {
     align-self: stretch;
     flex-direction: row;
-    padding: 0 var(--padding-lg) 0 9px;
+/*    padding: 0 var(--padding-lg) 0 9px;*/
     box-sizing: border-box;
 }
 
@@ -204,16 +180,16 @@ span {
 }
 ::-webkit-scrollbar {
     border-radius: 10px;
-    width: 12px;
+    width: 8px;
     height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #FFCCCC;
+    background: #f9f9f9;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(#FFCC33,#FF9900);
+    background: #dde3e9;
     border-radius: 3px;
 }
 
@@ -240,7 +216,6 @@ span {
     text-align: left;
     font-size: 45px;
     color: var(--color-darkslategray);
-    font-family: var(--font-lobster);
 }
 
 .khai-v,
@@ -525,12 +500,6 @@ span {
         font-size: 16px;
     }
 
-.foodcustom {
-    /* min-width: 390px;
-  max-width: 844px !important; */
-    font-family: var(--font-lobster);
-}
-
 .image-container {
     position: relative;
     width: 100%;
@@ -572,7 +541,73 @@ span {
     padding: 0;
 }
 
-/* Màn hình lớn hơn như máy tính bảng (iPad) */
+/* CSS cho nút gọi điện */
+
+#callStaffBtn{
+    background: #00ff90
+}
+#closeBtn {
+    background: #ff6a00
+}
+
+.call-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(245, 219, 194, 0.971);
+    color: rgb(5, 5, 5);
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+    .call-button:hover {
+        background-color: #f7ba60;
+        transform: scale(1.1);
+    }
+
+.expand-buttons {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+    .expand-buttons button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        background-color: rgba(245, 219, 194, 0.971);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+        .expand-buttons button:hover {
+            background-color: #f7ba60;
+            transform: scale(1.1);
+        }
+
+#scrollToTopBtn {
+    z-index: 9999;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    line-height: 50px;
+}
+
+
 @media screen and (max-width: 768px) {
     .drink-parent {
         justify-content: center;
@@ -580,11 +615,35 @@ span {
 
     .foodcustom {
         min-width: 100%;
-        max-width: 100%; /* Điều chỉnh để vừa với màn hình */
+        max-width: 100%;
+    }
+    #scrollToTopBtn {
+        bottom: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        line-height: 40px;
     }
 }
 
-/* Màn hình điện thoại lớn hơn 480px */
+@media (max-width: 576px) {
+    .call-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        bottom: 40px;
+        right: 25px;
+    }
+    .expand-buttons button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        bottom: 110px;
+        right: 25px;
+    }
+}
+
 @media screen and (max-width: 480px) {
     .drink-parent {
         justify-content: center;
@@ -593,7 +652,7 @@ span {
     .foodcustom {
         min-width: 100%;
         max-width: 100%;
-        padding: 10px; /* Thêm khoảng cách padding nếu cần */
+        padding: 10px
     }
 
     .rectangle-parent9,

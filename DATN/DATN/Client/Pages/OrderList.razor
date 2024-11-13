@@ -1,6 +1,7 @@
 ﻿@page "/order-list"
 @using DATN.Client.Service
 @using DATN.Shared
+@layout MainLayout
 @inject HttpClient httpClient
 @inject CartService _cartService
 @inject NavigationManager Navigation
@@ -12,15 +13,9 @@
     <div class="frame-parent">
         <div class="frame-wrapper">
             <div class="frame-group">
-                <div class="frame-container">
-                    <div class="frame-div">
-                        <div class="line4-31-group3119-31-iphone13-parent">
-                            <div class="line4-31-group3119-31-iphone13"></div>
-                            <div class="line5-31-group3119-31-iphone13"></div>
-                            <div class="line6-31-group3119-31-iphone13"></div>
-                        </div>
-                    </div>
-                    <h1 class="foodgo">Foodgo</h1>
+                <div class="frame-container d-flex align-items-center justify-content-between">
+                    <a class="nav-link" href="/"><i class="fas fa-arrow-left fs-2"></i></a>
+                    <h1 class="foodgo m-0">Foodgo</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
                         <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
                     </div>
@@ -30,57 +25,73 @@
 
     </div>
 </section>
-<div class="container mt-4">
+<div class="container mt-3 mb-4">
     <h4 style="text-align: center;">Danh sách gọi món</h4>
-    @if (cartItems == null)
+    @if (Carts == null)
     {
         <p>Loading...</p>
     }
     else
     {
-        @foreach (var item in cartItems)
-        {
-            <div class="card mb-3 p-2 shadow-sm" style="max-width: 400px; border-radius: 15px;">
-                <div class="row">
-                    <div class="col-3">
-                        <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductImage)" class="img-fluid rounded" alt="Chicken Burger">
-                    </div>
-                    <div class="col-7">
-                        <div class="card-body p-2">
-                            <h5 class="card-title mb-1">@item.ProductName</h5>
-                            <p class="text-muted mb-1">Burger Factory LTD</p>
-                            <p class="price text-danger mb-1">@item.Price.ToString("###,0##") VND</p>
-                            <p class="mb-0">Số lượng: @item.Quantity</p>
+        <ul class="list-group" id="cart-items">
+            @if (Carts != null && Carts.Count > 0)
+            {
+                foreach (var c in Carts)
+                {
+                    <li class="list-group-item d-flex align-items-center">
+                        <img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="@c.ProductName" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;" />
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">@c.ProductName</div>
+                            <div class="text-danger">@c.Price.ToString("N0")đ</div>
                         </div>
-                    </div>
-                    <div class="col-2 d-flex align-items-center">
-                        <a @onclick="() => RemoveFromCart(item)" class="w-100 h-25 btn-warning rounded d-flex justify-content-center align-items-center">
-                            <i class="fa-solid fa-trash" style="color:#ed1f1f"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        }
+                        <div class="quantity-control">
+                            <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
+                                <span>-</span>
+                            </button>
+                            <span class="badge bg-primary">@c.Quantity</span>
+                            <button type="button" class="btn btn-sm m-2" @onclick="() => IncreaseQuantity(c.ProductId)">
+                                <span>+</span>
+                            </button>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCart(c)">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </li>
 
+                }
+                <li class="list-group-item">
+                    <div class="fw-bold">Ghi chú</div>
+                    <textarea rows="2" @bind="ListCartDTO.Note" class="form-control" placeholder="Thêm ghi chú nếu có..."></textarea>
+                </li>
+            }
+            else
+            {
+                <li class="list-group-item text-center">Không có món ăn</li>
+            }
+        </ul>
+        
     }
 
-
-    <div class="total-section">
+    <div class="total-section mt-3" >
         <div class="d-flex justify-content-between">
-            <p class="mb-0">Tổng tiền</p>
-            <p class="mb-0"><strong>@Total.ToString("###,0##") VND</strong></p>
+            <p class="mb-0 fw-bold">Tổng tiền</p>
+            <p class="mb-0 text-danger"><strong>@Total.ToString("###,0##") VND</strong></p>
         </div>
-        <button @onclick="Order" type="button" class="btn btn-warning w-100 mt-2">
-            Gọi món ăn
-        </button>
+        <div class="d-flex justify-content-between mt-2">
+            <button @onclick="Order" type="button" class="btn btn-warning w-100 me-1">
+                Gọi món ăn
+            </button>
+        </div>
     </div>
 </div>
 <nav class="navbar fixed-bottom navbar-light bg-light">
     <div class="container-fluid justify-content-around">
         <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
-        <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
+        <a href="/order-list" class="nav-link"><i class="bi bi-card-list" style="color: orange"></i></a>
         <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
-        <a href="#" class="nav-link"><i class="bi bi-person"></i></a>
+        <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
     </div>
 </nav>
 

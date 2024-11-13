@@ -52,7 +52,7 @@
                             <td>@item.DiscountValue</td>
                             <td>@item.ExpriationDate</td>
                             <td class="text-center">
-                                @if (!item.IsActive)
+                                @if (!item.IsAcctive)
                                 {
                                     <button class="btn btn-primary" @onclick="() => EditVoucher(item.VoucherId)">Sửa</button>
                                     <button class="btn btn-danger" @onclick="() => HideVoucher(item.VoucherId)">Ẩn</button>

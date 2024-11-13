@@ -54,9 +54,9 @@ namespace DATN.Server.Service
             {
                 return null;
             }
-            existing.Roleid = update.Roleid;
+            existing.RoleId = update.RoleId;
             existing.AccountId = update.AccountId;
-            existing.IsActive = update.IsActive;
+            existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);
             _context.SaveChanges();

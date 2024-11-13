@@ -29,8 +29,7 @@ namespace DATN.Server.Controllers
             return _FloorService.AddFloor(new Floor
             {
                 NumberFloor = Floor.NumberFloor,
-                IsActive = Floor.IsActive,
-
+                IsDeleted = Floor.IsDeleted,
             });
         }
 

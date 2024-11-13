@@ -1,23 +1,19 @@
-﻿@page "/Login"
+﻿@page "/login"
+@using DATN.Client.Service
+@layout MainLayout
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider authenticationStateProvider
 @inject LocalStorageService _localStorageService
 
-<style>
-    body {
-        background-color: #f8f9fa;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
 
+<style>
     .login-card {
         background-color: white;
         border-radius: 10px;
         padding: 30px;
-        width: 100%;
+        width: 90%;
         max-width: 400px;
         box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
     }
@@ -34,17 +30,27 @@
         .btn-primary-custom:hover {
             background-color: #e67e22;
         }
+
+    .mobile-footer{
+        display: none !important;
+    }
 </style>
 
-<div class="login-card">
+<div class="align-items-start">
+    <a href="/" class="link-dark fw-semibold">
+        <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+    </a>
+</div>
+
+<div class="login-card position-absolute top-50 start-50 translate-middle">
     <h3 class="text-center mb-4">Đăng nhập</h3>
     <EditForm Model="@loginUser" OnValidSubmit="HandleLogin">
         <DataAnnotationsValidator />
 
 
         <div class="mb-3">
-            <InputText class="form-control" placeholder="Username" @bind-Value="loginUser.Username" />
-            <ValidationMessage For="@(() => loginUser.Username)" />
+            <InputText class="form-control" placeholder="Email" @bind-Value="loginUser.Email" />
+            <ValidationMessage For="@(() => loginUser.Email)" />
         </div>
         <div class="mb-3">
             <InputText type="password" class="form-control" placeholder="Mật khẩu" @bind-Value="loginUser.Password" />
@@ -93,3 +99,9 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+

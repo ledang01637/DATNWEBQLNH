@@ -1,29 +1,131 @@
-﻿using Microsoft.JSInterop;
+﻿using DATN.Client.Pages.AdminManager;
+using DATN.Shared;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.JSInterop;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace DATN.Client.Pages
 {
     public partial class VoiceCallCustomer
     {
-        private string token = "eyJjdHkiOiJzdHJpbmdlZS1hcGk7dj0xIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJqdGkiOiJTSy4wLjZoSHpGNDlFTHlQMDlUc0Q4VTAwbENERlhEMTdQeS0xNzI2MzAxMzY1IiwiaXNzIjoiU0suMC42aEh6RjQ5RUx5UDA5VHNEOFUwMGxDREZYRDE3UHkiLCJleHAiOjE3Mjg4OTMzNjUsInVzZXJJZCI6ImN1c3RvbWVyIn0.H34y6OkC6S_BZAhjTW073WHL-7rGqBeax1j9kUSnk-8  ";
-        private string from = "customer";
-        private string to = "manager";
-        private async Task SetupCall()
+        public DotNetObjectReference<VoiceCallCustomer> dotNetObjectReference;
+
+        private string token;
+        private string from;
+        private string to;
+
+        protected override async Task OnInitializedAsync()
         {
-            await JS.InvokeVoidAsync("setupCall", token, from, to);
+           
+            try
+            {
+                dotNetObjectReference = DotNetObjectReference.Create(this);
+
+                token = await _localStorageService.GetItemAsync("n");
+                to = await httpClient.GetStringAsync("api/Voice/get-message");
+
+                if (token is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+                from = GetTableNumberFromToken(token);
+                if (from is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+                if(to is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "To is null");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+                await SetupCall(token, from.ToLower(), to.ToLower());
+                await setupVideo();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Không thể kết nối: {ex.Message}");
+                await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
+                Navigation.NavigateTo("/");
+                return;
+            }
+        }
+
+        private async Task SetupCall(string token, string from, string to)
+        {
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/JwtTokenValidator/ValidateToken/", token);
+                if(response.IsSuccessStatusCode)
+                {
+                    var handler = new JwtSecurityTokenHandler();
+
+                    if (handler.ReadToken(token) is not JwtSecurityToken jsonToken)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Token is invalid");
+                    }
+                    else
+                    {
+                        bool isCall = true;
+                        await JS.InvokeVoidAsync("setupCall", token, from, to, isCall, dotNetObjectReference);
+                        await JS.InvokeVoidAsync("layout");
+                    }
+                }
+
+                
+            }
+            catch(Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", ex);
+                Navigation.NavigateTo("/");
+            }
         }
         private async Task setupVideo()
         {
-            await JS.InvokeVoidAsync("setupVideo", "answerCallButton", "callButton", "remoteVideo", "localVideo");
+            await JS.InvokeVoidAsync("setupVideo", "btn-answer", "btn-call", "remoteVideo", "localVideo");
         }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+        [JSInvokable("EndCall")]
+        public void EndCall()
         {
-            if (firstRender)
-            {
-                await SetupCall();
-                await setupVideo();
-            }
+            Navigation.NavigateTo("/");
         }
+
+        [JSInvokable("BusyCall")]
+        public async void BusyCall()
+        {
+            await JS.InvokeVoidAsync("showAlert","warning","Thông báo","Nhân viên đang có cuộc gọi khác");
+            await Task.Delay(500);
+        }
+
+        [JSInvokable("LstCall")]
+
+        public async Task LstCall(List<CallInfo> numberCall)
+        {
+
+        }
+        private static string GetTableNumberFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+            var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
+            return userId?.Value;
+        }
+    }
+    public class CallInfo
+    {
+        public string FromNumber { get; set; }
+        public string Time { get; set; }
     }
 }

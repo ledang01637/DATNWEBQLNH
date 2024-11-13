@@ -56,7 +56,7 @@ namespace DATN.Server.Service
             }
             existing.MenuId = update.MenuId;
             existing.Products = update.Products;
-            existing.IsDelete = update.IsDelete;
+            existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);
             _context.SaveChanges();

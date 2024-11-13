@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace DATN.Shared
 {
@@ -13,9 +8,9 @@ namespace DATN.Shared
         public int MenuItemId { get; set; }
         public int MenuId { get; set; }
         public int ProductId { get; set; }
-        public bool IsDelete { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public Product Products { get; set; }
-        public Menu Menus { get; set; }
+        public virtual Product Products { get; set; }
+        public virtual Menu Menus { get; set; }
     }
 }

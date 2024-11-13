@@ -1,5 +1,6 @@
 @page "/"
 @using DATN.Client.Service
+@layout MainLayout
 @inject HttpClient httpClient
 @inject LocalStorageService _localStorageService
 @inject NavigationManager Navigation
@@ -7,59 +8,52 @@
 @inject CartService _cartService
 
 
+@* <div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">Contact</a>
+</div>
 
+<div id="overlay" class="overlay" @onclick="() => Navbar(false)"></div> *@
 
 <section class="iphone-13-mini-2-inner mb-2">
     <div class="frame-parent">
         <div class="frame-wrapper">
             <div class="frame-group">
                 <div class="frame-container">
-                    <div class="frame-div">
-                        <div class="line4-31-group3119-31-iphone13-parent">
-                            <div class="line4-31-group3119-31-iphone13"></div>
-                            <div class="line5-31-group3119-31-iphone13"></div>
-                            <div class="line6-31-group3119-31-iphone13"></div>
-                        </div>
-                    </div>
-                    <h1 class="foodgo">Foodgo</h1>
+                    <i class="fas fa-bars fa-2x fs-1" style="cursor: pointer;"></i>
+                    <h1 class="foodgo">Tech Titans</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
                         <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
                     </div>
                 </div>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm sản phẩm..." />
-                </div>
             </div>
-        </div>
-        <div class="drink-parent text-center d-flex flex-nowrap justify-content-start justify-content-sm-center">
-            @foreach (var c in categories)
-            {
-                <div class="drink d-flex justify-content-center align-items-center">
-                    <div class="rounded d-flex flex-wrap align-items-center justify-content-center" style="width: 50px; height: 50px; background: #e9d1d1">
-                        <i class="bi bi-cup-straw fs-2 text-white"></i>
-                    </div>
-                    <span class="mt-2 d-block text-dark" style="max-width: 70px;">@c.CategoryName</span>
-                </div>
-            }
         </div>
     </div>
 </section>
-<section class="food_section layout_padding-bottom">
-    <div class="container foodcustom">
 
+<section class="food_section">
+    <div class="container foodcustom">
         <div class="mb-2 ">
             <div id="carouselFade" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
                     @if (menus == null)
                     {
-                        <p>Loading...</p>
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
                     }
                     else if (!menus.Any())
                     {
-                        <p>Empty</p>
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
                     }
                     else
                     {
@@ -105,7 +99,7 @@
         </div>
 
         <div class="heading_container heading_center">
-            <h2>
+            <h2 class="header_custom">
                 Our Menu
             </h2>
         </div>
@@ -114,7 +108,9 @@
             <li class="active" data-filter="*">All</li>
             @if (categories == null)
             {
-
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             }
             else
             {
@@ -134,8 +130,17 @@
             }
             else
             {
-                <div class="col-6 text-start ">
+                <div class="col-lg-6 text-start fw-bold">
                     Món ăn
+                </div>
+                <div class="col-lg-6 text-end ">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm..." />
+                    </div>
+                    @*                     <button @onclick="ToggleGridView" class="btn"><i class="fas fa-th"></i></button> *@
                 </div>
             }
         </div>
@@ -144,32 +149,34 @@
             <div class="row grid">
                 @if (products == null)
                 {
-                    <p>Loading...</p>
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
                 }
                 else
                 {
 
                     foreach (var p in products)
                     {
-                        <div class="col-sm-6 col-lg-4 all @(p.CategoryId)">
+                        <div class="col-sm-6 col-md-4 all @(p.CategoryId) mb-4">
                             <div class="box">
-                                <div>
-                                    <div class="img-box">
-                                        <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="">
-                                    </div>
-                                    <div class="detail-box">
-                                        <h5>
-                                            @p.ProductName
-                                        </h5>
-                                        <p style="display: @(p.ProductDescripntion == null ? "none" : "block")">@p.ProductDescripntion</p>
-                                        <div class="options">
-                                            <h6>
-                                                @p.Price.ToString("###,0##")
-                                            </h6>
-                                            <a @onclick="() => AddToCart(p)" class="nav-link btn">
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </a>
-                                        </div>
+                                <div class="img-box">
+                                    <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="Image">
+                                </div>
+                                <div class="detail-box">
+                                    <h5>
+                                        @p.ProductName
+                                    </h5>
+                                    <p style="display: @(p.ProductDescription == null ? "none" : "block")">@p.ProductDescription</p>
+                                    <div class="options d-flex justify-content-between align-items-center">
+                                        <h6>
+                                            @p.Price.ToString("###,0##") đ
+                                        </h6>
+                                        <a @onclick="() => AddToCart(p)" class="nav-link btn">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -180,12 +187,137 @@
             </div>
         </div>
     </div>
+    @if (carts != null && carts.Count > 0)
+    {
+        <div class="cart-footer fixed-bottom">
+            <div class="cart-icon" data-bs-toggle="modal" data-bs-target="#cartModal">
+                <i class="fas fa-shopping-cart fa-2x"></i>
+                <span class="badge bg-danger">@TotalQuantity</span>
+            </div>
+            <div class="total-price text-secondary">@TotalAmount.ToString("N0") VND</div>
+            <button class="checkout-btn" @onclick="NaviOrderList">Đặt món</button>
+        </div>
+    }
+
 </section>
-<nav class="navbar fixed-bottom navbar-light bg-light">
-    <div class="container-fluid justify-content-around">
-        <a href="#" class="nav-link"><i class="bi bi-house"></i></a>
-        <a href="#" class="nav-link"><i class="bi bi-card-list"></i></a>
-        <a href="#" class="nav-link"><i class="bi bi-bookmark"></i></a>
-        <a href="#" class="nav-link"><i class="bi bi-person"></i></a>
+
+<button id="callButtonIndex" class="call-button">
+    <i class="fa-solid fa-user"></i>
+</button>
+
+<button @onclick="ScrollToTop" id="scrollToTopBtn" class="btn btn-outline-primary position-fixed top-50 end-0 translate-middle-y m-2 rounded-circle" style="display: none; width: 40px; height: 40px;">
+    <i class="fa-solid fa-arrow-up position-absolute top-50 start-50 translate-middle"></i>
+</button>
+
+
+<!-- Các nút mở rộng -->
+<div class="expand-buttons" id="expandButtons">
+    <button @onclick="NaviCustomer" id="callStaffBtn">
+        <i class="fa-solid fa-phone"></i>
+    </button>
+    <button id="messageStaffBtn" data-bs-toggle="modal" data-bs-target="#sendMasageModal">
+        <i class="fa-regular fa-message"></i>
+    </button>
+    <button id="closeBtn">
+        <i class="fa-solid fa-times"></i>
+    </button>
+</div>
+
+<!-- Icon giỏ hàng cố định ở dưới -->
+@if (carts == null || carts.Count == 0)
+{
+    if (products != null && products.Any())
+    {
+        <nav class="navbar fixed-bottom navbar-light bg-light">
+            <div class="container-fluid justify-content-around">
+                <a href="/" class="nav-link"><i class="bi bi-house" style="color: orange"></i></a>
+                <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
+                <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
+                <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
+            </div>
+        </nav>
+    }
+}
+
+<!-- Modal giỏ hàng khi bấm vào icon -->
+
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cartModalLabel">Món đã chọn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="cart-items">
+                    @if (carts != null && carts.Count > 0)
+                    {
+                        foreach (var c in carts)
+                        {
+                            <li class="list-group-item d-flex align-items-center">
+                                <img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="@c.ProductName" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;" />
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold">@c.ProductName</div>
+                                    <div class="text-danger">@c.Price.ToString("N0")đ</div>
+                                </div>
+                                <div class="quantity-control">
+                                    <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
+                                        <span>-</span>
+                                    </button>
+                                    <span class="badge bg-primary">@c.Quantity</span>
+                                    <button type="button" class="btn btn-sm m-2" @onclick="() => IncreaseQuantity(c.ProductId)">
+                                        <span>+</span>
+                                    </button>
+                                </div>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCart(c)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </li>
+
+                        }
+                        <li class="list-group-item">
+                            <div class="fw-bold">Ghi chú</div>
+                            <textarea rows="2" @bind="note" class="form-control" placeholder="Thêm ghi chú nếu có..."></textarea>
+                        </li>
+                        <li class="list-group-item">
+                            <button class="btn btn-danger" @onclick="RemoveAllCarts">Xóa tất cả</button>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-center">Không có món ăn</li>
+                    }
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="checkout-btn-model" @onclick="NaviOrderList">Đặt món</button>
+            </div>
+        </div>
     </div>
-</nav>
+</div>
+
+<!-- Modal send massage -->
+
+<div class="modal fade" id="sendMasageModal" tabindex="-1" aria-labelledby="sendMasageModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sendMasageModal">Gửi yêu cầu nhân viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea @bind="messageText" class="form-control" rows="3" cols="3"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="checkout-btn-model" @onclick="SendMessage">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

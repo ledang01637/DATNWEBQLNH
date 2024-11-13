@@ -1,0 +1,95 @@
+﻿@page "/invoice-preview"
+@layout MainLayout
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+
+
+<div class="invoice-container" id="invoice-preview">
+    <!-- Invoice Header -->
+    <div class="invoice-header">
+        <h1>LHDMHHNTTLQVHHMNVT</h1>
+        <h2 class="mb-2">NHÀ HÀNG 5 SAO</h2>
+        <h4>HÓA ĐƠN</h4>
+    </div>
+
+    <!-- Invoice Details -->
+    <div class="invoice-details">
+        <div class="row">
+            <div class="col-md-6">
+                <strong>TIỆN NGHI NHÀ HÀNG CỦA CHÚNG TÔI</strong>
+            </div>
+            <div class="col-md-6 text-end">
+                Số bàn: @numberTable<br>
+                Thời gian: @DateTime.Now
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Table -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ảnh</th>
+                <th>Mục</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(carts == null)
+            {
+                <p>Vui lòng thêm sản phẩm</p>
+            }
+            else
+            {
+                foreach(var c in carts)
+                {
+                    <tr>
+                        <td><img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="Product"></td>
+                        <td>@c.ProductName</td>
+                        <td>@c.Quantity</td>
+                        <td>@c.Price.ToString("N0") VND</td>
+                        <td>@Total.ToString("N0") VND</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <!-- Total Section -->
+    @{
+        var TotalTax = Total * Tax;
+        var TotalServiceFee = Total * ServiceFee;
+        var TotalAmount = Total + TotalTax + TotalServiceFee;
+        <div class="total-section-bill text-end">
+            Tổng tiền đơn hàng: @Total.ToString("N0") VND<br>
+            Thuế VAT (10%): @TotalTax.ToString("N0") VND<br>
+            Phí dịch vụ (5%):  @TotalServiceFee.ToString("N0") VND<br>
+            <strong>Tổng tiền thanh toán: @TotalAmount.ToString("N0") VND </strong>
+        </div>
+    }
+
+
+    <!-- Footer Section: Bank Information and Contact Information -->
+    <div class="footer-section">
+        <div>
+            <strong>Thông tin ngân hàng</strong>
+            Ngân hàng: Tiên phong<br>
+            Tên tài khoản: FFOOD<br>
+            Số tài khoản: 123 456 7890
+        </div>
+        <div class="text-end">
+            <strong>Thông tin liên hệ</strong>
+            Email: ffood@teach.com<br>
+            Điện thoại: +84 912 345 678<br>
+            Địa chỉ: 3/2 Hưng Lợi, Ninh Kiều, Cần Thơ
+        </div>
+    </div>
+    <footer class="mt-2" style="text-align: center;"><b>Xin cảm ơn và hẹn gặp lại.</b></footer>
+</div>
+
+<!-- Nút in hóa đơn -->
+<button class="btn btn-primary mt-3" @onclick="PrintBill">In hóa đơn</button>
+<button class="btn btn-success mt-3" @onclick="PrintFromBrowser">Xem trước và in từ trình duyệt</button>

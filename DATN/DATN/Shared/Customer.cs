@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -15,13 +13,18 @@ namespace DATN.Shared
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public string Email { get; set; }
-        public bool IsDeleted { get; set; }
         public int AccountId { get; set; }
-        public decimal TotalRewardPoint { get; set; }
+        public int TotalRewardPoint { get; set; }
+        public bool IsDeleted { get; set; }
+        public virtual Account Accounts { get; set; }
 
-        public Account Accounts { get; set; }
-        public ICollection<Order> Orders { get; set; }
-        public RewardPointe RewardPoints { get; set; }
-        public ICollection<CustomerVoucher> CustomerVouchers { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<RewardPointe> RewardPoints { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<Order> Orders { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<CustomerVoucher> CustomerVouchers { get; set; }
     }
 }

@@ -11,7 +11,6 @@ namespace DATN.Client.Service
     {
         private readonly IJSRuntime _jsRuntime;
         private const string CartKey = "cart";
-
         public CartService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;
@@ -57,5 +56,12 @@ namespace DATN.Client.Service
             var cartJson = JsonSerializer.Serialize(cart);
             await _jsRuntime.InvokeVoidAsync("sessionStorage.setItem", CartKey, cartJson);
         }
+
+        public async Task ClearCart()
+        {
+            var cart = await GetCartAsync();
+            cart.Clear();
+        }
+
     }
 }

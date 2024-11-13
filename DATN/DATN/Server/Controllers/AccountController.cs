@@ -31,7 +31,7 @@ namespace DATN.Server.Controllers
                 CreateDate = Account.CreateDate,
                 UpdateDate = Account.UpdateDate,
                 IsActive = Account.IsActive,
-                UserName = Account.UserName,
+                Email = Account.Email,
                 Password = Account.Password,
 
             });

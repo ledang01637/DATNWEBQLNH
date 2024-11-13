@@ -54,7 +54,7 @@ namespace DATN.Server.Service
             {
                 return null;
             }
-            existing.Shifte_Name = update.Shifte_Name;
+            existing.ShifteName = update.ShifteName;
             existing.StartTime = update.StartTime;
             existing.EndTime = update.EndTime;
             existing.IsDeleted = update.IsDeleted;

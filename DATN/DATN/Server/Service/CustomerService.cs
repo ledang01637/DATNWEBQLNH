@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -17,6 +18,17 @@ namespace DATN.Server.Service
         public List<Customer> GetCustomer()
         {
             return _context.Customers.ToList();
+        }
+        public Customer GetCustomerByAccountId(int accountId)
+        {
+            var customer = _context.Customers.FirstOrDefault(a => a.AccountId == accountId);
+
+            return customer;
+        }
+
+        public List<Customer> GetCustomerInclude()
+        {
+            return _context.Customers.Include(c => c.Accounts).ToList();
         }
         public Customer AddCustomer(Customer Customer)
         {
@@ -60,6 +72,7 @@ namespace DATN.Server.Service
             existing.Email = update.Email;
             existing.IsDeleted = update.IsDeleted;
             existing.AccountId = update.AccountId;
+            existing.TotalRewardPoint = update.TotalRewardPoint;
 
             _context.Update(existing);
             _context.SaveChanges();

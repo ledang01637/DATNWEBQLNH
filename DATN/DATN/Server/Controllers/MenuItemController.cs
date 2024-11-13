@@ -29,9 +29,7 @@ namespace DATN.Server.Controllers
             {
                 MenuId = MenuItem.MenuId,
                 ProductId = MenuItem.ProductId,
-                IsDelete = MenuItem.IsDelete,
-
-
+                IsDeleted = MenuItem.IsDeleted,
             });
         }
 

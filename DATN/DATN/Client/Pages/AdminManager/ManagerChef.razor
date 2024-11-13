@@ -1,0 +1,95 @@
+﻿@page "/manager-chef"
+
+@layout EmployeeLayout
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+
+<style>
+    .food-item {
+        position: relative;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+        .food-item.removing {
+            transition: none;
+        }
+
+    .food-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .food-description {
+        color: #6c757d;
+    }
+
+    .food-list {
+        max-width: 600px;
+        margin: 20px auto;
+    }
+
+    .food-item.removing {
+        opacity: 0.7;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+</style>
+
+<div class="container">
+    <div class="food-list" id="foodList">
+        @if (noteProdReqs != null && noteProdReqs.Count > 0)
+        {
+            @foreach (var cn in noteProdReqs)
+            {
+                <div class="card mb-3" data-id="@cn.TableNumber">
+                    <div class="card-header">
+                        Bàn số: @cn.TableNumber
+                    </div>
+                    <div class="card-body" id="foodList">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Tên</th>
+                                    <th>Số lượng</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            @foreach (var p in cn.ProdReqs)
+                            {
+                                <tbody>
+                                    <tr class="@(p.IsComplete ? "table-success" : "")">
+                                        <td>@p.ProductName</td>
+                                        <td>@p.Quantity</td>
+                                        <td>
+                                            <button disabled="@p.IsComplete" class="btn btn-sm fw-bold custom-table btn-success" @onclick="() => ConfirmRequestAsync(p.ProductId)">
+                                                Xác nhận
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            }
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        Ghi chú: @cn.Note
+                    </div>
+                </div>
+            } 
+        }
+        else
+        {
+            <div class="food-item shadow-sm p-3 rounded">
+                <div class="food-name">
+                    Chưa có món ăn
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

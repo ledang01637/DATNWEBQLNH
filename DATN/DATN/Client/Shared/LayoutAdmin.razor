@@ -1,46 +1,61 @@
-﻿
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 @inject LocalStorageService _localStorageService
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 
 <CascadingAuthenticationState>
+    <AuthorizeView Roles="admin">
+        <Authorized>
+            @* <!-- Your Dialogflow Messenger script and widget -->
+            <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+            <df-messenger intent="WELCOME"
+                          chat-title="Service"
+                          agent-id="5810ed83-bdb4-4084-8ba7-c8c55dc158ce"
+                          language-code="vi"></df-messenger>  *@
 
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Corona Admin</title>
-        <!-- plugins:css -->
-        <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
-        <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
-        <!-- endinject -->
-        <!-- Plugin css for this page -->
-        <link rel="stylesheet" href="assets/vendors/jvectormap/jquery-jvectormap.css">
-        <link rel="stylesheet" href="assets/vendors/flag-icon-css/css/flag-icon.min.css">
-        <link rel="stylesheet" href="assets/vendors/owl-carousel-2/owl.carousel.min.css">
-        <link rel="stylesheet" href="assets/vendors/owl-carousel-2/owl.theme.default.min.css">
-        <!-- End plugin css for this page -->
-        <!-- inject:css -->
-        <!-- endinject -->
-        <!-- Layout styles -->
-        <link rel="stylesheet" href="assets/css/style.css">
-        <!-- End layout styles -->
-        <link rel="shortcut icon" href="assets/images/favicon.png" />
-    </head>
-
-    <div class="container-scroller col-md-12" style="max-height: 950px">
-        <NavAdmin />
-        <!-- partial -->
-        <div class="container-fluid page-body-wrapper">
-            <!-- partial -->
-            <div class="col-md-12 p-5">
-                @Body
+            <head>
+                <!-- Required meta tags -->
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <title>Corona Admin</title>
+                <!-- plugins:css -->
+                <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+                <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+                <!-- endinject -->
+                <!-- Plugin css for this page -->
+                <link rel="stylesheet" href="assets/vendors/jvectormap/jquery-jvectormap.css">
+                <link rel="stylesheet" href="assets/vendors/flag-icon-css/css/flag-icon.min.css">
+                <link rel="stylesheet" href="assets/vendors/owl-carousel-2/owl.carousel.min.css">
+                <link rel="stylesheet" href="assets/vendors/owl-carousel-2/owl.theme.default.min.css">
+                <!-- End plugin css for this page -->
+                <!-- inject:css -->
+                <!-- endinject -->
+                <!-- Layout styles -->
+                <link rel="stylesheet" href="assets/css/style.css">
+                <!-- End layout styles -->
+                <link rel="shortcut icon" href="assets/images/favicon.png" />
+            </head>
+            <div class="container-scroller col-md-12 text-dark bg-white mb-2" style="max-height: 950px">
+                <NavAdmin />
+                <!-- partial -->
+                <div class="container-fluid page-body-wrapper">
+                    <!-- partial -->
+                    <div class="col-md-12 p-2">
+                        @Body
+                    </div>
+                    <!-- main-panel ends -->
+                </div>
             </div>
-            <!-- main-panel ends -->
-        </div>
-    </div>
-
+        </Authorized>
+        <NotAuthorized>
+            <div class="container-fluid access-denied-container">
+                <div class="access-denied-card">
+                    <h1>403</h1>
+                    <p><strong>Access Denied</strong></p>
+                    <p>You do not have permission to access this page.</p>
+                    <a href="/" class="btn btn-primary mt-3">Go to Homepage</a>
+                </div>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
 </CascadingAuthenticationState>
-
-

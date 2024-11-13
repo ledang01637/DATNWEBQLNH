@@ -44,7 +44,7 @@ namespace DATN.Client.Pages.AdminManager
                 var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
                 if (category != null)
                 {
-                    category.IsDelete = true;
+                    category.IsDeleted = true;
                     await httpClient.PutAsJsonAsync($"api/Category/EditCategory/{categoryId}", category);
                     await LoadCategories();
                     StateHasChanged();
@@ -63,7 +63,7 @@ namespace DATN.Client.Pages.AdminManager
                 var category = listCategory.FirstOrDefault(p => p.CategoryId == categoryId);
                 if (category != null)
                 {
-                    category.IsDelete = false;
+                    category.IsDeleted = false;
                     await httpClient.PutAsJsonAsync($"api/Category/EditCategory/{categoryId}", category);
                     await LoadCategories();
                     StateHasChanged();

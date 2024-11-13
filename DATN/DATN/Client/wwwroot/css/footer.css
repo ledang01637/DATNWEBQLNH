@@ -1,0 +1,43 @@
+﻿body, .mobile-footer {
+    font-family: 'Poppins', sans-serif;
+}
+
+.mobile-footer {
+    background-color: #f8f9fa;
+    color: #343a40;
+    padding: 20px 0;
+    text-align: center;
+    min-height: 300px;
+}
+
+.footer-link {
+    color: #343a40;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+    .footer-link:hover {
+        color: #007bff;
+    }
+
+.social-link {
+    color: #343a40;
+    text-decoration: none;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+    .social-link:hover {
+        color: #007bff;
+        transform: scale(1.2);
+    }
+
+.mobile-footer p {
+    margin-bottom: 0.5rem;
+    font-size: 14px;
+}
+
+.mobile-footer .small {
+    font-size: 12px;
+    color: #6c757d;
+}

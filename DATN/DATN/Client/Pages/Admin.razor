@@ -1,89 +1,172 @@
-﻿@page "/information/{accountId:int}"
+﻿@page "/information"
 
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-@if (isLoaded)
-{
-    <div class="container-fluid col-md-12 row m-auto" style="height: 700px">
-        <div class="col-md-12 bg-dark">
-            <div class="col-md-12 p-1">
-                <h2>HỒ SƠ CỦA TÔI</h2>
-                <h6>Quản lý thông tin hồ sơ để bảo mật tài khoản</h6>
-            </div>
-            <hr class="border-3 bg-dark" />
-            <div class="col-md-12 row">
-                <div class="col-md-4 border-end">
-                    <div class="bg-danger rounded-pill p-4 mt-5 m-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-person-fill rounded-pill" viewBox="0 0 16 16">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
-                        </svg>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    canvas {
+        max-width: 600px;
+        margin: auto;
+    }
+
+    .form-label {
+        color: white;
+    }
+</style>
+
+<AuthorizeView Roles="1,2">
+    <Authorized>
+
+        @if (isLoaded)
+        {
+            <div class="container-scroller">
+                <div class="container-fluid">
+                    <div class="">
+                        <div class="content-wrapper">
+                            <div class="row">
+                                <div class="col-lg-6 grid-margin stretch-card">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Biểu đồ doanh thu</h4>
+                                            <canvas id="revenueChart" style="height:250px; width: 100%"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4 grid-margin stretch-card">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Bar chart</h4>
+                                            <canvas id="barChart" style="height:230px"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 grid-margin stretch-card">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <form>
+                                                <div class="mb-3">
+                                                    <label for="name" class="form-label">Họ và Tên</label>
+                                                    <input type="text" class="form-control" style="color:black;" id="name" placeholder="Nhập họ và tên" @bind="name" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="email" class="form-label">Email</label>
+                                                    <input type="email" class="form-control" style="color:black;" id="email" placeholder="Nhập email" @bind="email" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="phone" class="form-label">Số Điện Thoại</label>
+                                                    <input type="tel" class="form-control" style="color:black;" id="phone" placeholder="Nhập số điện thoại" @bind="phone" readonly>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="address" class="form-label">Địa Chỉ</label>
+                                                    <input type="text" class="form-control" style="color:black;" id="address" placeholder="Nhập địa chỉ" @bind="address" readonly>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 grid-margin stretch-card">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Doughnut chart</h4>
+                                            <canvas id="doughnutChart" style="height:250px"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-8">
-                    @foreach (var account in listAccount)
-                    {
-                        var connectEmployee = listEmployee.Find(c => c.AccountId == account.AccountId);
-                        if (connectEmployee != null)
-                        {
-                            <form>
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Name</label>
-                                    <input type="text" class="form-control border border-secondary p-4" id="name" value="@connectEmployee.EmployeeName" readonly />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control border border-secondary p-4" id="email" value="@connectEmployee.Email" readonly />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control border border-secondary p-4" id="phone" value="@connectEmployee.PhoneNumber" readonly />
-                                </div>
-                                <div class="mb-3">
-                                    <label for="address" class="form-label">Địa chỉ</label>
-                                    <input type="text" class="form-control border border-secondary p-4" id="address" value="@connectEmployee.Address" readonly />
-                                </div>
-                            </form>
-                        }
-                    }
-                </div>
             </div>
-        </div>
-    </div>
-}
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p class="text-danger">@errorMessage</p>
-}
-else
-{
-    <p>Loading...</p>
-}
+            <script>
+                var colors = ['#007bff', '#28a745', '#333333', '#c3e6cb', '#dc3545', '#6c757d'];
+
+                // Biểu đồ doanh thu (Revenue chart)
+                var revenueChart = document.getElementById("revenueChart");
+                if (revenueChart) {
+                    new Chart(revenueChart, {
+                        type: 'line',
+                        data: {
+                            labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+                            datasets: [{
+                                label: 'Doanh thu (triệu VND)',
+                                data: [120, 190, 300, 500, 200, 300, 400, 200, 250, 400, 450, 320],
+                                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                borderColor: '#007bff',
+                                borderWidth: 3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function (value) { return value + " triệu"; }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            </script>
+
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-danger">@errorMessage</p>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+
+    </Authorized>
+    <NotAuthorized>
+        <h3>Không có quyền truy cập</h3>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    [Parameter] public int accountId { get; set; }
-
-    private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
-    private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
-    private List<DATN.Shared.Account> filter = new List<DATN.Shared.Account>();
+    private int accountId;
+    private string name;
+    private string email;
+    private string phone;
+    private string address;
     private bool isLoaded = false;
     private string errorMessage;
+    private string username;
+    private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
+    private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
+
     protected override async Task OnInitializedAsync()
     {
-        await Load(); // Load all accounts
+        username = GetQueryParameter("username");
+        await Load();
+        await LoadAccountByUsername(username);
         isLoaded = true;
+    }
+
+    private string GetQueryParameter(string key)
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        return query.TryGetValue(key, out var value) ? value.ToString() : null;
     }
 
     private async Task Load()
     {
         try
         {
-            // Retrieve all accounts
             listAccount = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
             listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
-            filter = listAccount;
         }
         catch (Exception ex)
         {
@@ -91,43 +174,58 @@ else
         }
     }
 
-    private async Task LoadById(int AccountId)
+    private async Task LoadAccountByUsername(string username)
     {
+        if (listAccount == null || !listAccount.Any())
+        {
+            errorMessage = "Danh sách tài khoản chưa được tải.";
+            return;
+        }
+
+        // Tìm tài khoản dựa trên username
+        var account = listAccount.FirstOrDefault(x => x.Email == username);
+
+        if (account == null)
+        {
+            errorMessage = "Không tìm thấy tài khoản.";
+            return;
+        }
+
+        // Tìm thông tin nhân viên dựa trên accountId
+        var employeeInformation = listEmployee.FirstOrDefault(e => e.AccountId == account.AccountId);
+
+        if (employeeInformation == null)
+        {
+            errorMessage = "Không tìm thấy thông tin nhân viên.";
+            return;
+        }
+
         try
         {
-            var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
-            if (account != null)
+            // Lấy thông tin chi tiết nhân viên dựa trên employeeId
+            var accountDetails = await httpClient.GetFromJsonAsync<DATN.Shared.Employee>($"api/Employee/{employeeInformation.EmployeeId}");
+
+            if (accountDetails != null)
             {
-                await httpClient.DeleteAsync($"api/Account/{accountId}");
-                await Load();
-                StateHasChanged();
+                accountId = accountDetails.AccountId;
+                name = accountDetails.EmployeeName;
+                email = accountDetails.Email;
+                phone = accountDetails.PhoneNumber;
+                address = accountDetails.Address;
             }
+            else
+            {
+                errorMessage = "Không tìm thấy chi tiết tài khoản.";
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            errorMessage = $"Lỗi khi kết nối đến máy chủ: {httpEx.Message}";
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error deleting account: {ex.Message}";
+            errorMessage = $"Lỗi khi tải thông tin tài khoản: {ex.Message}";
         }
-
-        // try
-        // {
-        //     // Retrieve account by ID
-        //     var account = await httpClient.GetFromJsonAsync<DATN.Shared.Account>($"api/Account/GetAccount/{AccountId}");
-        //     if (account != null)
-        //     {
-        //         // If you want to filter by ID or use the account elsewhere
-        //         listAccount = new List<DATN.Shared.Account> { account };
-        //         filter = listAccount;
-        //     }
-        //     else
-        //     {
-        //         errorMessage = $"Account with ID {AccountId} not found.";
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     errorMessage = $"Error loading account by ID: {ex.Message}";
-        // }
     }
-
 
 }

@@ -1,9 +1,7 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -14,7 +12,9 @@ namespace DATN.Shared
 
         public string UnitName { get; set; }
         public string UnitDescription { get; set; }
+        public bool IsDeleted { get; set; }
 
-        public ICollection<Product> Products { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Product> Products { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -38,14 +39,62 @@ namespace DATN.Server.Service
                 return existing;
             }
         }
+        public Order GetOrderStatus(int tableId)
+        {
+            var order = _context.Orders.Where(o => o.TableId == tableId && o.Status.Equals("Đang xử lý")).FirstOrDefault();
+            if (order == null)
+            {
+                return new Order
+                {
+                    TableId = tableId,
+                    Status = "Chưa có khách",
+                };
+            }
+            return order;
+        }
+
+        public Order GetOrderInvoice(int orderId)
+        {
+            var order = _context.Orders
+                .Include(a => a.OrderItems)
+                .ThenInclude(b => b.Products)
+                .FirstOrDefault(o => o.OrderId == orderId);
+
+            return order ?? new Order();
+        }
+
+        public Order GetOrderByTable(int orderId)
+        {
+            var order = _context.Orders.Where(o => o.OrderId == orderId).FirstOrDefault();
+            return order ?? new Order();
+        }
+
+        public List<Order> GetOrderLstInclude()
+        {
+            const string ProcessingStatus = "Đang xử lý";
+
+            return _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Products)
+                .Where(o => o.Status == ProcessingStatus)
+                .ToList() ?? new List<Order> ();
+        }
+        public List<Order> GetOrderLstByCustomer(int customerId)
+        {
+            return _context.Orders
+                .Include(o => o.RewardPointes)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Products)
+                .Where(o => o.CustomerId == customerId)
+                .OrderByDescending(o => o.CreateDate)
+                .ToList() ?? new List<Order>();
+        }
+
         public Order GetIdOrder(int id)
         {
             var order = _context.Orders.Find(id);
-            if (order == null)
-            {
-                return null;
-            }
-            return order;
+
+            return order ?? new Order();
         }
         public Order UpdateOrder(int id, Order update)
         {
@@ -55,12 +104,16 @@ namespace DATN.Server.Service
                 return null;
             }
             existing.TableId = update.TableId;
-            existing.OrderDate = update.OrderDate;
+            existing.CreateDate = update.CreateDate;
             existing.TotalAmount = update.TotalAmount;
             existing.Status = update.Status;
             existing.CustomerId = update.CustomerId;
             existing.PaymentMethod = update.PaymentMethod;
             existing.CustomerVoucherId = update.CustomerVoucherId;
+            existing.EmployeeId = update.EmployeeId;
+            existing.IsDeleted = update.IsDeleted;
+            existing.Note = update.Note;
+            
 
             _context.Update(existing);
             _context.SaveChanges();

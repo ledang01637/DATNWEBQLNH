@@ -1,0 +1,126 @@
+﻿@page "/admin"
+@implements IAsyncDisposable
+@layout LayoutAdmin
+@inject IJSRuntime JS
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+<style>
+    .table-card {
+        transition: transform 0.2s;
+    }
+
+        .table-card:hover {
+            transform: scale(1.05);
+        }
+
+    .floor-container {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .grid-item {
+        cursor: pointer;
+        height: auto;
+    }
+
+    .floor {
+        margin-bottom: 20px;
+    }
+    .highlight {
+        background-color: #ffc107;
+        border: 2px solid #ff9800;
+    }
+
+</style>
+
+<h3>Admin Demo</h3>
+@if (isProcessing)
+{
+    <p>Bàn: @getRequid Yêu cầu: @getMessage Note: @Note</p>
+}
+else
+{
+    <p>Chưa có đơn hàng nào.</p>
+}
+@if (tables == null || floors == null)
+{
+    <p class="text-dark">Loading...</p>
+}
+else
+{
+    @foreach (var floor in floors)
+    {
+        <div class="floor">
+            <h3>Floor @floor.NumberFloor</h3>
+            <div id="floor-@floor.FloorId" data-floor-id="@floor.FloorId" style="display: grid; grid-template-columns: repeat(@numcol, 1fr); gap: 10px; border: 2px dashed #ccc;" class="sortable position-relative">
+                @foreach (var table in tables.Where(t => t.FloorId == floor.FloorId).OrderBy(t => t.Position))
+                {
+                    bool isHaveCustomer = numtables.Contains(table.TableNumber);
+
+                    <div class="m-2 grid-item"
+                         style="@(isMoveTable ? "col-md-2" : $"grid-column: {GetColumnFromPosition(table.Position)}; grid-row: {GetRowFromPosition(table.Position)};")">
+                        <div class="card table-card" style="background-color:@(isHaveCustomer ? "green" : "#fff");">
+                            <div class="card-body text-center position-relative">
+                                <img src="/images/png/table.png" class="img-fluid" alt="Table Image" style="height: 50px;">
+                                <div class="position-absolute top-0 end-0 fw-bold m-1">
+                                    <div class="card bg-light text-dark" style="width: 25px; height: 25px;">
+                                        @table.TableNumber
+                                    </div>
+                                </div>
+                                <div class="card m-1 bg-light text-dark" style="width: 100%; height: auto;">
+                                    <div>Hàng: @GetRowFromPosition(table.Position) Cột: @GetColumnFromPosition(table.Position)</div>
+                                </div>
+                                <button data-bs-toggle="modal" data-bs-target="#modalOrder" @onclick="() => ShowProductModal(table.TableNumber)">Check</button>
+                            </div>
+                        </div>
+                    </div>
+
+                }
+            </div>
+        </div>
+    }
+}
+<div class="modal fade" id="modalOrder" tabindex="-1" aria-labelledby="modalOrderLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-white">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @{
+                    decimal total = 0;
+                    <ul class="list-group" id="cart-items">
+                        @if (cartsDto != null && cartsDto.Count > 0)
+                        {
+                            @foreach (var c in cartsDto)
+                            {
+                                <li class="list-group-item d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">@c.ProductName</div>
+                                        <div class="text-muted">Đơn giá: @c.Price.ToString("N0")đ</div>
+                                        <div class="text-muted">Số lượng: @c.Quantity.ToString()</div>
+                                    </div>
+                                </li>
+                                total += (c.Price * c.Quantity);
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-center">Giỏ hàng trống</li>
+                        }
+                    </ul>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tổng cộng</span>
+                        <strong id="modal-total-amount">@total.ToString("N0")đ</strong>
+                    </div>
+                }
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary" @onclick="ConfirmOrder">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
