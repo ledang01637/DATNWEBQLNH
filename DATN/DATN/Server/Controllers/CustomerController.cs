@@ -24,6 +24,15 @@ namespace DATN.Server.Controllers
             return _CustomerService.GetCustomer();
         }
 
+        [HttpPost("GetCustomerExist")]
+
+        public ActionResult<Customer> GetCustomerExist([FromBody] Customer customer)
+        {
+            if(customer == null) { return BadRequest() ; }
+
+            return Ok(_CustomerService.GetCustomerExist(customer));
+        }
+
         [HttpPost("GetCustomerByAccountId")]
         public ActionResult<Customer> GetCustomerByAccountId([FromBody] int accountId)
         {
@@ -71,7 +80,6 @@ namespace DATN.Server.Controllers
                 IsDeleted = Customer.IsDeleted,
                 AccountId = Customer.AccountId,
                 TotalRewardPoint = Customer.TotalRewardPoint,
-
             });
         }
 

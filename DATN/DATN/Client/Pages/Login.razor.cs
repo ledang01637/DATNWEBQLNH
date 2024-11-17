@@ -24,6 +24,7 @@ namespace DATN.Client.Pages
         private string currentPassword = string.Empty;
         private string confirmNewPassword = string.Empty;
         private string Token = "";
+        private readonly string url = "/register";
         private Type CurrentLayout { get; set; }
 
         private async Task HandleLogin()

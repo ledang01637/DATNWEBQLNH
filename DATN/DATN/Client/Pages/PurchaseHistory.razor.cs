@@ -39,7 +39,6 @@ namespace DATN.Client.Pages
             
         }
 
-
         private async Task<string> CheckTypeAccount()
         {
             var token = await _localStorageService.GetItemAsync("authToken");

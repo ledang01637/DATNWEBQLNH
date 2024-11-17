@@ -18,6 +18,15 @@ namespace DATN.Server.Service
         {
             return _context.Accounts.ToList();
         }
+
+        public Account GetAccountExist(string Email)
+        {
+            var account = _context.Accounts.FirstOrDefault(x => x.Email == Email);
+
+            return account ?? new Account();
+        }
+
+
         public Account AddAccount(Account Account)
         {
             _context.Add(Account);

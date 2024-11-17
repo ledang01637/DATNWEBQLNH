@@ -7,6 +7,22 @@
 @inject IJSRuntime JS
 @inject CartService _cartService
 
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .content {
+        flex: 1;
+    }
+
+    .mobile-footer {
+        width: 100%;
+    }
+</style>
 
 @* <div id="mySidebar" class="sidebar">
     <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>

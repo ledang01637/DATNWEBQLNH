@@ -7,87 +7,104 @@
 
 
 
-
 <style>
-    body {
-        background-color: #f8f9fa;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-
     .register-card {
-        background-color: white;
-        border-radius: 10px;
-        padding: 30px;
         width: 100%;
         max-width: 400px;
-        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        background-color: #fff;
     }
 
     .btn-primary-custom {
-        background-color: #d35400;
+        background-color: #007bff;
+        color: #fff;
         border: none;
-        border-radius: 20px;
-        padding: 10px 0;
-        width: 100%;
-        font-weight: bold;
     }
 
         .btn-primary-custom:hover {
-            background-color: #e67e22;
+            background-color: #0056b3;
         }
+
+    .validation-message {
+        font-size: 14px;
+        color: #dc3545;
+    }
+
+    .mobile-footer {
+        display: none !important;
+    }
 </style>
-<div class="register-card">
+
+<div class="align-items-start">
+    <a href="/login" class="link-dark fw-semibold">
+        <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+    </a>
+</div>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="register-card position-absolute top-50 start-50 translate-middle shadow rounded">
+        <h3 class="text-center mb-4">Đăng ký</h3>
+        <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Họ Tên</label>
+                <InputText class="form-control" placeholder="Nhập họ tên" @bind-Value="customer.CustomerName" />
+                <ValidationMessage For="@(() => customer.CustomerName)" class="validation-message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <InputText class="form-control" placeholder="Nhập số điện thoại" @bind-Value="customer.PhoneNumber" min="10" max="12" />
+                <ValidationMessage For="@(() => customer.PhoneNumber)" class="validation-message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <InputText class="form-control" placeholder="Nhập địa chỉ" @bind-Value="customer.Address" />
+                <ValidationMessage For="@(() => customer.Address)" class="validation-message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control" placeholder="Nhập email" @bind-Value="customer.Email" />
+                <ValidationMessage For="@(() => customer.Email)" class="validation-message" />
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom" disabled="@isLoading">
+                Xác nhận
+            </button>
+
+        </EditForm>
+    </div>
+}
+
+@* <div class="register-card position-absolute top-50 start-50 translate-middle shadow rounded ms-2">
     <h3 class="text-center mb-4">Đăng ký</h3>
     <EditForm Model="@account" OnValidSubmit="HandleValidSubmitAsync">
         <DataAnnotationsValidator />
 
         <div class="mb-4 position-relative">
-            <InputText class="form-control" placeholder="Tên người dùng" @bind-Value="account.Email" />
+            <InputText class="form-control" placeholder="Email" @bind-Value="account.Email" />
             <ValidationMessage For="@(() => account.Email)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
         </div>
 
         <div class="mb-4 position-relative">
-            <InputText type="password" class="form-control" placeholder="Mật khẩu" @bind-Value="account.Password" />
+            <InputText type="password" class="form-control" placeholder="Password" @bind-Value="account.Password" />
             <ValidationMessage For="@(() => account.Password)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
         </div>
-        <div class="mb-4 position-relative">
-            <InputSelect class="form-control" placeholder="Quyền" @bind-Value="account.AccountType">
-                <option value="Employee">Employee</option>
-                <option value="Customer">Customer</option>
-                <option value="Customer">Manager</option>
-                <option value="No Account">No Account</option>
-            </InputSelect>
 
-        </div>
         <button type="submit" class="btn btn-primary-custom">Tôi đang rất đói!</button>
     </EditForm>
-</div>
+</div> *@
 
-@if (accounts == null)
-{
-    <p>Đang loading</p>
-}
-else if (!accounts.Any())
-{
-    <p>Trống</p>
-}
-else
-{
-    <table class="table table-bordered">
-        <tbody>
-            @foreach (var item in accounts)
-            {
-                <tr>
-                    <td>@item.Email</td>
-                    <td>@item.Password</td>
-                    <td>@item.CreateDate</td>
-                    <td>@item.UpdateDate</td>
-                    <td>@item.IsActive</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+

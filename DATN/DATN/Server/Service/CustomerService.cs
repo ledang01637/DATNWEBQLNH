@@ -19,6 +19,13 @@ namespace DATN.Server.Service
         {
             return _context.Customers.ToList();
         }
+
+        public Customer GetCustomerExist(Customer _customer)
+        {
+            var customer = _context.Customers.FirstOrDefault(a => a.Email.Equals(_customer.Email) || a.PhoneNumber.Equals(_customer.PhoneNumber));
+            return customer ?? new Customer();
+        }
+
         public Customer GetCustomerByAccountId(int accountId)
         {
             var customer = _context.Customers.FirstOrDefault(a => a.AccountId == accountId);
