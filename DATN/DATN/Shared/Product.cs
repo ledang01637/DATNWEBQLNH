@@ -15,7 +15,7 @@ namespace DATN.Shared
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
-        public string ProductDescription { get; set; }
+        public string? ProductDescription { get; set; }
         public byte[] ProductImage { get; set; }
         public bool IsDeleted { get; set; }
 

@@ -3,6 +3,7 @@ using DATN.Shared;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using DATN.Server.Service;
+using System;
 
 namespace DATN.Server.Controllers
 {
@@ -18,10 +19,13 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("GetOrder")]
-        public List<Order> GetOrder()
+        public ActionResult<List<Order>> GetOrder()
         {
-            return _OrderService.GetOrder();
+                var orders = _OrderService.GetOrder();
+                return Ok(orders);
+            
         }
+
 
         [HttpPost("AddOrder")]
         public Order AddOrder(Order Order)

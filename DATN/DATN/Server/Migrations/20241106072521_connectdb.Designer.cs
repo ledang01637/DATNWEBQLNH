@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATN.Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241021133338_Init")]
-    partial class Init
+    [Migration("20241106072521_connectdb")]
+    partial class connectdb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

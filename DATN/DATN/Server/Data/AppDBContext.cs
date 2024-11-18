@@ -275,6 +275,7 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Reservation>().Property(e => e.IsDeleted)
                 .HasColumnType("bit")
                 .IsRequired();
+
             #endregion
             #region Custom RelationShip
             modelBuilder.Entity<Account>().HasKey(b => b.AccountId);

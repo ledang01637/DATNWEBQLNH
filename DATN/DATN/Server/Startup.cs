@@ -86,7 +86,6 @@ namespace DATN.Server
             services.AddScoped<VoucherService>();
             services.AddScoped<FileEncryptionService>();
             services.AddScoped<NetworkService>();
-
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
             );

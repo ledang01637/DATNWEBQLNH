@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DATN.Server.Migrations
 {
-    public partial class Init : Migration
+    public partial class connectdb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
