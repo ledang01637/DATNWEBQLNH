@@ -16,7 +16,7 @@ namespace DATN.Shared
         public string Status { get; set; }
         public int CustomerId { get; set; }
         public string PaymentMethod { get; set; }
-        public string Note { get; set; }
+        public string? Note { get; set; }
         public int? CustomerVoucherId { get; set; }
         public bool IsDeleted { get; set; }
 

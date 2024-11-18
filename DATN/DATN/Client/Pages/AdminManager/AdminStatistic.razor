@@ -1,0 +1,77 @@
+﻿@page "/Statistic"
+@using System.Globalization
+@inject IJSRuntime JSRuntime
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+    <h3 class="text-center">Thống kê Quản lý Nhà Hàng</h3>
+    <div class="dashboard-container">
+        <div class="dashboard-item shadow-lg">
+            <h5>Doanh thu theo ngày</h5>
+            <div class="chart-container">
+                <div class="row">
+                    <div class="col-6">
+                        <select @onchange="(e) => UpdateSelectedYear(int.Parse(e.Value.ToString()))"
+                                class="form-select"
+                                aria-label="Select Year">
+                            @foreach (var year in availableYears)
+                            {
+                                <option value="@year" selected="@(year == selectedDailyYear)">
+                                    Năm @year
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        @if (selectedDailyYear.HasValue && availableWeeksByYear.ContainsKey(selectedDailyYear.Value))
+                        {
+                            <select @onchange="(e) => UpdateSelectedWeek(int.Parse(e.Value.ToString()))"
+                                    class="form-select"
+                                    aria-label="Select Week">
+                                @foreach (var week in availableWeeksByYear[selectedDailyYear.Value])
+                                {
+                                    <option value="@week" selected="@(week == selectedWeek)">
+                                        Tuần @week
+                                    </option>
+                                }
+                            </select>
+                        }
+                    </div>
+                </div>
+                
+                <canvas @ref="revenueChartRef"></canvas>
+            </div>
+        </div>
+        <div class="dashboard-item shadow-lg">
+            <h5>Doanh thu theo tháng</h5>
+            <div class="chart-container">
+                <select @onchange="OnYearSelected" class="form-select" aria-label="Default select example">
+                    @foreach (var year in availableYears)
+                    {
+                        <option value="@year" selected="@((year == selectedMonthlyYear) ? "selected" : null)">Năm @year</option>
+                    }   
+                </select>
+                <canvas @ref="monthlyRevenueChartRef" id="monthlyRevenueChart" class="chart-container"></canvas>
+            </div>
+        </div>
+        <div class="dashboard-item shadow-lg">
+            <h5>Món ăn phổ biến nhất</h5>
+                <div class="chart-container">
+                    <canvas @ref="popularDishesChartRef"></canvas>
+                </div>
+        </div>
+        <div class="dashboard-item shadow-lg">
+            <h5>Số lượng khách hàng</h5>
+            <div class="chart-container">
+                <select id="customerYear" @onchange="OnCustomerYearSelected" class="form-select">
+                    @foreach (var year in availableCustomerYears)
+                    {
+                        <option value="@year" selected="@(year == selectedCustomerYear)">@year</option>
+                    }
+                </select>
+                <canvas @ref="customerCountChartRef"></canvas>
+            </div>
+        </div>
+    </div>
+    

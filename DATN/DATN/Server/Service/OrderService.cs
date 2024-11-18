@@ -16,8 +16,8 @@ namespace DATN.Server.Service
             _context = context;
         }
         public List<Order> GetOrder()
-        {
-            return _context.Orders.ToList();
+        { 
+            return _context.Orders.ToList(); 
         }
         public Order AddOrder(Order Order)
         {
