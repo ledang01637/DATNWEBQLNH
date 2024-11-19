@@ -34,6 +34,7 @@ namespace DATN.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            isProcessing = true;
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
                 .Build();
@@ -106,6 +107,11 @@ namespace DATN.Client.Pages
             {
                 var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
                 await JS.InvokeVoidAsync("openChatGPT", query);
+            }
+            finally
+            {
+                isProcessing = false;
+                StateHasChanged();
             }
         }
 

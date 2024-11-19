@@ -5,8 +5,9 @@
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 
+
 <style>
-    body {
+    .custom-body {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
@@ -17,8 +18,8 @@
         flex: 1;
     }
 </style>
-<CascadingAuthenticationState>
 
+<CascadingAuthenticationState>
     @if (isLoading)
     {
         <div class="layout-rain">
@@ -26,47 +27,52 @@
                 <img src="images/shipper.png" class="shipper" alt="">
             </div>
         </div>
-    }else if (isAcceptWifi)
+    }
+    else if (isAcceptWifi)
     {
-        <div class="container mt-1 foodcustom">
-            @Body
+        <div class="custom-body">
+            <div class="container mt-1 foodcustom content">
+                @Body
+            </div>
+
+            <footer class="mobile-footer footer bg-light text-dark py-4">
+                <div class="container text-center">
+                    <div class="row">
+                        <div class="col-12 mb-3" data-aos="fade-up" data-aos-once="true">
+                            <a href="#" class="text-dark mx-2 social-link"><i class="fab fa-facebook fa-2x"></i></a>
+                            <a href="#" class="text-dark mx-2 social-link"><i class="fab fa-instagram fa-2x"></i></a>
+                            <a href="#" class="text-dark mx-2 social-link"><i class="fab fa-twitter fa-2x"></i></a>
+                        </div>
+                        <div class="col-12 mb-3" data-aos="fade-up" data-aos-once="true" data-aos-delay="100">
+                            <a href="#" class="text-dark mx-2 footer-link">Trang chủ</a> |
+                            <a href="#" class="text-dark mx-2 footer-link">Điều khoản sử dụng</a> |
+                            <a href="#" class="text-dark mx-2 footer-link">Chính sách bảo mật</a>
+                        </div>
+                        <div class="col-12 mb-2" data-aos="fade-up" data-aos-once="true" data-aos-delay="200">
+                            <p>Địa chỉ: 123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
+                            <p>Email: info@example.com</p>
+                            <p>Phone: +123 456 789</p>
+                            <br>
+                            <p class="small">&copy; 2024 Công ty của bạn. All rights reserved.</p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
 
-        <footer class="mobile-footer bg-light text-dark py-4 mt-4">
-            <div class="container text-center">
-                <div class="row">
-                    <div class="col-12 mb-3" data-aos="fade-up" data-aos-once="true">
-                        <a href="#" class="text-dark mx-2 social-link"><i class="fab fa-facebook fa-2x"></i></a>
-                        <a href="#" class="text-dark mx-2 social-link"><i class="fab fa-instagram fa-2x"></i></a>
-                        <a href="#" class="text-dark mx-2 social-link"><i class="fab fa-twitter fa-2x"></i></a>
-                    </div>
-                    <div class="col-12 mb-3" data-aos="fade-up" data-aos-once="true" data-aos-delay="100">
-                        <a href="#" class="text-dark mx-2 footer-link">Trang chủ</a> |
-                        <a href="#" class="text-dark mx-2 footer-link">Điều khoản sử dụng</a> |
-                        <a href="#" class="text-dark mx-2 footer-link">Chính sách bảo mật</a>
-                    </div>
-                    <div class="col-12 mb-2" data-aos="fade-up" data-aos-once="true" data-aos-delay="200">
-                        <p>Địa chỉ: 123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
-                        <p>Email: info@example.com</p>
-                        <p>Phone: +123 456 789</p>
-                        <br>
-                        <p class="small">&copy; 2024 Công ty của bạn. All rights reserved.</p>
 
-                    </div>
 
-                </div>
-            </div>
-        </footer>
     }
     else
     {
         <div class="container-fluid access-denied-container">
             <div class="access-denied-card">
                 <h1>Wifi không hợp lệ</h1>
-                <p>Vui lòng truy cập bằng Wifi của quán !</p>
+                <p>Vui lòng truy cập bằng Wifi của quán!</p>
             </div>
         </div>
-    } 
+    }
 </CascadingAuthenticationState>
+
 
 

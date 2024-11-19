@@ -88,23 +88,4 @@ else
     </div>
 }
 
-@* <div class="register-card position-absolute top-50 start-50 translate-middle shadow rounded ms-2">
-    <h3 class="text-center mb-4">Đăng ký</h3>
-    <EditForm Model="@account" OnValidSubmit="HandleValidSubmitAsync">
-        <DataAnnotationsValidator />
-
-        <div class="mb-4 position-relative">
-            <InputText class="form-control" placeholder="Email" @bind-Value="account.Email" />
-            <ValidationMessage For="@(() => account.Email)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
-        </div>
-
-        <div class="mb-4 position-relative">
-            <InputText type="password" class="form-control" placeholder="Password" @bind-Value="account.Password" />
-            <ValidationMessage For="@(() => account.Password)" style="margin-left:10px; position:absolute; left:0; bottom:-25px; font-size:14px !important;" />
-        </div>
-
-        <button type="submit" class="btn btn-primary-custom">Tôi đang rất đói!</button>
-    </EditForm>
-</div> *@
-
 

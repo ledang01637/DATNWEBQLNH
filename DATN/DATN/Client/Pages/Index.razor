@@ -7,22 +7,6 @@
 @inject IJSRuntime JS
 @inject CartService _cartService
 
-<style>
-    body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        margin: 0;
-    }
-
-    .content {
-        flex: 1;
-    }
-
-    .mobile-footer {
-        width: 100%;
-    }
-</style>
 
 @* <div id="mySidebar" class="sidebar">
     <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>
@@ -162,13 +146,18 @@
         </div>
 
         <div class="filters-content">
-            <div class="row grid">
-                @if (products == null)
+            <div class="row grid position-relative">
+                @if (products == null || isProcessing)
                 {
-                    <div class="d-flex justify-content-center">
+                    <div class="position-absolute top-50 start-50 translate-middle">
                         <div class="spinner-border spinner-border-sm" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
+                    </div>
+                }else if(!isProcessing && products.Count == 0)
+                {
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <h1 class="text-center">Không có sản phẩm</h1>
                     </div>
                 }
                 else
@@ -333,7 +322,3 @@
         </div>
     </div>
 </div>
-
-
-
-

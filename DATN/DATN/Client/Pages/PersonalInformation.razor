@@ -1,6 +1,28 @@
 ﻿@page "/personalinformation"
 @layout MainLayout
-<body>
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject CartService _cartService
+<style>
+    .btn-primary-custom {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+    }
+</style>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -13,34 +35,46 @@
                     <h4 class="text-center mx-auto mb-4 fw-semibold">Thông tin cá nhân</h4>
                 </div>
 
-                <form>
-                    <div class="form-group input-group-lg">
-                        <input type="text" class="form-control rounded-4 fw-semibold shadow" id="fullName" placeholder="Họ và tên" style="height: 50px; font-size: 15px;">
+                <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">Họ Tên</label>
+                        <InputText class="form-control" placeholder="Nhập họ tên" @bind-Value="customer.CustomerName" readonly="@(!isEdit)" />
+                        <ValidationMessage For="@(() => customer.CustomerName)" class="validation-message" />
                     </div>
-                    <div class="form-group input-group-lg">
-                        <input type="email" class="form-control rounded-4 fw-semibold shadow" id="email" placeholder="Email" style="height: 50px; font-size: 15px;">
-                    </div>  
-                    <div class="form-group input-group-lg">
-                        <input type="password" class="form-control rounded-4 fw-semibold shadow" id="password" placeholder="Mật khẩu" style="height: 50px; font-size: 15px;">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText class="form-control" placeholder="Nhập email" @bind-Value="customer.Email" readonly />
+                        <ValidationMessage For="@(() => customer.Email)" class="validation-message" />
                     </div>
-                    <div class="form-group input-group-lg">
-                        <input type="text" class="form-control rounded-4 fw-semibold shadow" id="phone" placeholder="Số điện thoại" style="height: 50px; font-size: 15px;">
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <InputText class="form-control" placeholder="Nhập số điện thoại" @bind-Value="customer.PhoneNumber" min="10" max="12" readonly="@(!isEdit)" />
+                        <ValidationMessage For="@(() => customer.PhoneNumber)" class="validation-message" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ</label>
+                        <InputText class="form-control" placeholder="Nhập địa chỉ" @bind-Value="customer.Address" readonly="@(!isEdit)" />
+                        <ValidationMessage For="@(() => customer.Address)" class="validation-message" />
                     </div>
 
                     <hr class="mt-5" />
                     <div class="d-flex justify-content-center">
-                        <button type="submit" class="btn btn-primary w-50 text-center rounded-4 bg-dark border-dark shadow" style="height: 70px;">Sửa thông tin | <i class="bi bi-pencil-square"></i></button>
+                        @if (isEdit)
+                        {
+                            <button type="submit" class="btn btn-primary-custom" disabled="@isLoading">
+                                Xác nhận
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-primary bg-dark border-dark" @onclick="Edit">Sửa thông tin | <i class="bi bi-pencil-square"></i></button>
+                        }
                     </div>
-                </form>
+                </EditForm>
             </div>
         </div>
     </div>
-    <nav class="navbar fixed-bottom navbar-light bg-light">
-        <div class="container-fluid justify-content-around">
-            <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
-            <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
-            <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
-            <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
-        </div>
-    </nav>
-</body>
+}

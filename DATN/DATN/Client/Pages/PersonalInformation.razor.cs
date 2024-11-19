@@ -1,76 +1,51 @@
 ﻿using DATN.Shared;
-using Microsoft.JSInterop;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Json;
-using System;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System;
+using Microsoft.JSInterop;
+using System.Net.Http.Json;
 using System.Linq;
-using System.Collections.Generic;
 
 namespace DATN.Client.Pages
 {
-    public partial class PurchaseHistory
+    public partial class PersonalInformation
     {
         private Customer customer = new();
-        private List<Order> orders = new();
-        private bool isProcess = false;
-        private bool isDataReady = false;
-
+        private bool isLoading = false;
+        private bool isEdit = false;
         protected override async Task OnInitializedAsync()
         {
-            isProcess = true;
-            try
+            var accountType = await CheckTypeAccount();
+            if (accountType != null && accountType != "customer")
             {
-                var accountType = await CheckTypeAccount();
-                if (accountType != null && accountType != "customer")
-                {
-                    Navigation.NavigateTo("/login");
-                    return;
-                }
-                string accountId = await GetAccountIdAsync();
-                if (string.IsNullOrEmpty(accountId))
-                {
-                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập lại");
-                    Navigation.NavigateTo("/login");
-                    return;
-                }
-
-                customer = await FetchCustomerByAccountAsync(int.Parse(accountId)) ?? new Customer();
-                if (customer != null && customer.CustomerId > 0)
-                {
-                    orders = await httpClient.GetFromJsonAsync<List<Order>>($"api/Order/GetOrderLstByCustomer?customerId={customer.CustomerId}");
-                }
-                else
-                {
-                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng tạo tk mới");
-                    Navigation.NavigateTo("/login");
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin: " + ex.Message);
+                Navigation.NavigateTo("/login");
                 return;
             }
-            finally 
+            string accountId = await GetAccountIdAsync();
+            if (string.IsNullOrEmpty(accountId))
             {
-                isDataReady = true;
-                isProcess = false;
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập lại");
+                return;
+            }
+            try
+            {
+                isLoading = true;
+                customer = await FetchCustomerByAccountAsync(int.Parse(accountId)) ?? new Customer();
+            }
+            catch(Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui long lien he Admin: " + ex.Message);
+                return;
+            }
+            finally
+            {
+                isLoading = false;
                 StateHasChanged();
             }
-            
-            
-        }
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (isDataReady && !isProcess)
-            {
-                isDataReady = false;
-                await JS.InvokeVoidAsync("initializeSearchOrder");
-                await JS.InvokeVoidAsync("initScrollToTop");
-            }
-        }
 
+        }
 
         private async Task<string> CheckTypeAccount()
         {
@@ -91,6 +66,7 @@ namespace DATN.Client.Pages
             }
             return null;
         }
+
         private async Task<string> GetAccountIdAsync()
         {
             var token = await _localStorageService.GetItemAsync("authToken");
@@ -100,6 +76,7 @@ namespace DATN.Client.Pages
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
             return jwtToken?.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
         }
+
         private async Task<Customer> FetchCustomerByAccountAsync(int accountId)
         {
             try
@@ -113,9 +90,22 @@ namespace DATN.Client.Pages
                 return null;
             }
         }
-        private async Task ScrollToTop()
+
+        private void Edit()
         {
-            await JS.InvokeVoidAsync("scrollToTop");
+            isEdit = true;
+        }
+
+        private async Task HandleValidSubmitAsync()
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Customer/{customer.CustomerId}",customer);
+
+            if(response.IsSuccessStatusCode)
+                await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Sửa thông tin thành công");
+            else
+                await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Sửa thông tin thất bại");
+
+            StateHasChanged();
         }
     }
 }

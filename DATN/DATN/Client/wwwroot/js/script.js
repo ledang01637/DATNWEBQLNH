@@ -140,15 +140,11 @@ function initCallButton(callButtonId, expandButtonId, closeBtnId) {
         document.onmouseup = function () {
             document.removeEventListener('mousemove', onMouseMove);
             document.onmouseup = null;
-
-            //if (!isDragging) {
-            //    toggleExpand();
-            //}
         };
     };
 
     function onMouseMove(event) {
-        isDragging = true; // Đánh dấu rằng đang kéo
+        isDragging = true;
         moveAt(event.pageX, event.pageY);
     }
 
