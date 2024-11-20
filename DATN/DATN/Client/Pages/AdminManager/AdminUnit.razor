@@ -22,38 +22,89 @@
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateUnit()">Add Unit</button>
-    <hr />
-    <h4>Unit</h4>
-    <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Search Unit..." @oninput="Filter" />
-    </div>
-    <div class="product-table-container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>UnitName</th>
-                    <th>UnitDescription</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var unit in filter)
-                {
-                    if (unit != null)
-                    {
+    <div class="col-md-12 row">
+        <div class="col-md-6">
+            <button class="btn btn-success" @onclick="() => CreateUnit()">Add Unit</button>
+            <hr />
+            <h4>Unit</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Search Unit..." @oninput="Filter" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
                         <tr>
-                            <td>@unit.UnitName</td>
-                            <td>@unit.UnitDescription</td>
-                            <td class="text-center">
-                                <button class="btn btn-primary" @onclick="() => EditUnit(unit.UnitId)">Edit</button>
-                                <button class="btn btn-danger" @onclick="() => DeleteUnit(unit.UnitId)">Delete</button>
-                            </td>
+                            <th>UnitName</th>
+                            <th>UnitDescription</th>
+                            <th></th>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var unit in filter)
+                        {
+                            if (unit != null)
+                            {
+                                <tr>
+                                    <td>@unit.UnitName</td>
+                                    <td>@unit.UnitDescription</td>
+                                    <td class="text-center">
+                                        @if (!unit.IsDeleted)
+                                        {
+                                            <button class="btn btn-primary" @onclick="() => EditUnit(unit.UnitId)">Edit</button>
+                                            <button class="btn btn-danger" @onclick="() => HideUnit(unit.UnitId)">Hide</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-warning" @onclick="() => RestoreUnit(unit.UnitId)">Restore</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-success" @onclick="() => CreateFloor()">Add Floor</button>
+            <hr />
+            <h4>Floor</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Search Floor..." @oninput="FilterFloor" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>NumberFloor</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filterfloor)
+                        {
+                            if (item != null)
+                            {
+                                <tr>
+                                    <td>@item.NumberFloor</td>
+                                    <td class="text-center">
+                                        @if (!item.IsDeleted)
+                                        {
+                                            <button class="btn btn-primary" @onclick="() => EditFloor(item.FloorId)">Edit</button>
+                                            <button class="btn btn-danger" @onclick="() => HideFloor(item.FloorId)">Hide</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-warning" @onclick="() => RestoreFloor(item.FloorId)">Restore</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))

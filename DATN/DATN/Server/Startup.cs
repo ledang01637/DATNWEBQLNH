@@ -80,10 +80,6 @@ namespace DATN.Server
                 facebookOptions.CallbackPath = "/signin-facebook";
             });
 
-            //ConnectDB
-            services.AddDbContext<AppDBContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             services.AddScoped<AccountService>();
             services.AddScoped<CategoryService>();
             services.AddScoped<CustomerService>();

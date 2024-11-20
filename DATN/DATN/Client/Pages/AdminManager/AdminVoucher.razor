@@ -24,11 +24,11 @@
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateVoucher()">Thêm</button>
+    <button class="btn btn-success" @onclick="() => CreateVoucher()">Add Voucher</button>
     <hr />
     <h4>Voucher</h4>
     <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="Filter" />
+        <input type="text" class="form-control" placeholder="Serach Voucher..." @oninput="Filter" />
     </div>
     <div class="product-table-container">
         <table class="table table-striped">
@@ -50,16 +50,16 @@
                             <td>@item.VoucherCode</td>
                             <td>@item.PointRequired</td>
                             <td>@item.DiscountValue</td>
-                            <td>@item.ExpriationDate</td>
+                            <td>@item.ExpriationDate.ToString("MM/dd/yyyy")</td>
                             <td class="text-center">
                                 @if (!item.IsAcctive)
                                 {
-                                    <button class="btn btn-primary" @onclick="() => EditVoucher(item.VoucherId)">Sửa</button>
-                                    <button class="btn btn-danger" @onclick="() => HideVoucher(item.VoucherId)">Ẩn</button>
+                                    <button class="btn btn-primary" @onclick="() => EditVoucher(item.VoucherId)">Edit</button>
+                                    <button class="btn btn-danger" @onclick="() => HideVoucher(item.VoucherId)">Hide</button>
                                 }
                                 else
                                 {
-                                    <button class="btn btn-warning" @onclick="() => RestoreVoucher(item.VoucherId)">Khôi phục</button>
+                                    <button class="btn btn-warning" @onclick="() => RestoreVoucher(item.VoucherId)">Restore</button>
                                 }
                             </td>
                         </tr>
