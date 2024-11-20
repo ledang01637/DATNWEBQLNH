@@ -66,8 +66,10 @@ namespace DATN.Client.Pages.AdminManager
                                     await _localStorageService.SetItemAsync("AccountId", accountId);
                                 }
                             }
-                            await JS.InvokeVoidAsync("showAlert", "success", "Thành công");
-                            Navigation.NavigateTo("/manager", true);
+                            await JS.InvokeVoidAsync("showAlert", "success", "Đăng nhập thành công!");
+                            //Navigation.NavigateTo("/information", true);
+                            Navigation.NavigateTo($"/adminaccount?username={Username}", true);
+
                         }
                         else
                         {

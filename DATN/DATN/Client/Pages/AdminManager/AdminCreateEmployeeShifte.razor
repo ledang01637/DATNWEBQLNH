@@ -4,58 +4,70 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add EmployeeShifte</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@employeeshifte" OnValidSubmit="CreateEmployeeShifte" Context="editFormContext">
+                    <EditForm Model="@employeeshifte" OnValidSubmit="CreateEmployeeShifte">
                         <DataAnnotationsValidator />
-                        <div class="text-danger mb-3">
-                            <ValidationSummary />
-                        </div>
+                        <ValidationSummary />
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="ShifteDay" class="control-label"><strong>ShifteDay</strong></label>
                             <input type="date" id="ShifteDay" @bind="employeeshifte.ShifteDay" class="form-control" placeholder="ShifteDay" />
                             <ValidationMessage For="@(() => employeeshifte.ShifteDay)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="EmployeeId" class="control-label"><strong>EmployeeId</strong></label>
-                            <input id="EmployeeId" @bind="employeeshifte.EmployeeId" class="form-control" placeholder="EmployeeId" />
+                            <select id="EmployeeId" @bind="employeeshifte.EmployeeId" class="form-control">
+                                <option value="">Chọn employee</option>
+                                @if (employees != null && employees.Any())
+                                {
+                                    @foreach (var employee in employees)
+                                    {
+                                        <option value="@employee.EmployeeId">@employee.EmployeeName</option>
+                                    }
+                                }
+                            </select>
                             <ValidationMessage For="@(() => employeeshifte.EmployeeId)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="ShifteId" class="control-label"><strong>ShifteId</strong></label>
-                            <input type="ShifteId" id="PhoneNumber" @bind="employeeshifte.ShifteId" class="form-control" placeholder="ShifteId" />
+                            <select id="ShifteId" @bind="employeeshifte.ShifteId" class="form-control">
+                                <option value="">Chọn shifte</option>
+                                @if (shiftes != null && shiftes.Any())
+                                {
+                                    @foreach (var shifte in shiftes)
+                                    {
+                                        <option value="@shifte.ShifteId">@shifte.ShifteName</option>
+                                    }
+                                }
+                            </select>
                             <ValidationMessage For="@(() => employeeshifte.ShifteId)" />
                         </div>
 
-
-
-                        <div class="form-group text-center">
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                                <a class="btn btn-secondary mx-2" data-bs-target="#carouselExample" data-bs-slide="prev">Quay Về</a>
-                            </div>
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminshifte" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -69,16 +81,54 @@
     </div>
 </div>
 
+
 @code {
     private string errorMessage;
     private string successMessage;
     private DATN.Shared.EmployeeShifte employeeshifte = new DATN.Shared.EmployeeShifte();
+    private List<DATN.Shared.Employee> employees = new List<DATN.Shared.Employee>();
+    private List<DATN.Shared.Shifte> shiftes = new List<DATN.Shared.Shifte>();
     private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadEmployees();
+        await LoadShiftes();
         isLoaded = true;
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Employee>>("api/Employee/GetEmployee");
+
+            if (response != null)
+            {
+                employees = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
+    }
+    private async Task LoadShiftes()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Shifte>>("api/Shifte/GetShifte");
+
+            if (response != null)
+            {
+                shiftes = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
     }
 
     private async Task CreateEmployeeShifte()
@@ -87,12 +137,13 @@
         try
         {
             var response = await httpClient.PostAsJsonAsync("api/EmployeeShifte/AddEmployeeShifte", employeeshifte);
+            employeeshifte.IsDeleted = true;
 
             if (response.IsSuccessStatusCode)
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/adminemployee");
+                Navigation.NavigateTo("/adminshifte");
             }
             else
             {

@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -20,8 +21,10 @@ namespace DATN.Server.Service
         }
         public EmployeeShifte AddEmployeeShifte(EmployeeShifte EmployeeShifte)
         {
+            EmployeeShifte.IsDeleted = false;
             _context.Add(EmployeeShifte);
             _context.SaveChanges();
+
             return EmployeeShifte;
         }
         public EmployeeShifte DeleteEmployeeShifte(int id)
@@ -31,13 +34,13 @@ namespace DATN.Server.Service
             {
                 return null;
             }
-            else
-            {
-                _context.Remove(existing);
-                _context.SaveChanges();
-                return existing;
-            }
+
+            existing.IsDeleted = true;
+            _context.Update(existing);
+            _context.SaveChanges();
+            return existing;
         }
+
         public EmployeeShifte GetIdEmployeeShifte(int id)
         {
             var employeeShifte = _context.EmployeeShiftes.Find(id);
@@ -57,10 +60,16 @@ namespace DATN.Server.Service
             existing.ShifteDay = update.ShifteDay;
             existing.EmployeeId = update.EmployeeId;
             existing.ShifteId = update.ShifteId;
+            existing.IsDeleted = update.IsDeleted;
 
             _context.Update(existing);
             _context.SaveChanges();
             return existing;
         }
+        public List<EmployeeShifte> GetEmployeeShiftes()
+        {
+            return _context.EmployeeShiftes.Where(e => !e.IsDeleted).AsNoTracking().ToList();
+        }
+
     }
 }

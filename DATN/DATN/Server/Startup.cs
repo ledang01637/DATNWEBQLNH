@@ -63,10 +63,6 @@ namespace DATN.Server
             })
             .AddCookie();
 
-            //ConnectDB
-            services.AddDbContext<AppDBContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             services.AddScoped<AccountService>();
             services.AddScoped<CategoryService>();
             services.AddScoped<CustomerService>();

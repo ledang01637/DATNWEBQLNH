@@ -4,55 +4,53 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">add Product</h5>
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add Shifte</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@shifte" OnValidSubmit="CreateShifte" Context="editFormContext">
+                    <EditForm Model="@shifte" OnValidSubmit="CreateShifte">
                         <DataAnnotationsValidator />
-                        <div class="text-danger mb-3">
-                            <ValidationSummary />
-                        </div>
+                        <ValidationSummary />
 
-                        <div class="form-group">
-                            <label for="Shifte_Name" class="control-label"><strong>ShifteName</strong></label>
-                            <input id="Shifte_Name" @bind="shifte.ShifteName" class="form-control" placeholder="ShifteName" />
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="Shifte_Name" class="control-label"><strong>Shifte_Name</strong></label>
+                            <input id="Shifte_Name" @bind="shifte.ShifteName" class="form-control" placeholder="Shifte_Name" />
                             <ValidationMessage For="@(() => shifte.ShifteName)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="StartTime" class="control-label"><strong>StartTime</strong></label>
-                            <input id="StartTime" @bind="shifte.StartTime" class="form-control" placeholder="StartTime" />
+                            <input id="StartTime" type="time" @bind="shifte.StartTime" class="form-control" placeholder="StartTime" />
                             <ValidationMessage For="@(() => shifte.StartTime)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 p-3">
                             <label for="EndTime" class="control-label"><strong>EndTime</strong></label>
-                            <input id="EndTime" @bind="shifte.EndTime" class="form-control" placeholder="EndTime" />
+                            <input id="EndTime" type="time" @bind="shifte.EndTime" class="form-control" placeholder="EndTime" />
                             <ValidationMessage For="@(() => shifte.EndTime)" />
                         </div>
 
-                        <div class="form-group text-center">
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                                <a href="/admincategory" class="btn btn-secondary mx-2">Quay Về</a>
-                            </div>
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminshifte" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
+
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -70,7 +68,6 @@
     private string errorMessage;
     private string successMessage;
     private DATN.Shared.Shifte shifte = new DATN.Shared.Shifte();
-    private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
@@ -80,25 +77,41 @@
 
     private async Task CreateShifte()
     {
+        // Ensure dates are selected
+        if (shifte.StartTime == default || shifte.EndTime == default)
+        {
+            errorMessage = "Please select both start and end dates.";
+            successMessage = string.Empty;
+            return;
+        }
+
+        // Check that StartTime does not exceed EndTime at the day, month, and year level
+        if (shifte.StartTime.Date > shifte.EndTime.Date)
+        {
+            errorMessage = "The start date must not be later than the end date.";
+            successMessage = string.Empty;
+            return;
+        }
+
         try
         {
             var response = await httpClient.PostAsJsonAsync("api/Shifte/AddShifte", shifte);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Thêm thành công!";
+                successMessage = "Successfully added!";
                 errorMessage = string.Empty;
                 Navigation.NavigateTo("/adminshifte");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Error : {errorContent}";
+                errorMessage = $"Error: {errorContent}";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            errorMessage = $"An error occurred: {ex.Message}";
             successMessage = string.Empty;
         }
 
