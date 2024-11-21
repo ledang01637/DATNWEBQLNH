@@ -1,0 +1,124 @@
+﻿@page "/createaccount"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@account" OnValidSubmit="CreateAccount" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="AccountType" class="control-label"><strong>AccountType</strong></label>
+                            <input id="AccountType" @bind="account.AccountType" class="form-control" placeholder="AccountType" />
+                            <ValidationMessage For="@(() => account.AccountType)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CreateDate" class="control-label"><strong>CreateDate</strong></label>
+                            <input type="date" id="CreateDate" @bind="account.CreateDate" class="form-control" placeholder="CreateDate" required />
+                            <ValidationMessage For="@(() => account.CreateDate)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UpdateDate" class="control-label"><strong>UpdateDate</strong></label>
+                            <input type="date" id="UpdateDate" @bind="account.UpdateDate" class="form-control" placeholder="UpdateDate" required />
+                            <ValidationMessage For="@(() => account.UpdateDate)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CustomerId" class="control-label"><strong>UserName</strong></label>
+                            <input id="CustomerId" @bind="account.UserName" class="form-control" placeholder="UserName" required />
+                            <ValidationMessage For="@(() => account.UserName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Password" class="control-label"><strong>Password</strong></label>
+                            <input type="password" id="Password" @bind="account.Password" class="form-control" placeholder="Password" required />
+                            <ValidationMessage For="@(() => account.Password)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">tiếp theo</button>
+                                <a href="/adminaccount" class="btn btn-secondary mx-2">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Account account = new DATN.Shared.Account();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = true;
+    }
+
+    private async Task CreateAccount()
+    {
+        try
+        {
+            var responseAccount = await httpClient.PostAsJsonAsync("api/Account/AddAccount", account);
+
+            if (responseAccount.IsSuccessStatusCode)
+            {
+                successMessage = "Thêm thành công!";
+                errorMessage = string.Empty;
+
+            }
+            else
+            {
+                var errorContent = await responseAccount.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+
+        Navigation.NavigateTo("/createcustomer");
+
+    }
+
+
+}

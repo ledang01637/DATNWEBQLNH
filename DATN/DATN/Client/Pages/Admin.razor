@@ -1,0 +1,131 @@
+﻿@page "/information/{accountId:int}"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+@if (isLoaded)
+{
+    <div class="container-fluid col-md-12 row m-auto" style="height: 700px">
+        <div class="col-md-12 bg-body-secondary">
+            <div class="col-md-12 p-1">
+                <h2>HỒ SƠ CỦA TÔI</h2>
+                <h6>Quản lý thông tin hồ sơ để bảo mật tài khoản</h6>
+            </div>
+            <hr class="border-3 bg-dark" />
+            <div class="col-md-12 row">
+                <div class="col-md-4 border-end">
+                    <div class="bg-danger rounded-pill p-4 mt-5 m-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="currentColor" class="bi bi-person-fill rounded-pill" viewBox="0 0 16 16">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    @foreach (var account in listAccount)
+                    {
+                        var connectEmployee = listEmployee.Find(c => c.AccountId == account.AccountId);
+                        if (connectEmployee != null)
+                        {
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control border border-secondary p-4" id="name" value="@connectEmployee.EmployeeName" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control border border-secondary p-4" id="email" value="@connectEmployee.Email" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control border border-secondary p-4" id="phone" value="@connectEmployee.PhoneNumber" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Địa chỉ</label>
+                                    <input type="text" class="form-control border border-secondary p-4" id="address" value="@connectEmployee.Address" readonly />
+                                </div>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    [Parameter] public int accountId { get; set; }
+
+    private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
+    private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
+    private List<DATN.Shared.Account> filter = new List<DATN.Shared.Account>();
+    private bool isLoaded = false;
+    private string errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        await Load(); // Load all accounts
+        isLoaded = true;
+    }
+
+    private async Task Load()
+    {
+        try
+        {
+            // Retrieve all accounts
+            listAccount = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
+            listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
+            filter = listAccount;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading accounts: {ex.Message}";
+        }
+    }
+
+    private async Task LoadById(int AccountId)
+    {
+        try
+        {
+            var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
+            if (account != null)
+            {
+                await httpClient.DeleteAsync($"api/Account/{accountId}");
+                await Load();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error deleting account: {ex.Message}";
+        }
+
+        // try
+        // {
+        //     // Retrieve account by ID
+        //     var account = await httpClient.GetFromJsonAsync<DATN.Shared.Account>($"api/Account/GetAccount/{AccountId}");
+        //     if (account != null)
+        //     {
+        //         // If you want to filter by ID or use the account elsewhere
+        //         listAccount = new List<DATN.Shared.Account> { account };
+        //         filter = listAccount;
+        //     }
+        //     else
+        //     {
+        //         errorMessage = $"Account with ID {AccountId} not found.";
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     errorMessage = $"Error loading account by ID: {ex.Message}";
+        // }
+    }
+
+
+}

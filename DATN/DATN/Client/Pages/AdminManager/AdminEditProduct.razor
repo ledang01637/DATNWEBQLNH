@@ -1,0 +1,144 @@
+﻿
+@page "/editproduct/{ProductId:int}"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">CHỈNH SỬA MÓN ĂN</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@prod" OnValidSubmit="EditProd" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+                        <div class="form-group">
+                            <label for="ProductId" class="control-label"><strong>Mã Món Ăn</strong></label>
+                            <input id="ProductId" @bind="prod.ProductId" class="form-control" placeholder="Mã món ăn" disabled />
+                            <ValidationMessage For="@(() => prod.ProductId)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ProductName" class="control-label"><strong>Tên món ăn</strong></label>
+                            <input id="ProductName" @bind="prod.ProductName" class="form-control" placeholder="Nhập tên món ăn" />
+                            <ValidationMessage For="@(() => prod.ProductName)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
+                            <input id="ProductImage" @bind="prod.ProductImage" class="form-control" />
+                            <ValidationMessage For="@(() => prod.ProductImage)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CategoryId" class="control-label"><strong>Danh mục</strong></label>
+                            <input id="CategoryId" @bind="prod.CategoryId" class="form-control" placeholder="Nhập mã danh mục" />
+                            <ValidationMessage For="@(() => prod.CategoryId)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Price" class="control-label"><strong>Giá</strong></label>
+                            <input id="Price" @bind="prod.Price" class="form-control" placeholder="Nhập giá món ăn" />
+                            <ValidationMessage For="@(() => prod.Price)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ProductDescripntion" class="control-label"><strong>Ghi chú</strong></label>
+                            <textarea id="ProductDescripntion" @bind="prod.ProductDescripntion" class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <ValidationMessage For="@(() => prod.ProductDescripntion)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Cập Nhật</button>
+                                <a href="/adminproduct" class="btn btn-secondary mx-2">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int ProductId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Product prod = new DATN.Shared.Product();
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEditProduct();
+        isLoaded = true;
+    }
+
+    private async Task LoadEditProduct()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<Product>($"api/Product/{ProductId}");
+            if (response != null)
+            {
+                prod = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy món ăn.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditProd()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Product/{ProductId}", prod);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminproduct");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+}

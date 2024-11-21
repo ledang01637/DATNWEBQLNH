@@ -1,0 +1,105 @@
+﻿@page "/createcategory"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">Add new category</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@cate" OnValidSubmit="CreateCate" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CategoryName" class="control-label"><strong>CategoryName</strong></label>
+                            <input id="CategoryName" @bind="cate.CategoryName" class="form-control" placeholder="CategoryName" />
+                            <ValidationMessage For="@(() => cate.CategoryName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CategoryDescription" class="control-label"><strong>CategoryDescription</strong></label>
+                            <input id="CategoryDescription" @bind="cate.CategoryDescription" class="form-control" placeholder="CategoryDescription" />
+                            <ValidationMessage For="@(() => cate.CategoryDescription)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                                <a href="/admincategory" class="btn btn-secondary mx-2">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Category cate = new DATN.Shared.Category();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = true;
+    }
+
+    private async Task CreateCate()
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Category/AddCategory", cate);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Thêm thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/admincategory");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+    }
+}

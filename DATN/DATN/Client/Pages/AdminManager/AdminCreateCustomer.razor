@@ -1,0 +1,133 @@
+﻿@page "/createcustomer"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-3 p-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+            </div>
+            <div class="card-body">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@customer" OnValidSubmit="CreateCustomer" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CustomerName" class="control-label"><strong>CustomerName</strong></label>
+                            <input id="CustomerName" @bind="customer.CustomerName" class="form-control" placeholder="CustomerName" />
+                            <ValidationMessage For="@(() => customer.CustomerName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="PhoneNumber" class="control-label"><strong>PhoneNumber</strong></label>
+                            <input type="number" id="PhoneNumber" @bind="customer.PhoneNumber" class="form-control" placeholder="PhoneNumber" />
+                            <ValidationMessage For="@(() => customer.PhoneNumber)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Address" class="control-label"><strong>Address</strong></label>
+                            <input id="Address" @bind="customer.Address" class="form-control" placeholder="Address" />
+                            <ValidationMessage For="@(() => customer.Address)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Email" class="control-label"><strong>Email</strong></label>
+                            <input type="email" id="Email" @bind="customer.Email" class="form-control" placeholder="Email" />
+                            <ValidationMessage For="@(() => customer.Email)" />
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="AccountId" class="control-label"><strong>AccountId</strong></label>
+                            <input id="AccountId" @bind="customer.AccountId" class="form-control" placeholder="AccountId" />
+                            <ValidationMessage For="@(() => customer.AccountId)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="TotalRewardPoint" class="control-label"><strong>TotalRewardPoint</strong></label>
+                            <input id="TotalRewardPoint" @bind="customer.TotalRewardPoint" class="form-control" placeholder="TotalRewardPoint" />
+                            <ValidationMessage For="@(() => customer.TotalRewardPoint)" />
+                        </div>
+
+                        <div class="form-group text-center">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                                <a class="btn btn-secondary mx-2" data-bs-target="#carouselExample" data-bs-slide="prev">Quay Về</a>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Customer customer = new DATN.Shared.Customer();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = true;
+    }
+
+    private async Task CreateCustomer()
+    {
+
+        try
+        {
+            var responseCustomer = await httpClient.PostAsJsonAsync("api/Customer/AddCustomer", customer);
+
+            if (responseCustomer.IsSuccessStatusCode)
+            {
+                successMessage = "Thêm thành công!";
+                errorMessage = string.Empty;
+
+            }
+            else
+            {
+                var errorContent = await responseCustomer.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+
+        Navigation.NavigateTo("/createrewardpointe");
+        //--------------------------------
+
+    }
+
+
+}

@@ -1,0 +1,83 @@
+﻿@page "/adminmenu"
+@using DATN.Shared
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+
+<style>
+    .product-table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+        .product-table-container table {
+            width: 100%;
+        }
+
+    .search-bar, .filter-bar {
+        margin-bottom: 20px;
+    }
+</style>
+
+@if (isLoaded)
+{
+    <div class="col-md-12 grid-margin stretch-card p-5">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Menu</h4>
+                <p class="card-description">
+                    <button class="btn btn-success" @onclick="() => CreateMenu()">Add new employee</button>
+                </p>
+                <div class="search-bar">
+                    <input type="text" class="form-control" placeholder="Sreach employee..." @oninput="Filter" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>MenuName</th>
+                                <th>MenuDescription</th>
+                                <th>PriceCombo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in filter)
+                            {
+                                if (item != null)
+                                {
+                                    <tr>
+                                        <td>@item.MenuName</td>
+                                        <td>@item.MenuDescription</td>
+                                        <td>@item.PriceCombo</td>
+                                        <td class="text-center">
+                                            @if (!item.IsDelete)
+                                            {
+                                                <button class="btn btn-primary" @onclick="() => EditMenu(item.MenuId)">Sửa</button>
+                                                <button class="btn btn-danger" @onclick="() => Hide(item.MenuId)">Ẩn</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-warning" @onclick="() => Restore(item.MenuId)">Khôi phục</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else
+{
+    <p>Loading...</p>
+}
+
