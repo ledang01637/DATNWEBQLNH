@@ -165,6 +165,21 @@
         border-radius: 5px;
         background-color: #fff;
     }
+
+    .notification-item {
+        padding: 10px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item p {
+            margin: 0;
+            font-size: 14px;
+        }
+
 </style>
 
 <div class="row position-relative">
@@ -209,7 +224,41 @@
 
     <!-- Bảng yêu cầu bàn -->
     <div class="col-md-4 custom-table mb-2">
-        <h5 class="mb-2">Quản lý yêu cầu</h5>
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-2">Quản lý yêu cầu</h5>
+            <div class="dropdown dropend">
+                <button class="btn btn-default dropdown-toggle position-relative border border-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell-fill"></i>
+                    <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <span class="visually-show">3</span>
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown" style="width: 300px;">
+                    <li><h6 class="dropdown-header text-center fw-bold">Thông báo</h6></li>
+                    <li class="notification-item">
+                        <a href="#" style="text-decoration: none; color: black;">
+                            <p class="mb-1 fw-semibold ">Thông báo 1: Bàn số 1 Đã đặt món</p>
+                            <small class="text-muted">2 phút trước</small>
+                        </a>
+                    </li>
+                    <li class="notification-item">
+                        <a href="#" style="text-decoration: none; color: black;">
+                            <p class="mb-1 fw-semibold ">Thông báo 2: Bàn số 2 đã thanh toán</p>
+                            <small class="text-muted">10 phút trước</small>
+                        </a>
+                    </li>
+                    <li class="notification-item">
+                        <a href="#" style="text-decoration: none; color: black;">
+                            <p class="mb-1 fw-semibold ">Thông báo 3: Bạn có tin nhắn mới.</p>
+                            <small class="text-muted">30 phút trước</small>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a href="#" class="dropdown-item text-center">Xem tất cả</a></li>
+                </ul>
+            </div>
+        </div>
+
         <table class="table table-sm mb-4 table-bordered">
             <thead>
                 <tr>

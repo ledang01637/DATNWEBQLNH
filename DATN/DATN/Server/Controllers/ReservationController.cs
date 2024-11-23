@@ -3,6 +3,7 @@ using DATN.Shared;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using DATN.Server.Service;
+using System;
 
 namespace DATN.Server.Controllers
 {
@@ -30,12 +31,20 @@ namespace DATN.Server.Controllers
             {
                 CustomerName = Reservation.CustomerName,
                 CustomerPhone = Reservation.CustomerPhone,
-                ReservationDate = Reservation.ReservationDate,
-                NumberGuest = Reservation.NumberGuest,
+                CustomerEmail = Reservation.CustomerEmail,
+                ReservationTime = Reservation.ReservationTime,
+                Adults = Reservation.Adults,
+                Children = Reservation.Children,
                 Tables = Reservation.Tables,
                 IsPayment = Reservation.IsPayment,
                 DepositPayment = Reservation.DepositPayment,
-                PaymentMethod = Reservation.PaymentMethod
+                PaymentMethod = Reservation.PaymentMethod,
+                CreatedDate = Reservation.CreatedDate,
+                UpdatedDate = Reservation.UpdatedDate,
+                ReservationStatus = Reservation.ReservationStatus,
+                CustomerNote = Reservation.CustomerNote,
+                TableId = Reservation.TableId,
+                IsDeleted = Reservation.IsDeleted
             });
         }
 

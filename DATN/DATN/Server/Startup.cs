@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using DATN.Server.Hubs;
 using DATN.Server.Hash;
+using DATN.Server.Payment.ServicePayment;
 
 namespace DATN.Server
 {
@@ -90,6 +91,7 @@ namespace DATN.Server
             services.AddScoped<FileEncryptionService>();
             services.AddScoped<NetworkService>();
             services.AddScoped<MessageService>();
+            services.AddScoped<VNPayService>();
 
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))

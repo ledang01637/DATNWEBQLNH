@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DATN.Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241031022926_Init")]
+    [Migration("20241123122353_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -490,10 +490,28 @@ namespace DATN.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("Adults")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Children")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("CustomerNote")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
@@ -509,22 +527,24 @@ namespace DATN.Server.Migrations
                     b.Property<bool>("IsPayment")
                         .HasColumnType("bit");
 
-                    b.Property<int>("NumberGuest")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NumberSeat")
-                        .HasColumnType("int");
-
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<DateTime>("ReservationDate")
+                    b.Property<string>("ReservationStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("ReservationTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("TableId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("ReservationId");
 
@@ -674,6 +694,32 @@ namespace DATN.Server.Migrations
                     b.HasIndex("FloorId");
 
                     b.ToTable("Tables");
+                });
+
+            modelBuilder.Entity("DATN.Shared.Transaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("DATN.Shared.Unit", b =>
@@ -960,6 +1006,17 @@ namespace DATN.Server.Migrations
                     b.Navigation("Floors");
                 });
 
+            modelBuilder.Entity("DATN.Shared.Transaction", b =>
+                {
+                    b.HasOne("DATN.Shared.Reservation", "Reservation")
+                        .WithMany("Transactions")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("DATN.Shared.Account", b =>
                 {
                     b.Navigation("Customers");
@@ -1019,6 +1076,11 @@ namespace DATN.Server.Migrations
                     b.Navigation("MenuItems");
 
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("DATN.Shared.Reservation", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("DATN.Shared.Role", b =>

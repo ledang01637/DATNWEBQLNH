@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DATN.Server.Service
 {
@@ -56,12 +57,19 @@ namespace DATN.Server.Service
             }
             existing.CustomerName = update.CustomerName;
             existing.CustomerPhone = update.CustomerPhone;
-            existing.ReservationDate = update.ReservationDate;
-            existing.NumberGuest = update.NumberGuest;
+            existing.CustomerEmail = update.CustomerEmail;
+            existing.ReservationTime = update.ReservationTime;
+            existing.Adults = update.Adults;
+            existing.Children = update.Children;
             existing.Tables = update.Tables;
             existing.IsPayment = update.IsPayment;
             existing.DepositPayment = update.DepositPayment;
             existing.PaymentMethod = update.PaymentMethod;
+            existing.CreatedDate = update.CreatedDate;
+            existing.UpdatedDate = update.UpdatedDate;
+            existing.ReservationStatus = update.ReservationStatus;
+            existing.CustomerNote = update.CustomerNote;
+            existing.TableId = update.TableId;
             existing.IsDeleted = update.IsDeleted;
 
 

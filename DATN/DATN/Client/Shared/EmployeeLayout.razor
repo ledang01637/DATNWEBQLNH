@@ -53,14 +53,13 @@
 </style>
 
 <CascadingAuthenticationState>
-    <AuthorizeView Roles="admin,employee">
+    <AuthorizeView Roles="admin,employee,chef">
         <Authorized>
             @if (isLoading)
             {
                 <div class="layout-rain">
                     <div class="bubbles" id="bubbles">
                         <img src="images/shipper.png" class="shipper" alt="">
-                        <hr class="divider">
                     </div>
                 </div>
             }

@@ -159,7 +159,7 @@ namespace DATN.Client.Pages.AdminManager
                     employee = await GetEmployeeByAccountId(int.Parse(accountId));
                     if(employee == null || employee.EmployeeId <= 0 )
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Vui lòng đăng nhập bằng tài khoản nhân viên");
+                        await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Vui lòng đăng nhập bằng tài khoản nhân viên hoặc thêm nhân viên mới");
                         
                         await Task.Delay(1000);
                         Navigation.NavigateTo("/login-admin");

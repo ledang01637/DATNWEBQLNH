@@ -76,7 +76,7 @@ namespace DATN.Client.Pages.AdminManager
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản hoặc mật khẩu không đúng! hoặc không có quyền truy cập", "");
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo", "Tài khoản hoặc mật khẩu không đúng! hoặc không có quyền truy cập", "");
                     }
                 }
                 catch (JsonException ex)

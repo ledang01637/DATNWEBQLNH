@@ -33,11 +33,14 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Shifte>().HasKey(l => l.ShifteId);
             modelBuilder.Entity<EmployeeShifte>().HasKey(l => l.EmployeeShifteId);
 
+            modelBuilder.Entity<Transaction>().HasKey(l => l.TransactionId);
             modelBuilder.Entity<Reservation>().HasKey(l => l.ReservationId);
             modelBuilder.Entity<Table>().HasKey(l => l.TableId);
             modelBuilder.Entity<RewardPointe>().HasKey(l => l.RewardPointId);
 
             modelBuilder.Entity<Message>().HasKey(l => l.MessageId);
+
+
             #endregion
 
             #region Custom DataType
@@ -50,6 +53,7 @@ namespace DATN.Server.Data
             modelBuilder.Entity<Product>().Property(f => f.Price).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Voucher>().Property(f => f.DiscountValue).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Reservation>().Property(f => f.DepositPayment).HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<Transaction>().Property(f => f.Amount).HasColumnType("decimal(18,2)");
             modelBuilder.Entity<Customer>().Property(o => o.CustomerId).ValueGeneratedOnAdd().UseIdentityColumn();
 
             //Shifte
@@ -304,14 +308,30 @@ namespace DATN.Server.Data
                 .HasMaxLength(30)
                 .IsRequired();
 
+            modelBuilder.Entity<Reservation>().Property(e => e.CustomerEmail)
+                .HasColumnType("varchar(50)")
+                .HasMaxLength(50)
+                .IsRequired();
+
             modelBuilder.Entity<Reservation>().Property(e => e.IsDeleted)
                 .HasColumnType("bit")
                 .IsRequired();
-                
+
+            modelBuilder.Entity<Reservation>().Property(e => e.CustomerNote)
+                .HasColumnType("nvarchar(255)")
+                .HasMaxLength(255)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Reservation>().Property(e => e.ReservationStatus)
+                .HasColumnType("nvarchar(20)")
+                .HasMaxLength(20)
+                .IsRequired();
+
+
             #endregion
 
             #region Custom RelationShip
-            
+
             //Account
             modelBuilder.Entity<Account>()
                .HasOne(a => a.Employees)
@@ -451,6 +471,13 @@ namespace DATN.Server.Data
                 .HasForeignKey(o => o.TableId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //Transactions
+            modelBuilder.Entity<Transaction>()
+                .HasOne(o => o.Reservation)
+                .WithMany(cv => cv.Transactions)
+                .HasForeignKey(o => o.ReservationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             //RewardPoints
             modelBuilder.Entity<RewardPointe>()
                 .HasOne(o => o.Customers)
@@ -516,6 +543,7 @@ namespace DATN.Server.Data
         public DbSet<CustomerVoucher> CustomerVouchers { get; set; }
         public DbSet<Voucher> Vouchers { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Table> Tables { get; set; }
         public DbSet<RoleAccount> RoleAccounts { get; set; }
         public DbSet<Account> Accounts { get; set; }

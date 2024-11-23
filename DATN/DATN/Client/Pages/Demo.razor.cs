@@ -1,9 +1,11 @@
 ﻿using DATN.Shared;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -11,82 +13,29 @@ namespace DATN.Client.Pages
 {
     public partial class Demo
     {
-        private HubConnection hubConnection;
-        private string message;
-        private int searchTerm = 0;
-        private bool showModal = false;
-        private List<Table> tables = new();
-        private List<Floor> floors = new();
-        private List<RequestTable> requestsTable = new();
-
-        protected override async Task OnInitializedAsync()
+        private async Task CreatePayment()
         {
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
-                .Build();
-
-            tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-            floors = await httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
-            
-            if(tables.Count > 0 && floors.Count > 0)
+            var vnpRequest = new VNPayRequest
             {
-                foreach(var table in tables)
-                {
-                    requestsTable.Add(new RequestTable
-                    {
-                        TableId = table.TableId,
-                        NumberTable = table.TableNumber,
-                        FloorId = table.FloorId,
-                        IsCompleted = false
-                    });
-                }
-            }
+                OrderId = new Random().Next(10000, 99999),
+                Amount = 50000m / 100m,
+                Description = "Thanh toán đặt bàn",
+                CreatedDate = DateTime.Now,
+                FullName = "abc"
+            };
 
-            await hubConnection.StartAsync();
-
-        }
-
-        private async Task ProcessPayment()
-        {
-            if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
+            var response = await httpClient.PostAsJsonAsync("api/VNPay/CreateUrlVNPay", vnpRequest);
+            if(response.IsSuccessStatusCode)
             {
-                await hubConnection.SendAsync("SendMessage", message);
+                var paymentUrl = await response.Content.ReadAsStringAsync();
+                Navigation.NavigateTo(paymentUrl, true);
             }
             else
             {
-                await JS.InvokeVoidAsync("howAlert", "Không thể kết nối tới server!");
-            }
-        }
-
-        private void CompleteTableRequest(RequestTable table)
-        {
-            table.IsCompleted = true;
-            showModal = true;
-        }
-
-        private void CloseModal()
-        {
-            showModal = false;
-        }
-
-        // Function to filter tables based on search term
-        private IEnumerable<RequestTable> FilterTables(IEnumerable<RequestTable> requestTables)
-        {
-           
-            if (searchTerm == 0)
-            {
-                return requestTables;
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"API lỗi: {errorMessage}");
             }
 
-            return requestTables.Where(t => t.NumberTable == searchTerm);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            if (hubConnection is not null)
-            {
-                await hubConnection.DisposeAsync();
-            }
         }
     }
 }

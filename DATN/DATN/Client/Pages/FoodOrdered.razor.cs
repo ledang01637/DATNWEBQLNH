@@ -355,6 +355,7 @@ namespace DATN.Client.Pages
                     carts.Clear();
                     await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
                     await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
+
                     Navigation.NavigateTo("/");
                 }
                 else

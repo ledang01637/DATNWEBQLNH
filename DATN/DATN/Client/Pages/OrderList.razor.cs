@@ -158,7 +158,7 @@ namespace DATN.Client.Pages
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng thêm món ăn", "");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng thêm món ăn");
             }
         }
         private async Task SenMessageAsync()
@@ -249,7 +249,12 @@ namespace DATN.Client.Pages
         }
         private async Task HandleAccountPayment(Table table)
         {
-            customer = await GetCustomer("customer");
+            var email = await GetEmailAccount();
+
+            if(string.IsNullOrEmpty(email)) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập lại"); return; }
+
+            customer = await GetCustomer(email);
+
             if (customer == null)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy khách hàng");
@@ -389,11 +394,11 @@ namespace DATN.Client.Pages
             tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
         }
 
-        private async Task<Customer> GetCustomer(string typeAccount)
+        private async Task<Customer> GetCustomer(string email)
         {
             customers = await httpClient.GetFromJsonAsync<List<Customer>>("api/Customer/GetCustomerInclude");
             if(customers == null) {return null; }
-            return customers.FirstOrDefault(a => a.Accounts.AccountType.ToLower().Equals(typeAccount));
+            return customers.FirstOrDefault(a => a.Accounts.Email.ToLower().Equals(email));
         }
 
         private async Task<string> CheckTypeAccount()
@@ -411,6 +416,26 @@ namespace DATN.Client.Pages
                 else
                 {
                     await JS.InvokeVoidAsync("showAlert","error","Lỗi","Vui lòng liên hệ Admin");
+                }
+            }
+            return null;
+        }
+
+        private async Task<string> GetEmailAccount()
+        {
+            var token = await _localStorageService.GetItemAsync("authToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+
+                if (handler.ReadToken(token) is JwtSecurityToken jwtToken)
+                {
+                    var accountEmailClaim = jwtToken.Claims.FirstOrDefault(c => c.Type.Equals("Username"));
+                    return accountEmailClaim?.Value;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
                 }
             }
             return null;
