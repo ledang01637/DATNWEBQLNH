@@ -18,6 +18,7 @@ namespace DATN.Client.Pages
         protected override void OnInitialized()
         {
             reservationModel.Adults = 1;
+            reservationModel.PaymentMethod = "Transfer";
         }
 
         public async Task HandleBookTableAsync()
@@ -68,7 +69,8 @@ namespace DATN.Client.Pages
                         await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thanh toán thất bại"); return;
 
                     }
-                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Thanh toán thành công");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đặt bàn thành công");
+                    Navigation.NavigateTo("/", true);
                 }
             }
             catch (Exception ex)

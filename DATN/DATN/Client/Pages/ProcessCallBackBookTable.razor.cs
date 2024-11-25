@@ -45,7 +45,8 @@ namespace DATN.Client.Pages
                         
                     }
 
-                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Thanh toán thành công");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đặt bàn thành công");
+                    Navigation.NavigateTo("/",true);
                 }
             }
             catch (Exception ex)

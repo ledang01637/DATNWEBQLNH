@@ -127,7 +127,7 @@
         margin-bottom: 30px;
     }
 
-    .table-card {
+    .table-card, .table-card-booktable {
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
     }
@@ -137,6 +137,12 @@
             background: #dee2e6;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
+
+        .table-card-booktable:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
 
     .custom-table {
         font-size: 11px;
@@ -180,11 +186,34 @@
             font-size: 14px;
         }
 
+        .notification-item:hover {
+            cursor: pointer;
+            background: #38ceff;
+        }
+
+    .order-booking-item {
+        border-bottom: 1px solid rgba(120, 120, 128, .2);
+    }
+
+    .custom-seat {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+    }
+   
+    .selected-table {
+        background-color: #FF9900; 
+    }
+
+
 </style>
 
 <div class="row position-relative">
     <div class="col-md-8">
-        @if(tables == null || floors == null)
+        @if (tables == null || floors == null)
         {
             <div class="d-flex justify-content-center">
                 <div class="spinner-border spinner-border-sm" role="status">
@@ -230,34 +259,39 @@
                 <button class="btn btn-default dropdown-toggle position-relative border border-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-bell-fill"></i>
                     <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        <span class="visually-show">3</span>
+                        @if (reservations != null && reservations.Count > 0)
+                        {
+                            <span class="visually-show">@reservations.Count</span>
+                        }
+                        else
+                        {
+                            <span class="visually-show">0</span>
+                        }
                     </span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="notificationDropdown" style="width: 300px;">
-                    <li><h6 class="dropdown-header text-center fw-bold">Thông báo</h6></li>
-                    <li class="notification-item">
-                        <a href="#" style="text-decoration: none; color: black;">
-                            <p class="mb-1 fw-semibold ">Thông báo 1: Bàn số 1 Đã đặt món</p>
-                            <small class="text-muted">2 phút trước</small>
-                        </a>
-                    </li>
-                    <li class="notification-item">
-                        <a href="#" style="text-decoration: none; color: black;">
-                            <p class="mb-1 fw-semibold ">Thông báo 2: Bàn số 2 đã thanh toán</p>
-                            <small class="text-muted">10 phút trước</small>
-                        </a>
-                    </li>
-                    <li class="notification-item">
-                        <a href="#" style="text-decoration: none; color: black;">
-                            <p class="mb-1 fw-semibold ">Thông báo 3: Bạn có tin nhắn mới.</p>
-                            <small class="text-muted">30 phút trước</small>
-                        </a>
-                    </li>
+                    <li><h6 class="dropdown-header text-center fw-bold">Khách đặt bàn</h6></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a href="#" class="dropdown-item text-center">Xem tất cả</a></li>
+                    @if (reservations != null && reservations.Count > 0)
+                    {
+                        foreach (var rv in reservations)
+                        {
+                            <li class="notification-item" @onclick="() => ProcessBookTable(rv.ReservationId)">
+                                <div style="text-decoration: none; color: black;">
+                                    <p class="mb-1 fw-semibold">Mã đơn hàng: #@rv.ReservationId</p>
+                                    <small class="text-muted">Thời gian đến: @rv.ReservationTime</small>
+                                </div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li><p class="text-center text-muted">Không có yêu cầu nào.</p></li>
+                    }
                 </ul>
             </div>
         </div>
+
 
         <table class="table table-sm mb-4 table-bordered">
             <thead>
@@ -275,9 +309,10 @@
                     <tr class="table-light">
                         <td class="fw-bold">Không có yêu cầu</td>
                     </tr>
-                }else
+                }
+                else
                 {
-                    foreach(var r in requests)
+                    foreach (var r in requests)
                     {
                         <tr class="@(r.IsCompleted ? "table-success" : "table-danger")">
                             <td>@r.TableNumbe</td>
@@ -322,8 +357,122 @@
 
 
 
-    <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
-        <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+    @*     <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
+    <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
+    </div> *@
+</div>
+
+<div class="modal fade" id="bookTableModal" tabindex="-1" aria-labelledby="bookTableModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookTableModal">Mã đơn hàng: @reservationModel.ReservationId</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card p-3 pb-0">
+                    <h5 class="mb-2 text-center">Thông tin người đặt</h5>
+                    <div class="card-body">
+                        <EditForm Model="@reservationModel" OnValidSubmit="OnSubmitForm">
+                            <DataAnnotationsValidator />
+                            <div class="mb-3">
+                                <label for="name" class="form-label fw-bold">Tên liên hệ <span class="text-danger">*</span></label>
+                                <InputText id="name" class="form-control" @bind-Value="reservationModel.CustomerName" placeholder="Nhập tên liên hệ" readonly />
+                                <ValidationMessage For="@(() => reservationModel.CustomerName)" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                                    <InputText type="tel" id="phone" class="form-control" @bind-Value="reservationModel.CustomerPhone" placeholder="Nhập số điện thoại" readonly />
+                                    <ValidationMessage For="@(() => reservationModel.CustomerPhone)" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                                    <InputText class="form-control" placeholder="Nhập email" @bind-Value="reservationModel.CustomerEmail" readonly />
+                                    <ValidationMessage For="@(() => reservationModel.CustomerEmail)" class="validation-message" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="mb-3 col-md-6 col-6">
+                                    <label for="adults" class="form-label icon-label fw-bold">
+                                        <i class="fas fa-user"></i> Người lớn:
+                                    </label>
+                                    <InputNumber class="form-control" placeholder="Người lớn" @bind-Value="reservationModel.Adults" min="1" max="200" readonly="@(isEdit ? false : true)" />
+                                    <ValidationMessage For="@(() => reservationModel.Adults)" class="validation-message" />
+                                </div>
+                                <div class="mb-3 col-md-6 col-6">
+                                    <label for="children" class="form-label icon-label fw-bold">
+                                        <i class="fas fa-child"></i> Trẻ em:
+                                    </label>
+                                    <InputNumber class="form-control" placeholder="Trẻ em" @bind-Value="reservationModel.Children" min="0" max="200" readonly="@(isEdit ? false : true)" />
+                                    <ValidationMessage For="@(() => reservationModel.Children)" class="validation-message" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="time" class="form-label fw-bold">Thời gian đến:</label>
+                                <div class="row">
+                                    <div class="col-7">
+                                        <InputDate class="form-control" placeholder="Ngày đến" @bind-Value="selectedDate" min="@reservationModel.ReservationTime" readonly="@(isEdit ? false : true)" />
+                                    </div>
+                                    <div class="col-5">
+                                        <input class="form-control" type="time" placeholder="Giờ đến" @bind-value="selectedTime" min="@reservationModel.ReservationTime" readonly="@(isEdit ? false : true)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="children" class="form-label icon-label fw-bold">
+                                    Tiền cọc = (Người lớn x 50,000):
+                                </label>
+                                <InputNumber class="form-control" placeholder="Tiền cọc" @bind-Value="reservationModel.DepositPayment" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label for="note" class="form-label fw-bold">Ghi chú</label>
+                                <InputTextArea id="note" rows="3" @bind-Value="reservationModel.CustomerNote" class="form-control" placeholder="Nhập ghi chú" readonly="@(isEdit ? false : true)"></InputTextArea>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="chooseTable" class="form-label fw-bold">Chọn bàn</label>
+                                @foreach (var f in floors)
+                                {
+                                    <div class="text-center fw-semibold mb-2">Tầng @f.NumberFloor</div>
+                                    <div class="row mb-3">
+                                        @foreach (var table in tables.Where(t => t.FloorId == f.FloorId && t.Status != "Đã đặt").OrderBy(t => t.Position))
+                                        {
+                                            <div class="col-6 col-md-2 p-2">
+                                                <div class="card table-card-booktable @(selectedTableId == table.TableId ? "selected-table" : "")" style="height: 100px; width: 100%; cursor: pointer;" @onclick="() => ProcessChooseTable(table.TableId)">
+                                                    <div class="card-body text-center position-relative">
+                                                        <img src="/Image/dinner-table.png" style="height: 40px" alt="Table Image" class="mb-2">
+                                                        <div class="position-absolute top-0 end-0 fw-bold m-1 text-white bg-primary rounded-circle custom-seat">
+                                                            @table.SeatingCapacity ghế
+                                                        </div>
+                                                        <span class="d-block fw-bold">Bàn @table.TableNumber</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="d-flex justify-content-end pt-3" style="border-top: 1px solid">
+                                @if(isEdit){
+                                    <button type="button" class="btn btn-primary w-25 me-3" @onclick="ConformInforCustomer">
+                                       Cập nhật
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-info w-25 me-3" @onclick="EditInforCustomer">Sửa thông tin</button>
+                                    <button type="submit" class="btn btn-primary w-25">
+                                        Xác nhận
+                                    </button>
+                                }
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
     </div>
 </div>
 

@@ -369,6 +369,29 @@ namespace DATN.Client.Pages
             }
         }
 
+        private async Task Transfer(Order order)
+        {
+            var vnpRequest = new VNPayRequest
+            {
+                OrderId = new Random().Next(10000, 99999),
+                Amount = order.TotalAmount,
+                Description = "Thanh toán đặt bàn",
+                CreatedDate = DateTime.Now,
+                FullName = "",
+            };
+
+            var response = await httpClient.PostAsJsonAsync("api/VNPay/CreateUrlVNPay", vnpRequest);
+            if (response.IsSuccessStatusCode)
+            {
+                var paymentUrl = await response.Content.ReadAsStringAsync();
+                Navigation.NavigateTo(paymentUrl, true);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"API lỗi: {errorMessage}");
+            }
+        }
 
         private int GetTableNumberFromToken(string token)
         {
