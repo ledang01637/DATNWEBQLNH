@@ -358,6 +358,20 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
 
+                var table = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
+
+                if (table != null && table.TableId > 0) {
+
+                    table.Status = "Trống";
+
+                    var res = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
+
+                    if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn"); return;
+                }
 
                 TotalAmount = 0;
                 IsUsing = false;
@@ -406,7 +420,6 @@ namespace DATN.Client.Pages.AdminManager
                         if(createdRewardPoint != null)
                         {
                             customer.TotalRewardPoint += createdRewardPoint.RewardPoint;
-                            Console.WriteLine(customer.TotalRewardPoint);
                             var res = await httpClient.PutAsJsonAsync($"api/Customer/{customer.CustomerId}", customer);
                             if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Điểm chưa được thêm"); return; }
                         }

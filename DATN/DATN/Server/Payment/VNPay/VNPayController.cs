@@ -2,8 +2,10 @@
 using DATN.Server.Service;
 using DATN.Shared;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections;
 using System.Linq;
 
 namespace DATN.Server.Payment.VNPay
@@ -42,6 +44,12 @@ namespace DATN.Server.Payment.VNPay
             {
                 return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
             }
-        }  
+        }
+
+        [HttpGet("PaymentCallBack")]
+        public ActionResult<VNPayResponse> PaymentCallBack()
+        {
+            return Ok(_VNPayService.PaymentResponse(Request.Query));
+        }
     }
 }

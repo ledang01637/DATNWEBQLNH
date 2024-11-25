@@ -1,7 +1,89 @@
 ﻿@page "/demo"
+@using DATN.Client.Service
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 @layout MainLayout
 @inject NavigationManager Navigation
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
 
 <button @onclick="CreatePayment">a</button>
+<style>
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .btn-red {
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+    }
+
+        .btn-red:hover {
+            background-color: #ff7875;
+        }
+
+    .btn-outline-danger {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #ff4d4f;
+            color: white;
+        }
+
+    .book-header {
+        border-bottom: 1px solid #bababa;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    h5 {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .btn-group-custom {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+</style>
+
+<div class="d-flex d-inline-block">
+    <div class="align-items-start">
+        <a href="/" class="link-dark fw-semibold">
+            <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+        </a>
+    </div>
+    <h5 class="text-center mx-auto mb-4 fw-semibold">Đặt cọc</h5>
+</div>
+
+<div class="container my-3">
+    <div class="row g-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <h5 class="mb-4">Vui lòng cọc trước 500k để giữ chỗ</h5>
+                <button class="btn btn-primary" @onclick="CreatePayment">Thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

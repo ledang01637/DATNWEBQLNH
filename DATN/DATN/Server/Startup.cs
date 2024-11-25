@@ -92,6 +92,7 @@ namespace DATN.Server
             services.AddScoped<NetworkService>();
             services.AddScoped<MessageService>();
             services.AddScoped<VNPayService>();
+            services.AddScoped<TransactionService>();
 
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))

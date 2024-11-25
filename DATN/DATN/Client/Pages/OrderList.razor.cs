@@ -206,19 +206,27 @@ namespace DATN.Client.Pages
                             };
                             carts.Add(cartDto);
                         }
+
+                        table.Status = "Đang dùng";
+
+                        var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
+
+                        if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
+
                         await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note);
+
                         await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
                     }
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
+                    await JS.InvokeVoidAsync("showAlert", "error","Lỗi" ,"Không thể kết nối tới server!");
                     return;
                 }
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "table is null");
+                await JS.InvokeVoidAsync("showAlert", "warning","Thông báo" ,"Vui lòng quét mã QR");
                 return;
             }
         }

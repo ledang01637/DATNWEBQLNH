@@ -20,6 +20,12 @@ namespace DATN.Server.Service
         {
             return _context.Tables.ToList();
         }
+
+        public Table GetTableByNumber(int numberTable)
+        {
+            var table = _context.Tables.FirstOrDefault(a => a.TableNumber == numberTable);
+            return table ?? new Table();
+        }
         public Table GetTableInclude(int tableId)
         {
             return _context.Tables
