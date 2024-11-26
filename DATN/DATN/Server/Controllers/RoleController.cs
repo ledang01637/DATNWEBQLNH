@@ -23,6 +23,12 @@ namespace DATN.Server.Controllers
             return _RoleService.GetRole();
         }
 
+        [HttpGet("GetRoleIdCustomer")]
+        public ActionResult<int> GetRoleIdCustomer()
+        {
+            return Ok(_RoleService.GetRoleIdCustomer());
+        }
+
         [HttpPost("AddRole")]
         public Role AddRole(Role Role)
         {

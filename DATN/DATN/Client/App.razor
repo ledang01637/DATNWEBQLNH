@@ -19,7 +19,6 @@
                 }
                 else
                 {
-                    Console.WriteLine("2");
                     <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
                 }
             }
@@ -47,7 +46,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        IsAdmin = user.Identity.IsAuthenticated && (user.IsInRole("3") || user.IsInRole("1") || user.IsInRole("2"));
+        IsAdmin = user.Identity.IsAuthenticated && (user.IsInRole("admin") || user.IsInRole("no account") || user.IsInRole("customer"));
         IsLoading = false;
     }
 }

@@ -81,17 +81,10 @@
     private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        isLoaded = true;
-    }
+    protected override async Task OnInitializedAsync() => isLoaded = true;
 
     private async Task CreateRewardPointe()
     {
-
-
-        //--------------------------------
-
         try
         {
             var responseRewardPointe = await httpClient.PostAsJsonAsync("api/RewardPointe/AddRewardPointe", rewardpointe);
@@ -115,7 +108,7 @@
         }
 
         StateHasChanged();
-        //--------------------------------
+
     }
 
 

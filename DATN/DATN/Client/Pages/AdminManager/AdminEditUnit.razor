@@ -1,0 +1,121 @@
+
+@page "/editunit/{UnitId:int}"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add Unit</h5>
+            </div>
+            <div class="card-body col-md-12 m-auto">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@unit" OnValidSubmit="EditUnit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="UnitName" class="control-label"><strong>UnitName</strong></label>
+                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" />
+                            <ValidationMessage For="@(() => unit.UnitName)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="UnitDescription" class="control-label"><strong>UnitDescription</strong></label>
+                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" />
+                            <ValidationMessage For="@(() => unit.UnitDescription)" />
+                        </div>
+
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Edit</button>
+                            <a href="/adminunit" class="btn btn-secondary mx-2">Back</a>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UnitId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Unit unit = new DATN.Shared.Unit();
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEditUnit();
+        isLoaded = true;
+    }
+
+    private async Task LoadEditUnit()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<Unit>($"api/Unit/{UnitId}");
+            if (response != null)
+            {
+                unit = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy món ăn.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditUnit()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Unit/{UnitId}", unit);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminunit");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+}

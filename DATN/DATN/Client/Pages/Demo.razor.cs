@@ -1,5 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using DATN.Client.Pages.AdminManager;
+using DATN.Shared;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -7,37 +14,33 @@ namespace DATN.Client.Pages
 {
     public partial class Demo
     {
-        private HubConnection hubConnection;
-        private string message;
 
-        protected override async Task OnInitializedAsync()
+        private Reservation reservation = new();
+
+        private async Task CreatePayment()
         {
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
-                .Build();
-
-            await hubConnection.StartAsync();
-        }
-
-        private async Task ProcessPayment()
-        {
-            if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
+            reservation = await _localStorageService.GetAsync<Reservation>("reservaion");
+            var vnpRequest = new VNPayRequest
             {
-                await hubConnection.SendAsync("SendMessage", message);
+                OrderId = new Random().Next(10000, 99999),
+                Amount = reservation.Adults * 50000,
+                Description = "Thanh toán đặt bàn",
+                CreatedDate = DateTime.Now,
+                FullName = reservation.CustomerName,
+            };
+
+            var response = await httpClient.PostAsJsonAsync("api/VNPay/CreateUrlVNPay", vnpRequest);
+            if (response.IsSuccessStatusCode)
+            {
+                var paymentUrl = await response.Content.ReadAsStringAsync();
+                Navigation.NavigateTo(paymentUrl, true);
             }
             else
             {
-                await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"API lỗi: {errorMessage}");
             }
         }
 
-
-        public async ValueTask DisposeAsync()
-        {
-            if (hubConnection is not null)
-            {
-                await hubConnection.DisposeAsync();
-            }
-        }
     }
 }

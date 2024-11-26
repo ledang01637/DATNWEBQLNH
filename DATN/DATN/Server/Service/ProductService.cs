@@ -22,9 +22,9 @@ namespace DATN.Server.Service
 
         public List<Product> GetProductInclude()
         {
-            return _context.Products
-                .Include(a => a.Categories)
+            var listPro = _context.Products
                 .Include(a => a.Units).ToList();
+            return listPro ?? new List<Product>();
         }
 
         public Product AddProduct(Product Product)

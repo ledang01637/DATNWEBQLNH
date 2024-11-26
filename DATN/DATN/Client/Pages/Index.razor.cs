@@ -34,6 +34,7 @@ namespace DATN.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            isProcessing = true;
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
                 .Build();
@@ -55,7 +56,7 @@ namespace DATN.Client.Pages
         {
             try
             {
-                var productTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
+                var productTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProductInclude");
                 var categoryTask = httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
                 var menuTask = httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
                 var accountTask = httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
@@ -67,7 +68,9 @@ namespace DATN.Client.Pages
                 menus = await menuTask ?? new List<Menu>();
                 accounts = await accountTask ?? new List<Account>();
 
-                if (accounts != null)
+                var accountType = await CheckTypeAccount();
+
+                if (accounts != null && (accountType != "customer"))
                 {
                     loginUser.Email = "no account";
                     loginUser.Password = "123456";
@@ -92,7 +95,8 @@ namespace DATN.Client.Pages
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showLog", "Tài khoản mật khẩu không chính xác");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Tài khoản mật khẩu không chính xác");
+                        return;
                     }
                 }
 
@@ -103,6 +107,11 @@ namespace DATN.Client.Pages
             {
                 var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
                 await JS.InvokeVoidAsync("openChatGPT", query);
+            }
+            finally
+            {
+                isProcessing = false;
+                StateHasChanged();
             }
         }
 
@@ -150,13 +159,14 @@ namespace DATN.Client.Pages
             }
             else
             {
-                Cart newCart = new Cart
+                Cart newCart = new()
                 {
                     ProductId = product.ProductId,
                     ProductName = product.ProductName,
                     Price = product.Price,
                     ProductImage = product.ProductImage,
                     Quantity = 1,
+                    UnitName = product.Units.UnitName,
                 };
                 carts.Add(newCart);
             }
@@ -194,8 +204,6 @@ namespace DATN.Client.Pages
 
         private Task UpdateCartTotals(decimal priceChange, int quantityChange)
         {
-
-
             TotalQuantity += quantityChange;
 
             if(priceChange < 0) 
@@ -216,7 +224,7 @@ namespace DATN.Client.Pages
             var cartItem = carts.FirstOrDefault(c => c.ProductId == productId);
             if (cartItem == null)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Cart item not found");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng thêm món ăn");
                 return;
             }
 
@@ -250,7 +258,7 @@ namespace DATN.Client.Pages
             await JS.InvokeVoidAsync("closeModal", "cartModal");
             if(!string.IsNullOrEmpty(note)) 
             {
-                ListCart.Note = note;
+                ListCartDTO.Note = note;
             }
             Navigation.NavigateTo("/order-list");
         }
@@ -267,7 +275,7 @@ namespace DATN.Client.Pages
             string token = await _localStorageService.GetItemAsync("n");
             if (string.IsNullOrEmpty(token))
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét QR");
                 return;
             }
 
@@ -275,7 +283,7 @@ namespace DATN.Client.Pages
 
             if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.SendAsync("SendMessageTable", messageText, number.ToString());
+                await hubConnection.SendAsync("SendMessageTable", messageText, number);
                 await JS.InvokeVoidAsync("closeModal", "sendMasageModal");
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành công","Đã gửi yêu cầu");
             }
@@ -298,6 +306,30 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return int.Parse(userId?.Value);
         }
+        private async Task<string> CheckTypeAccount()
+        {
+            var token = await _localStorageService.GetItemAsync("authToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+
+                if (handler.ReadToken(token) is JwtSecurityToken jwtToken)
+                {
+                    var accountTypeClaim = jwtToken.Claims.FirstOrDefault(c => c.Type.Equals("AccountType"));
+                    return accountTypeClaim?.Value;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                }
+            }
+            return null;
+        }
+
+        //private async void Navbar(bool isClose)
+        //{
+        //    await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);
+        //}
 
         //private string GetGridColumnClass()
         //{

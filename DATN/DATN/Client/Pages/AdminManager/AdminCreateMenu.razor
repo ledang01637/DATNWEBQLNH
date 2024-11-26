@@ -1,0 +1,105 @@
+﻿@page "/createmenu"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add Unit</h5>
+            </div>
+            <div class="card-body col-md-12 m-auto">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@menu" OnValidSubmit="CreateMenu">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="MenuName" class="control-label"><strong>MenuName</strong></label>
+                            <input id="MenuName" @bind="menu.MenuName" class="form-control" placeholder="MenuName" />
+                            <ValidationMessage For="@(() => menu.MenuName)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="PriceCombo" class="control-label"><strong>PriceCombo</strong></label>
+                            <input type="number" id="PriceCombo" @bind="menu.PriceCombo" class="form-control" placeholder="PriceCombo" />
+                            <ValidationMessage For="@(() => menu.PriceCombo)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="MenuDescription" class="control-label"><strong>MenuDescription</strong></label>
+                            <input id="MenuDescription" @bind="menu.MenuDescription" class="form-control" placeholder="MenuDescription" />
+                            <ValidationMessage For="@(() => menu.MenuDescription)" />
+                        </div>
+
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminmenu" class="btn btn-secondary mx-2">Back</a>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Menu menu = new DATN.Shared.Menu();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = true;
+    }
+
+    private async Task CreateMenu()
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Menu/AddMenu", menu);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Success";
+                errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminmenu");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+
+}

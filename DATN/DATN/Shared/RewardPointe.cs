@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -18,6 +15,8 @@ namespace DATN.Shared
         public int OrderId { get; set; }
 
         public virtual Customer Customers { get; set; }
+
+        [JsonIgnore]
         public virtual Order Orders { get; set; }
     }
 }

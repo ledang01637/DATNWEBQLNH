@@ -13,11 +13,13 @@ namespace DATN.Client.Pages.AdminManager
 {
     public partial class TablePage
     {
-        private Table tableModel = new Table();
-        private List<Table> tables = new List<Table>();
-        private List<Table> tablesChanges = new List<Table>();
-        private List<Floor> floors = new List<Floor>();
+        private Table tableModel = new();
+        private List<Table> tables = new();
+        private List<Table> tablesChanges = new();
+        private List<Floor> floors = new();
+        private QR qrModel = new();
         public DotNetObjectReference<TablePage> dotNetObjectReference;
+
         private int selectTableId;
         private bool isMoveTable = false;
         private int numcol = 6;
@@ -25,9 +27,11 @@ namespace DATN.Client.Pages.AdminManager
         private string row { get; set; }
         private string column { get; set; }
 
+
         protected override async Task OnInitializedAsync()
         {
             dotNetObjectReference = DotNetObjectReference.Create(this);
+            qrModel.Url = "https://localhost:44328/";
             await LoadAll();
         }
 
@@ -53,7 +57,6 @@ namespace DATN.Client.Pages.AdminManager
         {
             rowCount = (int)Math.Ceiling((double)tables.Count / 6);
             if (tables.Count % 6 == 0) rowCount++;
-            Console.WriteLine("rowCount: " + rowCount);
         }
 
         private async Task AddTable()
@@ -64,7 +67,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 SetDefaultTableProperties();
                 var response = await httpClient.PostAsJsonAsync("api/Table/AddTable", tableModel);
-                await HandleResponse(response, "Thành công", "Error add Table");
+                await HandleResponse(response, "Thành công", "Thêm bàn thành công");
             }
             catch (Exception ex)
             {
@@ -95,24 +98,29 @@ namespace DATN.Client.Pages.AdminManager
         {
             if (response.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("showAlert", "success", successMessage, "");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành công", successMessage);
                 await LoadAll();
             }
             else
             {
-                Console.WriteLine(errorMessage);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", errorMessage);
             }
         }
 
         private async Task LoadTableForEdit(int tableId)
         {
+            await JS.InvokeVoidAsync("clearQrCode");
             tableModel = await httpClient.GetFromJsonAsync<Table>($"api/Table/{tableId}");
             selectTableId = tableModel.TableId;
+            qrModel.NumberTable = tableModel.TableNumber;
+
             var parts = tableModel.Position.Split('-');
             row = parts[0].Trim();
             column = parts[1].Trim();
             isMoveTable = true;
             await JS.InvokeVoidAsync("MoveTable");
+
+            StateHasChanged();
         }
 
         private async Task UpdateTable()
@@ -136,7 +144,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 await JS.InvokeVoidAsync("closeModal", "ConfirmDeleteModal");
                 tableModel.IsDeleted = true;
-                await UpdateTable(); // Tái sử dụng logic cập nhật cho việc xóa
+                await UpdateTable();
             }
             catch (Exception ex)
             {
@@ -237,6 +245,19 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
+        private async Task GenerateQrCode()
+        {
+            var mD5Hash = await GenerateMD5Hash(qrModel.NumberTable.ToString());
+            var urlCode = $"{qrModel.Url}demoIndex?n={mD5Hash}";
+
+            await _localStorageService.SetItemAsync("ss", urlCode);
+            await JS.InvokeVoidAsync("clearQrCode");
+            await JS.InvokeVoidAsync("generateQrCode", urlCode);
+        }
+        private async Task<string> GenerateMD5Hash(string input)
+        {
+            return await JS.InvokeAsync<string>("generateMD5Hash", input);
+        }
 
         private async Task HandleError(Exception ex)
         {

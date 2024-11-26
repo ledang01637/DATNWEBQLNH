@@ -1,58 +1,4 @@
-﻿function layout() {
-    particlesJS("particles-js", {
-        "particles": {
-            "number": {
-                "value": 50,
-                "density": {
-                    "enable": true,
-                    "value_area": 800
-                }
-            },
-            "color": {
-                "value": "#ffffff"
-            },
-            "shape": {
-                "type": "circle",
-                "stroke": {
-                    "width": 0,
-                    "color": "#000000"
-                }
-            },
-            "opacity": {
-                "value": 0.5,
-                "random": false
-            },
-            "size": {
-                "value": 3,
-                "random": true
-            },
-            "move": {
-                "enable": true,
-                "speed": 2,
-                "direction": "bottom",
-                "random": false,
-                "straight": false,
-                "out_mode": "out",
-                "bounce": false
-            }
-        },
-        "interactivity": {
-            "detect_on": "canvas",
-            "events": {
-                "onhover": {
-                    "enable": false,
-                    "mode": "repulse"
-                },
-                "onclick": {
-                    "enable": false,
-                    "mode": "push"
-                },
-                "resize": true
-            }
-        },
-        "retina_detect": true
-    });
-}
+﻿let callQueue = [], isProcessingCall = false;
 function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId, dotNetObjectReference) {
     call1.on('addremotestream', function (stream) {
         console.log('addremotestream');
@@ -75,9 +21,8 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
     call1.on('signalingstate', function (state) {
         console.log('signalingstate ', state);
         if (state.code === 3) {
-            console.log("state code :" + state.code);
+
         } else if (state.code === 4 || state.code === 5 || state.code === 6) {
-            console.log("state code :" + state.code);
 
             var localVideoElement = localVideo[0];
             var remoteVideoElement = remoteVideo[0];
@@ -92,6 +37,9 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
             callboxElement.style.display = "none";
             $('#incoming-call-notice').hide();
 
+            if (state.code === 5) {
+                busyCallFromJs(dotNetObjectReference);
+            }
             endCallFromJs(dotNetObjectReference);
 
         }
@@ -107,18 +55,17 @@ function settingCallEvent(call1, localVideo, remoteVideo, callButton, answerCall
 }
 
 function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
-    console.log(dotNetObjectReference);
+
     var callButton = $('#btn-call');
     var answerCallButton = $('#btn-answer');
     var endCallButton = $('#btn-end');
     var rejectCallButton = $('#btn-reject');
-
     var localVideo = $('#localVideo');
     var remoteVideo = $('#remoteVideo');
-
     var callboxId = $('#call-box');
     const callMessage = $('#call-message');
-    const callActions = $('#call-actions');
+
+
 
     var currentCall = null;
 
@@ -127,7 +74,7 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
     client.connect(token);
 
     client.on('otherdeviceauthen', (data) => {
-        console.log('Another device authenticated:', data);
+
     });
 
     client.on('connect', function () {
@@ -145,7 +92,6 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
     // MAKE CALL
     if (isCall) {
 
-
         currentCall = new StringeeCall(client, callerId, calleeId, false);
 
         settingCallEvent(currentCall, localVideo, remoteVideo, callButton, answerCallButton, endCallButton, rejectCallButton, callboxId, dotNetObjectReference);
@@ -160,6 +106,16 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
 
     // RECEIVE CALL
     client.on('incomingcall', function (incomingcall) {
+        if (isProcessingCall) {
+            incomingcall.reject();
+            callQueue.push({
+                fromNumber: incomingcall.fromNumber,
+                time: new Date().toLocaleString()
+            });
+            lstCallFromJs(dotNetObjectReference, callQueue);
+            return;
+        }
+        isProcessingCall = true;
 
         $('#incoming-call-notice').show();
         currentCall = incomingcall;
@@ -173,7 +129,6 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
             var callboxElement = callboxId[0];
             callboxElement.style.display = "block";
             answerCallButton.show();
-            console.log(answerCallButton.show());
             rejectCallButton.show();
             endCallButton.hide();
             callButton.hide();
@@ -185,6 +140,7 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
 
     // Event handler for buttons
     answerCallButton.on('click', function () {
+        isProcessingCall = true;
         $(this).hide();
         endCallButton.show();
         rejectCallButton.hide();
@@ -197,25 +153,31 @@ function setupCall(token, callerId, calleeId, isCall, dotNetObjectReference) {
     });
 
     rejectCallButton.on('click', function () {
+        isProcessingCall = false;
         $(this).hide();
         callButton.show();
+        answerCallButton.hide();
         if (currentCall != null) {
             currentCall.reject(function (res) {
                 console.log('+++ reject call: ', res);
+                var callboxElement = callboxId[0];
+                callboxElement.style.display = "none";
             });
         }
 
     });
 
     endCallButton.on('click', function () {
+        isProcessingCall = false;
         $(this).hide();
         callButton.show();
-
+        answerCallButton.hide();
         if (currentCall != null) {
             currentCall.hangup(function (res) {
                 console.log('+++ hangup: ', res);
                 var callboxElement = callboxId[0];
                 callboxElement.style.display = "none";
+                endCallFromJs(dotNetObjectReference);
             });
         }
         $('#incoming-call-notice').hide();
@@ -247,8 +209,18 @@ function setupVideo(answerButtonId, callButtonId, remoteVideo, localVideo) {
 }
 
 function endCallFromJs(dotNetHelper) {
+    isProcessingCall = false;
     dotNetHelper.invokeMethodAsync('EndCall');
     $('#btn-answer').hide();
+}
+
+function lstCallFromJs(dotNetHelper, numberCall) {
+    dotNetHelper.invokeMethodAsync('LstCall', numberCall);
+}
+
+
+function busyCallFromJs(dotNetHelper) {
+    dotNetHelper.invokeMethodAsync('BusyCall');
 }
 
 function callButtonManager(isClose) {
@@ -263,8 +235,199 @@ function callButtonManager(isClose) {
     $('#btn-end').hide();
     $('#btn-reject').hide();
     $('#btn-answer').hide();
-    
+
 }
+
+
+// Cấu hình giao diện với hiệu ứng particles
+function layout() {
+    particlesJS("particles-js", {
+        particles: {
+            number: { value: 50, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            shape: { type: "circle", stroke: { width: 0, color: "#000000" } },
+            opacity: { value: 0.5 },
+            size: { value: 3, random: true },
+            move: { enable: true, speed: 2, direction: "bottom", out_mode: "out" }
+        },
+        interactivity: {
+            detect_on: "canvas",
+            events: { onhover: { enable: false }, onclick: { enable: false }, resize: true }
+        },
+        retina_detect: true
+    });
+}
+
+
+
+
+//// Xử lý sự kiện cuộc gọi V2
+//let currentCall = null, callQueue = [], isProcessingCall = false;
+
+//function setupCall(token, callerId, calleeId, isCall, dotNetHelper) {
+//    const callButton = $('#btn-call'), answerButton = $('#btn-answer');
+//    const endButton = $('#btn-end'), rejectButton = $('#btn-reject');
+//    const localVideo = $('#localVideo'), remoteVideo = $('#remoteVideo');
+//    const callboxElement = $('#call-box'), callMessage = $('#call-message');
+
+//    const client = new StringeeClient();
+//    client.connect(token);
+
+//    client.on('authen', (res) => console.log('Authen status:', res));
+
+//    if (isCall) {
+//        initiateCall(client, callerId, calleeId, dotNetHelper, localVideo, remoteVideo, callboxElement);
+//    }
+
+//    client.on('incomingcall', (incomingcall) => {
+//        if (isProcessingCall) {
+//            incomingcall.reject();
+//            callQueue.push(incomingcall);
+//            return;
+//        }
+//        isProcessingCall = true;
+//        handleIncomingCall(incomingcall, callButton, answerButton, endButton, rejectButton, dotNetHelper, localVideo, remoteVideo, callboxElement);
+//    });
+
+//    answerButton.on('click', () => answerCurrentCall(currentCall, callMessage, callButton, answerButton, rejectButton, endButton));
+//    rejectButton.on('click', () => rejectCurrentCall(currentCall, callMessage, callButton, answerButton, rejectButton, endButton, callboxElement));
+//    endButton.on('click', () => endCurrentCall(currentCall, callMessage, callButton, answerButton, rejectButton, endButton, callboxElement));
+
+//    document.addEventListener('connect_ok', () => {
+//        callButton.hide();
+//        endButton.show();
+//    });
+//}
+
+//function settingCallEvent(call, localVideo, remoteVideo, callboxElement, dotNetHelper) {
+//    call.on('addremotestream', (stream) => {
+//        remoteVideo[0].srcObject = stream;
+//        remoteVideo.show();
+//    });
+
+//    call.on('addlocalstream', (stream) => {
+//        localVideo[0].srcObject = stream;
+//        localVideo.show();
+//    });
+
+//    call.on('signalingstate', (state) => {
+//        if ([4, 5, 6].includes(state.code)) {
+//            localVideo[0].srcObject = null;
+//            remoteVideo[0].srcObject = null;
+//            localVideo.hide();
+//            remoteVideo.hide();
+//            callboxElement.hide();
+//            $('#incoming-call-notice').hide();
+//            dotNetHelper.invokeMethodAsync('EndCall');
+//            isProcessingCall = false;
+//        }
+//    });
+//}
+
+//function initiateCall(client, callerId, calleeId, dotNetHelper, localVideo, remoteVideo, callboxElement) {
+//    const currentCall = new StringeeCall(client, callerId, calleeId, false);
+//    settingCallEvent(currentCall, localVideo, remoteVideo, callboxElement, dotNetHelper);
+//    currentCall.makeCall((res) => {
+//        if (res.message === 'SUCCESS') document.dispatchEvent(new Event('connect_ok'));
+//    });
+//}
+
+//function handleIncomingCall(incomingcall, callButton, answerButton, endButton, rejectButton, dotNetHelper, localVideo, remoteVideo, callboxElement) {
+//    isProcessingCall = true;
+//    $('#incoming-call-notice').show();
+//    currentCall = incomingcall;
+//    $('#caller-name').text(`Cuộc gọi từ bàn: ${incomingcall.fromNumber}`);
+//    settingCallEvent(incomingcall, localVideo, remoteVideo, callboxElement, dotNetHelper);
+
+//    callboxElement.show();
+//    answerButton.show();
+//    rejectButton.show();
+
+//    endButton.hide();
+//    callButton.hide();
+//}
+
+//function answerCurrentCall(currentCall, callMessage, callButton, answerButton, rejectButton, endButton) {
+//    endButton.show();
+
+//    answerButton.hide();
+//    rejectButton.hide();
+//    callButton.hide();
+
+//    currentCall.answer((res) => {
+//        isProcessingCall = false;
+//        callMessage.text('Đang nghe...');
+//    });
+//}
+
+//function rejectCurrentCall(currentCall, callMessage, callButton, answerButton, rejectButton, endButton, callboxElement) {
+//    callMessage.text('');
+//    callboxElement.hide();
+
+//    callButton.show();
+//    answerButton.hide();
+//    rejectButton.hide();
+//    endButton.hide();
+
+//    currentCall.reject(() => {
+//        isProcessingCall = false;
+//    });
+//}
+
+//function endCurrentCall(currentCall, callMessage, callButton, answerButton, rejectButton, endButton, callboxElement) {
+//    callMessage.text('');
+//    callboxElement.hide();
+
+//    callButton.show();
+//    answerButton.hide();
+//    rejectButton.hide();
+//    endButton.hide();
+
+//    currentCall.hangup(() => {
+//        isProcessingCall = false;
+//        $('#incoming-call-notice').hide();
+//    });
+//}
+
+//function setupVideo(answerButtonId, callButtonId, remoteVideo, localVideo) {
+//    var localVideo = $('#localVideo');
+//    var remoteVideo = $('#remoteVideo');
+//    var answerButton = document.getElementById(answerButtonId);
+//    var callButton = document.getElementById(callButtonId);
+
+//    answerButton.addEventListener('click', function () {
+//        remoteVideo[0].muted = false;
+//        localVideo[0].play();
+//        remoteVideo[0].play();
+//    });
+
+//    callButton.addEventListener('click', function () {
+//        remoteVideo[0].muted = false;
+//        localVideo[0].play();
+//        remoteVideo[0].play();
+//    });
+//}
+
+//function callButtonManager(isClose) {
+//    var callBox = $('#call-box').get(0);
+//    callBox.style.display = 'block';
+//    if (isClose) {
+//        callBox.style.display = 'none';
+//    }
+//    $('#caller-name').text(`Nhập bàn bạn muốn gọi`);
+//    $('#btn-call').show();
+//    $('#toNumber').prop('hidden', false);
+//    $('#btn-end').hide();
+//    $('#btn-reject').hide();
+//    $('#btn-answer').hide();
+
+//}
+//function endCallFromJs(dotNetHelper) {
+//    dotNetHelper.invokeMethodAsync('EndCall');
+//    $('#btn-answer').hide();
+//}
+
+
 
 
 

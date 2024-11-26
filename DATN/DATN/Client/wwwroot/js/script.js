@@ -67,6 +67,23 @@ window.generateMD5Hash = function (input) {
     return CryptoJS.MD5(input).toString();
 };
 
+//Payment
+function selectPaymentMethod(isCash, cashBtnId, transferBtnId) {
+    document.querySelectorAll('.payment-button').forEach(button => {
+        button.classList.remove('active');
+        button.classList.add('text-muted');
+    });
+    if (isCash === 't') {
+        document.getElementById(transferBtnId).classList.add('active');
+        document.getElementById(transferBtnId).classList.remove('text-muted');
+    } else if (isCash === 'c') {
+        document.getElementById(cashBtnId).classList.add('active');
+        document.getElementById(cashBtnId).classList.remove('text-muted');
+    }
+}
+
+
+
 //Scroll
 function initScrollToTop() {
     let scrollToTopBtn = document.getElementById("scrollToTopBtn");
@@ -124,15 +141,11 @@ function initCallButton(callButtonId, expandButtonId, closeBtnId) {
         document.onmouseup = function () {
             document.removeEventListener('mousemove', onMouseMove);
             document.onmouseup = null;
-
-            //if (!isDragging) {
-            //    toggleExpand();
-            //}
         };
     };
 
     function onMouseMove(event) {
-        isDragging = true; // Đánh dấu rằng đang kéo
+        isDragging = true;
         moveAt(event.pageX, event.pageY);
     }
 
@@ -185,8 +198,6 @@ function initCallButton(callButtonId, expandButtonId, closeBtnId) {
         return false;
     };
 }
-
-
 
 
 

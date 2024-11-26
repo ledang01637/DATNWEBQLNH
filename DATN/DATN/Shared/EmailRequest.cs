@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace DATN.Shared
 {
-    public class ListCart
+    public class EmailRequest
     {
-        public static List<Cart> Carts { get; set; }
-        public static string Note { get; set; }
+        public string To { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
     }
 }

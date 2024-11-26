@@ -15,7 +15,7 @@ namespace DATN.Client.Pages
         private string numberTable = "";
         protected override async Task OnInitializedAsync()
         {
-            carts = await _localStorageService.GetCartItemAsync("historyOrder");
+            carts = await _localStorageService.GetListAsync<Cart>("historyOrder");
 
             numberTable = await _localStorageService.GetItemAsync("n");
 

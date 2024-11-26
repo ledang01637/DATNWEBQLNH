@@ -15,6 +15,7 @@ namespace DATN.Client.Pages.AdminManager
     {
         private List<DATN.Shared.Product> listProd = new List<DATN.Shared.Product>();
         private List<DATN.Shared.Unit> listUnit = new List<DATN.Shared.Unit>();
+        private List<DATN.Shared.Category> listCategory = new List<DATN.Shared.Category>();
         private List<DATN.Shared.Product> filter = new List<DATN.Shared.Product>();
         private bool isLoaded = false;
         private string errorMessage;
@@ -31,6 +32,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 listProd = await httpClient.GetFromJsonAsync<List<DATN.Shared.Product>>("api/Product/GetProduct");
                 listUnit = await httpClient.GetFromJsonAsync<List<DATN.Shared.Unit>>("api/Unit/GetUnit");
+                listCategory = await httpClient.GetFromJsonAsync<List<DATN.Shared.Category>>("api/Category/GetCategories");
                 filter = listProd;
             }
             catch (Exception ex)

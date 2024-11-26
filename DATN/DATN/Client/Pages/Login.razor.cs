@@ -24,6 +24,7 @@ namespace DATN.Client.Pages
         private string currentPassword = string.Empty;
         private string confirmNewPassword = string.Empty;
         private string Token = "";
+        private readonly string url = "/register";
         private Type CurrentLayout { get; set; }
 
         private async Task HandleLogin()
@@ -90,7 +91,7 @@ namespace DATN.Client.Pages
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản hoặc mật khẩu không đúng!", "");
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Tài khoản hoặc mật khẩu không đúng!");
                     }
                 }
                 catch (JsonException ex)
@@ -106,24 +107,6 @@ namespace DATN.Client.Pages
             }
         }
 
-        private async Task HandlePasswordChange()
-        {
-            //if (loggedInUser == null)
-            //{
-            //    // Nếu người dùng chưa đăng nhập
-            //    await JS.InvokeVoidAsync("showAlert", "Chưa đăng nhập");
-            //    return;
-            //}
-            //if (passwordChangeModel.NewPassword != passwordChangeModel.ConfirmNewPassword)
-            //{
-            //    // Kiểm tra nếu mật khẩu mới không khớp với xác nhận mật khẩu
-            //    await JS.InvokeVoidAsync("showAlert", "Mật khẩu xác nhận không khớp");
-            //    return;
-            //}
-            //// Cập nhật mật khẩu mới
-            //loggedInUser.Password = passwordChangeModel.NewPassword;
-            //await JS.InvokeVoidAsync("showAlert", "Đổi mật khẩu thành công");
-        }
     }
 
 }

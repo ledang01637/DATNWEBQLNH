@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using DATN.Server.Data;
 using DATN.Server.Service;
@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.ResponseCompression;
 using System.Linq;
 using DATN.Server.Hubs;
 using DATN.Server.Hash;
+using DATN.Server.Payment.ServicePayment;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Facebook;
 
 namespace DATN.Server
 {
@@ -33,9 +36,12 @@ namespace DATN.Server
         {
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
 
             //Authentication
-
             var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
@@ -56,9 +62,23 @@ namespace DATN.Server
             {
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                
+
             })
-            .AddCookie();
+            .AddCookie()
+            .AddGoogle(googleOptions =>
+            {
+                IConfigurationSection googleAuthNSection = Configuration.GetSection("Authentication:Google");
+                googleOptions.ClientId = googleAuthNSection["ClientId"];
+                googleOptions.ClientSecret = googleAuthNSection["ClientSecret"];
+                googleOptions.CallbackPath = "/signin-google";
+            })
+            .AddFacebook(facebookOptions =>
+            {
+                IConfigurationSection facebookAuthNSection = Configuration.GetSection("Authentication:Facebook");
+                facebookOptions.AppId = facebookAuthNSection["AppId"];
+                facebookOptions.AppSecret = facebookAuthNSection["AppSecret"];
+                facebookOptions.CallbackPath = "/signin-facebook";
+            });
 
             //ConnectDB
             services.AddDbContext<AppDBContext>(options =>
@@ -86,9 +106,25 @@ namespace DATN.Server
             services.AddScoped<VoucherService>();
             services.AddScoped<FileEncryptionService>();
             services.AddScoped<NetworkService>();
+            services.AddScoped<MessageService>();
+            services.AddScoped<VNPayService>();
+            services.AddScoped<TransactionService>();
+
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
             );
+
+            //CORS 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
 
             //Hubs
             services.AddSignalR();
@@ -123,6 +159,7 @@ namespace DATN.Server
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseCors("AllowAllOrigins");
 
 
             app.UseEndpoints(endpoints =>

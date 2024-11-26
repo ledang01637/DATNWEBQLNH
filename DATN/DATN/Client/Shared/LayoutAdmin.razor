@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 
 <CascadingAuthenticationState>
-    <AuthorizeView Roles="1,2,3">
+    <AuthorizeView Roles="admin">
         <Authorized>
             @* <!-- Your Dialogflow Messenger script and widget -->
             <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
@@ -42,7 +42,7 @@
                 <!-- partial -->
                 <div class="container-fluid page-body-wrapper">
                     <!-- partial -->
-                    <div class="col-md-12 p-2 pb-5">
+                    <div class="col-md-12 p-2 bg-secondary">
                         @Body
                     </div>
                     <!-- main-panel ends -->

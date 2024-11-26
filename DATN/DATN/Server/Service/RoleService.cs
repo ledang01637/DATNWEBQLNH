@@ -4,6 +4,7 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -17,6 +18,12 @@ namespace DATN.Server.Service
         public List<Role> GetRole()
         {
             return _context.Roles.ToList();
+        }
+
+        public int GetRoleIdCustomer()
+        {
+            var role = _context.Roles.FirstOrDefault(r => r.RoleName.Equals("customer"));
+            return role == null ? 0 : role.RoleId;
         }
         public Role AddRole(Role Role)
         {

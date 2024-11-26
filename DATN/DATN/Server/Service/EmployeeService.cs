@@ -18,6 +18,13 @@ namespace DATN.Server.Service
         {
             return _context.Employees.ToList();
         }
+
+        public Employee GetEmployeeByAccountId(int accountId)
+        {
+            var employee = _context.Employees.FirstOrDefault(x => x.AccountId == accountId);
+
+            return employee ?? new Employee();
+        }
         public Employee AddEmployee(Employee Employee)
         {
             _context.Add(Employee);

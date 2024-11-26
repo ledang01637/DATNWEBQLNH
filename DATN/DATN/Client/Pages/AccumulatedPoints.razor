@@ -5,98 +5,91 @@
 @inject NavigationManager Navigation
 @inject LocalStorageService _localStorageService
 @inject IJSRuntime JS
-<body>
-	<div class="container mt-5 row">
-        <div class="d-flex d-inline-block">
-            <div class="align-items-start">
-                <a href="userinfo" class="link-dark fw-semibold">
-                    <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
-                </a>
-            </div>
-            <h5 class="text-center mx-auto mb-4 fw-semibold">Đổi điểm tích lũy</h5>
-        </div>
 
-        <div class="point text-end">
-            <img src="/image/Voucher/award.png" alt="Điểm" /> @rewardPoint điểm
-        </div>
-        @if(vouchers == null)
-        {
-            <p>Voucher Empty</p>
-        }
-        else
-        {
-            foreach(var v in vouchers)
-            {
-                <div class="d-flex flex-row align-items-center pt-2 p-0">
-                    <div class="icon-badge bg-img-custom rounded-4">
-                        <img src="/image/Voucher/Voucher-1.png" alt="Voucher" class="img-fluid">
-                    </div>
-                    <div class="ms-3 pt-3">
-                        <h5 class="fw-semibold " style="font-size: 15px;">Giảm 15% cho món nướng</h5>
-                        <div class="d-flex align-items-center" style="font-size:11px;">
-                            <i class="bi bi-clock me-2"></i> 18/8/2024 &nbsp; <strong>@v.PointRequired điểm </strong>
-                        </div>
-                        <p class="expired text-danger fw-semibold" style="font-size: 15px;">@v.ExpriationDate </p>
-                    </div>
-                    <div class="d-flex flex-row align-items-center ms-auto">
-                        <img src="/image/Voucher/award.png" alt="Điểm" style="width: 20px;" />
-                        <div class="round ms-2">
-                            <input type="checkbox" id="checkbox-1" />
-                            <label for="checkbox-1"></label>
-                        </div>
-                        <button @onclick="() => RedeemPoints(v.PointRequired, v.VoucherId)" class="btn btn-success">Đổi</button>
-                    </div>
-                </div>
-            } 
+<style>
+    .voucher-card {
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        transition: box-shadow 0.3s;
+    }
+
+        .voucher-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+    .icon-badge {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9f5ff;
+    }
 
-@*         <!-- Second Item -->
+    .round input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .expired {
+        font-size: 12px;
+    }
+
+</style>
+
+<div class="container mt-5 row">
+    <div class="d-flex d-inline-block">
+        <div class="align-items-start">
+            <a href="/userinfo" class="link-dark fw-semibold">
+                <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+            </a>
+        </div>
+        <h5 class="text-center mx-auto mb-4 fw-semibold">Đổi điểm tích lũy</h5>
+    </div>
+
+    <div class="point text-end mb-3">
+        <img src="/image/Voucher/award.png" alt="Điểm" />Bạn hiện có @customer.TotalRewardPoint điểm
+    </div>
+
+    @if (vouchers == null)
+    {
         <div class="d-flex flex-row align-items-center pt-2 p-0">
-            <div class="icon-badge bg-img-custom rounded-4">
-                <img src="/image/Voucher/Voucher-1.png" alt="Voucher" class="img-fluid">
-            </div>
-            <a class="ms-3 pt-3">
-                <h5 class="fw-semibold " style="font-size: 15px;">Giảm 2% các món</h5>
+            <div class="ms-3 pt-3">
                 <div class="d-flex align-items-center" style="font-size:11px;">
-                    <i class="bi bi-clock me-2"></i> 18/8/2024 &nbsp; <strong>10.000 điểm </strong>
-                </div>
-                <p class="expired text-danger fw-semibold" style="font-size: 15px;">6 ngày trước </p>
-            </a>
-            <div class="d-flex flex-row align-items-center ms-auto">
-                <img src="/image/Voucher/award.png" alt="Điểm" style="width: 20px;" />
-                <div class="round ms-2">
-                    <input type="checkbox" id="checkbox-2" />
-                    <label for="checkbox-2"></label>
+                    <strong>Hiện không có voucher nào</strong>
                 </div>
             </div>
         </div>
+    }
+    else
+    {
+        foreach (var v in vouchers)
+        {
+            <div class="voucher-card d-flex flex-row align-items-center p-2 rounded-3 shadow-sm mb-3">
+                <div class="icon-badge bg-img-custom rounded-4 p-1">
+                    <img src="/image/Voucher/Voucher-1.png" alt="Voucher" class="img-fluid rounded">
+                </div>
 
-        <!-- Third Item -->
-        <div class="d-flex flex-row align-items-center pt-2 p-0">
-            <div class="icon-badge bg-img-custom rounded-4">
-                <img src="/image/Voucher/Charity_voucher.png" alt="Voucher" class="img-fluid">
-            </div>
-            <a class="ms-3">
-                <h5 class="fw-semibold " style="font-size: 15px;">Quyên góp quỹ từ thiện</h5>
-            </a>
-            <div class="d-flex flex-row align-items-center ms-auto">
-                <img src="/image/Voucher/award.png" alt="Điểm" style="width: 20px;" />
-                <div class="round ms-2">
-                    <input type="checkbox" id="checkbox-3" />
-                    <label for="checkbox-3"></label>
+                <div class="ms-3 pt-2">
+                    <h5 class="fw-semibold text-primary mb-1" style="font-size: 15px;">Giảm @(Math.Round(v.DiscountValue * 100))% trên hóa đơn</h5>
+                    <div class="d-flex align-items-center text-muted" style="font-size: 11px;">
+                        <i class="bi bi-clock me-1"></i> @DateTime.Now.ToShortDateString() &nbsp; <strong class="text-dark">@v.PointRequired điểm</strong>
+                    </div>
+                    <p class="expired text-danger fw-semibold mt-1 mb-0" style="font-size: 13px;">Hạn: @v.ExpriationDate.ToShortDateString()</p>
+                </div>
+
+                <div class="d-flex flex-row align-items-center ms-auto">
+                    <img src="/image/Voucher/award.png" alt="Điểm" class="me-2" style="width: 20px;" />
+                    <button @onclick="() => RedeemPointsAsync(v.PointRequired, v.VoucherId,v.ExpriationDate)"
+                            class="btn btn-success ms-2 px-3 py-1 rounded-pill"
+                            disabled="@(DateTime.Now > v.ExpriationDate )">
+                        Đổi
+                    </button>
                 </div>
             </div>
-        </div> *@
 
-	</div>
-    <nav class="navbar fixed-bottom navbar-light bg-light">
-        <div class="container-fluid justify-content-around">
-            <a href="#" class="nav-link"> <img src="image/vectors/icons8-home.svg" alt=""></a>
-            <a href="#" class="nav-link"> <img src="image/vectors/shopping_list_117_x2.svg"></a>
-            <a href="#" class="nav-link"> <img src="image/vectors/rectangle_16_x2 (1).svg" alt=""></a>
-            <a href="#" class="nav-link"> <img src="image/vectors/icons8-user-30.png"></a>
-        </div>
-    </nav>
+        }
+    }
 
-</body>
+</div>

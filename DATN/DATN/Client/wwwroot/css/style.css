@@ -1,33 +1,15 @@
-﻿
-.line4-31-group3119-31-iphone13,
-.line5-31-group3119-31-iphone13,
-.line6-31-group3119-31-iphone13 {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-top: 2px solid var(--color-black);
-    box-sizing: border-box;
-    width: 20px;
-    height: 2px;
+﻿*{
+    margin: 0px;
+    padding: 0px;
 }
 
-.line5-31-group3119-31-iphone13,
-.line6-31-group3119-31-iphone13 {
-    top: 9px;
-    width: 26px;
+.content {
+    flex: 1;
 }
 
-.line6-31-group3119-31-iphone13 {
-    top: 18px;
-    width: 20px;
+.mobile-footer {
+    width: 100%;
 }
-
-.line4-31-group3119-31-iphone13-parent {
-    width: 24px;
-    height: 20px;
-    position: relative;
-}
-
 .frame-div {
     display: flex;
     flex-direction: column;
@@ -35,7 +17,9 @@
     justify-content: flex-start;
     padding: var(--padding-2xl) 0 0;
 }
-
+.nice-select {
+    display: none !important;
+}
 .foodgo {
     margin: 0;
     position: relative;
@@ -68,7 +52,7 @@
     align-self: stretch;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: var(--gap-xl);
 }

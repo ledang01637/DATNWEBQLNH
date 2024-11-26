@@ -77,4 +77,3 @@ function MoveTable(FloorId, IsSwap, dotNetHelper, maxColumns) {
         console.error("Cannot find sortable element with ID: floor-" + FloorId);
     }
 }
-

@@ -19,6 +19,7 @@ namespace DATN.Client
             builder.Services.AddScoped<LocalStorageService>();
             builder.Services.AddScoped<CartService>();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+
             await builder.Build().RunAsync();
         }
     }

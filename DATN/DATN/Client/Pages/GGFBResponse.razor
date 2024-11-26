@@ -1,0 +1,93 @@
+﻿@page "/ggfb-response"
+@using DATN.Client.Service
+@layout MainLayout
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject LocalStorageService _localStorageService
+
+
+
+<style>
+    .register-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+        background-color: #fff;
+    }
+
+    .btn-primary-custom {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #0056b3;
+        }
+
+    .validation-message {
+        font-size: 14px;
+        color: #dc3545;
+    }
+
+    .mobile-footer {
+        display: none !important;
+    }
+</style>
+
+<div class="align-items-start">
+    <a href="/login" class="link-dark fw-semibold">
+        <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+    </a>
+</div>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="register-card position-absolute top-50 start-50 translate-middle shadow rounded">
+        <h3 class="text-center mb-4">Đăng ký</h3>
+        <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Họ Tên</label>
+                <InputText class="form-control" placeholder="Nhập họ tên" @bind-Value="customer.CustomerName" />
+                <ValidationMessage For="@(() => customer.CustomerName)" class="validation-message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <InputText class="form-control" placeholder="Nhập số điện thoại" @bind-Value="customer.PhoneNumber" min="10" max="12" />
+                <ValidationMessage For="@(() => customer.PhoneNumber)" class="validation-message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <InputText class="form-control" placeholder="Nhập địa chỉ" @bind-Value="customer.Address" />
+                <ValidationMessage For="@(() => customer.Address)" class="validation-message" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control" placeholder="Nhập email" @bind-Value="customer.Email" readonly />
+                <ValidationMessage For="@(() => customer.Email)" class="validation-message" />
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom" disabled="@isLoading">
+                Xác nhận
+            </button>
+
+        </EditForm>
+    </div>
+}
+
+

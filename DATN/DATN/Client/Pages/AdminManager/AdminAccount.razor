@@ -11,9 +11,9 @@
         overflow-y: auto;
     }
 
-    .product-table-container table {
-        width: 100%;
-    }
+        .product-table-container table {
+            width: 100%;
+        }
 
     .search-bar, .filter-bar {
         margin-bottom: 20px;
@@ -24,61 +24,51 @@
     <Authorized>
         @if (isLoaded)
         {
-            <div class="col-md-12 grid-margin stretch-card p-5 ">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Account</h4>
-                        <p class="card-description">
-                            <button class="btn btn-success" @onclick="() => CreateAccount()">Add new account</button>
-                        </p>
-                        <div class="search-bar">
-                            <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." @oninput="FilterAccount" />
-                        </div>
-                        <div class="product-table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th>
-                                        <th>AccountType</th>
-                                        <th>CreateDate</th>
-                                        <th>UpdateDate</th>
-                                        <th>UserName</th>
-                                        <th>Password</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
+@*             <button class="btn btn-success" @onclick="() => CreateAccount()">Add Account</button> *@
+            <hr />
+            <h4>Account</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Search Account..." @oninput="FilterAccount" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>AccountType</th>
+                            <th>CreateDate</th>
+                            <th>UpdateDate</th>
+                            <th>UserName</th>
+                            <th>Password</th>
+                            <th></th>
+                        </tr>
+                    </thead>
 
-                                <tbody>
-                                    @foreach (var account in filter)
+                    <tbody>
+                        @foreach (var account in filter)
+                        {
+                            <tr>
+                                <td>@account.AccountType</td>
+                                <td>@account.CreateDate</td>
+                                <td>@account.UpdateDate</td>
+                                <td>@account.Email</td>
+                                <td>*****</td>
+                                <td>
+                                    @if (account.IsActive)
                                     {
-                                        <tr>
-                                            <td>@account.AccountId</td>
-                                            <td>@account.AccountType</td>
-                                            <td>@account.CreateDate</td>
-                                            <td>@account.UpdateDate</td>
-                                            <td>@account.Email</td>
-@*                                             <td>@account.Password</td> *@
-                                            <td>*****</td>
-                                            <td>
-                                                @if (account.IsActive)
-                                                {
-                                                    <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Edit</button>
-                                                    <button class="btn btn-danger" @onclick="() => HideAccount(account.AccountId)">Hide</button>
-                                                    <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Employee</button>
-                                                    <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Customer</button>
-                                                }
-                                                else
-                                                {
-                                                    <button class="btn btn-warning" @onclick="() => RestoreAccount(account.AccountId)">Restore</button>
-                                                }
-                                            </td>
-                                        </tr>
+                                        <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Edit</button>
+                                        <button class="btn btn-danger" @onclick="() => HideAccount(account.AccountId)">Hide</button>
+                                        <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Employee</button>
+                                        <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Customer</button>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                                    else
+                                    {
+                                        <button class="btn btn-warning" @onclick="() => RestoreAccount(account.AccountId)">Restore</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         }
         else if (!string.IsNullOrEmpty(errorMessage))

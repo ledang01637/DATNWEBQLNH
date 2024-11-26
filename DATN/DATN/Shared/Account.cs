@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace DATN.Shared
 {
@@ -21,7 +18,11 @@ namespace DATN.Shared
         public bool IsDeleted { get; set; }
 
         public virtual ICollection<RoleAccount> RoleAccounts { get; set; }
+        public virtual ICollection<Message> Messages { get; set; }
         public virtual Employee Employees { get; set; }
+
+        [JsonIgnore]
         public virtual Customer Customers { get; set; }
+
     }
 }

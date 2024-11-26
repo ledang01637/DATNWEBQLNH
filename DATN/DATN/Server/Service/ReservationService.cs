@@ -4,6 +4,8 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -17,6 +19,12 @@ namespace DATN.Server.Service
         public List<Reservation> GetReservation()
         {
             return _context.Reservations.ToList();
+        }
+
+        public List<Reservation> GetReservationInclude()
+        {
+            var reservations = _context.Reservations.Where(a => !a.IsDeleted).Include(a => a.Tables).ToList();
+            return reservations ?? new List<Reservation>();
         }
         public Reservation AddReservation(Reservation Reservation)
         {
@@ -56,12 +64,19 @@ namespace DATN.Server.Service
             }
             existing.CustomerName = update.CustomerName;
             existing.CustomerPhone = update.CustomerPhone;
-            existing.ReservationDate = update.ReservationDate;
-            existing.NumberGuest = update.NumberGuest;
+            existing.CustomerEmail = update.CustomerEmail;
+            existing.ReservationTime = update.ReservationTime;
+            existing.Adults = update.Adults;
+            existing.Children = update.Children;
             existing.Tables = update.Tables;
-            existing.Is_Payment = update.Is_Payment;
+            existing.IsPayment = update.IsPayment;
             existing.DepositPayment = update.DepositPayment;
             existing.PaymentMethod = update.PaymentMethod;
+            existing.CreatedDate = update.CreatedDate;
+            existing.UpdatedDate = update.UpdatedDate;
+            existing.ReservationStatus = update.ReservationStatus;
+            existing.CustomerNote = update.CustomerNote;
+            existing.TableId = update.TableId;
             existing.IsDeleted = update.IsDeleted;
 
 

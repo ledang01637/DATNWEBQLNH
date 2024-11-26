@@ -8,9 +8,8 @@
     border: 2px solid green;
     padding: 20px;
     margin: 20px auto;
-    width: 210mm; /* Width of A4 paper */
-    height: auto; /* Let the height adjust automatically */
-    box-sizing: border-box; /* Ensure padding is included in the width */
+    height: auto;
+    box-sizing: border-box;
 }
 
 .invoice-header {
@@ -74,20 +73,3 @@ total-section-bill {
         margin-bottom: 5px;
     }
 
-/* Setup for print */
-@media print {
-    body, html {
-        width: 210mm;
-        height: auto;
-        margin: 0;
-        padding: 0;
-    }
-
-    .invoice-container {
-        margin: 0;
-        width: 100%;
-        height: auto;
-        border: none; /* Remove borders for printing */
-        padding: 10mm;
-    }
-}

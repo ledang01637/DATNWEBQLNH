@@ -1,6 +1,5 @@
 @page "/"
 @using DATN.Client.Service
-
 @layout MainLayout
 @inject HttpClient httpClient
 @inject LocalStorageService _localStorageService
@@ -9,19 +8,22 @@
 @inject CartService _cartService
 
 
+@* <div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">Contact</a>
+</div>
+
+<div id="overlay" class="overlay" @onclick="() => Navbar(false)"></div> *@
 
 <section class="iphone-13-mini-2-inner mb-2">
     <div class="frame-parent">
         <div class="frame-wrapper">
             <div class="frame-group">
                 <div class="frame-container">
-                    <div class="frame-div">
-                        <div class="line4-31-group3119-31-iphone13-parent">
-                            <div class="line4-31-group3119-31-iphone13"></div>
-                            <div class="line5-31-group3119-31-iphone13"></div>
-                            <div class="line6-31-group3119-31-iphone13"></div>
-                        </div>
-                    </div>
+                    <i class="fas fa-bars fa-2x fs-1" style="cursor: pointer;"></i>
                     <h1 class="foodgo">Tech Titans</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
                         <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
@@ -29,14 +31,6 @@
                 </div>
             </div>
         </div>
-        @* <div class="drink-parent text-center d-flex flex-nowrap justify-content-start justify-content-sm-center">
-            <div class="drink d-flex justify-content-center align-items-center">
-                <div class="rounded d-flex flex-wrap align-items-center justify-content-center" style="width: 50px; height: 50px; background: #e9d1d1">
-                    <i class="bi bi-cup-straw fs-2 text-white"></i>
-                </div>
-                <span class="mt-2 d-block text-dark" style="max-width: 70px;"></span>
-            </div>
-        </div> *@
     </div>
 </section>
 
@@ -152,13 +146,18 @@
         </div>
 
         <div class="filters-content">
-            <div class="row grid">
-                @if (products == null)
+            <div class="row grid position-relative">
+                @if (products == null || isProcessing)
                 {
-                    <div class="d-flex justify-content-center">
+                    <div class="position-absolute top-50 start-50 translate-middle">
                         <div class="spinner-border spinner-border-sm" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
+                    </div>
+                }else if(!isProcessing && products.Count == 0)
+                {
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <h1 class="text-center">Không có sản phẩm</h1>
                     </div>
                 }
                 else
@@ -210,6 +209,7 @@
 <button id="callButtonIndex" class="call-button">
     <i class="fa-solid fa-user"></i>
 </button>
+
 <button @onclick="ScrollToTop" id="scrollToTopBtn" class="btn btn-outline-primary position-fixed top-50 end-0 translate-middle-y m-2 rounded-circle" style="display: none; width: 40px; height: 40px;">
     <i class="fa-solid fa-arrow-up position-absolute top-50 start-50 translate-middle"></i>
 </button>
@@ -231,14 +231,17 @@
 <!-- Icon giỏ hàng cố định ở dưới -->
 @if (carts == null || carts.Count == 0)
 {
-    <nav class="navbar fixed-bottom navbar-light bg-light">
-        <div class="container-fluid justify-content-around">
-            <a href="/" class="nav-link"><i class="bi bi-house" style="color: orange"></i></a>
-            <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
-            <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
-            <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
-        </div>
-    </nav>
+    if (products != null && products.Any())
+    {
+        <nav class="navbar fixed-bottom navbar-light bg-light">
+            <div class="container-fluid justify-content-around">
+                <a href="/" class="nav-link"><i class="bi bi-house" style="color: orange"></i></a>
+                <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
+                <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
+                <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
+            </div>
+        </nav>
+    }
 }
 
 <!-- Modal giỏ hàng khi bấm vào icon -->
@@ -319,7 +322,3 @@
         </div>
     </div>
 </div>
-
-
-
-

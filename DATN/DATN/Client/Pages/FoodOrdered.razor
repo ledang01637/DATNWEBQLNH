@@ -7,7 +7,66 @@
 @inject CartService _cartService
 @inject IJSRuntime JS
 
+<style>
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 100vh !important;
+        margin: 0;
+    }
+    .voucher-item {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        background-color: #fff3e0;
+    }
 
+    .voucher-icon {
+        font-size: 2rem;
+        color: #ff7043;
+        margin-right: 15px;
+    }
+
+    .voucher-content {
+        flex-grow: 1;
+    }
+
+    .voucher-action {
+        color: #ff7043;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .voucher-code {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #ff7043;
+    }
+
+    .payment-button {
+        border-radius: 0px !important;
+    }
+
+        .payment-button.active {
+            border-color: #ef4c2b !important;
+            color: #ef4c2b !important;
+        }
+
+    .form-check-custom:checked {
+        background-color: #f0800af5 !important;
+        border-color: orange;
+    }
+
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+
+</style>
 
 <section class="iphone-13-mini-2-inner">
     <div class="frame-parent">
@@ -15,11 +74,9 @@
             <div class="frame-group">
                 <div class="frame-container">
                     <div class="frame-div">
-                        <div class="line4-31-group3119-31-iphone13-parent">
-                            <div class="line4-31-group3119-31-iphone13"></div>
-                            <div class="line5-31-group3119-31-iphone13"></div>
-                            <div class="line6-31-group3119-31-iphone13"></div>
-                        </div>
+                        <a class="nav-link" href="/order-list">
+                            <i class="fas fa-arrow-left fs-2"></i>
+                        </a>
                     </div>
                     <h1 class="foodgo">Foodgo</h1>
                     <div class="ellipse4-31-iphone13mini-1-wrapper">
@@ -36,16 +93,23 @@
     <h4 style="text-align: center;">Danh sách đã gọi</h4>
     @if (carts == null)
     {
-        <p>Loading...</p>
+        <div class="d-flex justify-content-center mt-3">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     }
     else if (!carts.Any())
     {
-        <p>Cart rỗng...</p>
+        <div class="card my-3 p-3 text-center">
+            <span class="text-center">Không có món ăn</span>
+        </div>
     }
     else
     {
         @foreach (var item in carts)
         {
+
             <div class="card my-3 p-3">
                 <div class="d-flex justify-content-between">
                     <div class="d-flex">
@@ -53,34 +117,70 @@
                              style="width: 100px; height: 70px; background-image: url(data:image/png;base64,@Convert.ToBase64String(item.ProductImage)); background-size: cover;">
                         </div>
                         <div class="ms-3">
-                            <p class="mb-0" style="font-family: 'Poppins'; font-weight: 700;">@item.ProductName</p>
-                            <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">@item.Price.ToString("###,0##") VND</p>
-                            <p class="mb-0 text-secondary" style="font-family: 'Roboto'; font-size: 12px;">Số lượng: @item.Quantity </p>
+                            <p class="mb-0 fw-blod">@item.ProductName</p>
+                            <p class="mb-0 text-secondary text-danger">@item.Price.ToString("###,0##") VND</p>
+                            <p class="mb-0 text-secondary">Số lượng: @item.Quantity </p>
                         </div>
-                    </div>
-                    <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
-                        <img src="/images/vectors/icons8-tick-30.png" alt="Tick" style="width: 20px; height: 14.7px;" />
                     </div>
                 </div>
             </div>
         }
     }
-    <div class="total-section">
-        <div class="d-flex justify-content-between">
-            <p class="mb-0">Tổng tiền</p>
-            <p class="mb-0"><strong>@Total.ToString("N0") VND</strong></p>
+    @if (!carts.Any())
+    {
+        <div class="total-section-custom" style="display: @(!carts.Any() ? "none" : "")">
+            <div class="d-flex justify-content-between">
+                <p class="mb-0">Tổng tiền</p>
+                <p class="mb-0"><strong>@order.TotalAmount.ToString("N0") VND</strong></p>
+            </div>
+            <button @onclick="Payment" type="button" class="btn btn-warning w-100 mt-2">
+                Thanh toán
+            </button>
         </div>
-@*         @{
-            foreach (var cv in customerVouchers)
+    }
+    else
+    {
+
+        <div class="card">
+            @if (isHasAccount)
             {
-                <label>Chọn voucher: @cv.VoucherId</label>
-                <a @onclick="() => UseVoucher(cv.VoucherId)">Mã số voucher là @cv.VoucherId</a>
+                <div class="card-title">
+                    <div class="d-flex justify-content-between p-3">
+                        @if (!isCorrectVoucher)
+                        {
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Thêm voucher:
+                            </span>
+                            <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                                Chọn voucher <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-dark fw-bold">
+                                <i class="fa-solid fa-ticket" style="color: #ef4c2b"></i> Mã voucher: @Code
+                            </span>
+                            <a class="text-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#voucherModal">
+                                Thay đổi voucher
+                            </a>
+                        }
+
+                    </div>
+                </div>
+                <hr />
             }
-        } *@
-        <button @onclick="Payment" type="button" class="btn btn-warning w-100 mt-2">
-            Thanh toán
-        </button>
-    </div>
+            <div class="card-body pt-3">
+                <div class="d-flex justify-content-between">
+                    <button class="btn border w-50 me-2 text-muted payment-button" id="transferBtnId" @onclick="() => ChoosePayMenthodAsync('t')">Chuyển khoản</button>
+                    <button class="btn border w-50 text-muted payment-button" id="cashBtnId" @onclick="() => ChoosePayMenthodAsync('c')">Tiền mặt</button>
+                </div>
+                <button @onclick="Payment" type="button" style="background: #ef4c2b" class="btn w-100 mt-2 text-white">
+                    Thanh toán - @order.TotalAmount.ToString("###,0##") VND
+                </button>
+            </div>
+        </div>
+    }
+
 </div>
 <nav class="navbar fixed-bottom navbar-light bg-light">
     <div class="container-fluid justify-content-around">
@@ -90,6 +190,61 @@
         <a href="/userinfo" class="nav-link"><i class="bi bi-person"></i></a>
     </div>
 </nav>
+
+<!-- Modal -->
+<div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voucherModalLabel">Chọn Voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="voucherInput" class="form-label">Mã Voucher</label>
+                    <div class="input-group">
+                        <input type="text" id="voucherInput" @bind-value="Code" class="form-control" placeholder="Nhập mã voucher tại đây">
+                        <button class="btn text-white btn-sm" style="background: #ff7043" @onclick="() => UseVoucher(Code,true)">Áp dụng</button>
+                    </div>
+                </div>
+
+                @if (customerVouchers != null && customerVouchers.Count > 0)
+                {
+                    @foreach (var cv in customerVouchers.Where(a => a.IsUsed == false).ToList())
+                    {
+                        bool isDisabled = cv.Vouchers.VoucherCode.Equals(Code);
+
+                        <div class="voucher-item" style="background: @(cv.IsUsed ? "#c6c6c6" : "")">
+                            <div class="voucher-icon"><i class="fas fa-ticket-alt"></i></div>
+                            <div class="voucher-content">
+                                <div class="voucher-code">@cv.Vouchers.VoucherCode</div>
+                                <div>Giảm: @(Math.Round(cv.Vouchers.DiscountValue * 100))%</div>
+                                <div>HSD: @cv.ExpirationDate.ToShortDateString()</div>
+                                <div>Trạng thái: @cv.Status</div>
+                            </div>
+                            <a class="voucher-action nav-link @(isDisabled || cv.IsUsed ? "disabled" : "")"
+                               style="cursor: @(isDisabled || cv.IsUsed ? "not-allowed" : "pointer");"
+                               @onclick="@(isDisabled || cv.IsUsed ? null : (() => UseVoucher(cv.Vouchers.VoucherCode, false)))">
+                                Dùng ngay
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="voucher-content">
+                        <div class="voucher-code text-center">Bạn không có voucher nào</div>
+                    </div>
+                }
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger text-white" data-bs-dismiss="modal">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 

@@ -1,9 +1,11 @@
 ﻿using DATN.Client.Pages.AdminManager;
 using DATN.Shared;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http.Json;
@@ -13,30 +15,51 @@ namespace DATN.Client.Pages
 {
     public partial class VoiceCallCustomer
     {
+        public DotNetObjectReference<VoiceCallCustomer> dotNetObjectReference;
+
         private string token;
         private string from;
-        private string to = "Manager";
-        public DotNetObjectReference<VoiceCallCustomer> dotNetObjectReference;
+        private string to;
 
         protected override async Task OnInitializedAsync()
         {
-            dotNetObjectReference = DotNetObjectReference.Create(this);
-            token = await _localStorageService.GetItemAsync("n");
-            if (token == null)
+           
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                dotNetObjectReference = DotNetObjectReference.Create(this);
+
+                token = await _localStorageService.GetItemAsync("n");
+                to = await httpClient.GetStringAsync("api/Voice/get-message");
+
+                if (token is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+                from = GetTableNumberFromToken(token);
+                if (from is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+                if(to is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "To is null");
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+                await SetupCall(token, from.ToLower(), to.ToLower());
+                await setupVideo();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Không thể kết nối: {ex.Message}");
+                await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
                 Navigation.NavigateTo("/");
                 return;
             }
-            from = GetTableNumberFromToken(token);
-            if (from == null)
-            {
-                await JS.InvokeVoidAsync("showAlert", "error", "From is null");
-                Navigation.NavigateTo("/");
-                return;
-            }
-            await SetupCall(token, from, to);
-            await setupVideo();
         }
 
         private async Task SetupCall(string token, string from, string to)
@@ -78,6 +101,20 @@ namespace DATN.Client.Pages
         {
             Navigation.NavigateTo("/");
         }
+
+        [JSInvokable("BusyCall")]
+        public async void BusyCall()
+        {
+            await JS.InvokeVoidAsync("showAlert","warning","Thông báo","Nhân viên đang có cuộc gọi khác");
+            await Task.Delay(500);
+        }
+
+        [JSInvokable("LstCall")]
+
+        public async Task LstCall(List<CallInfo> numberCall)
+        {
+
+        }
         private static string GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -85,5 +122,10 @@ namespace DATN.Client.Pages
             var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
             return userId?.Value;
         }
+    }
+    public class CallInfo
+    {
+        public string FromNumber { get; set; }
+        public string Time { get; set; }
     }
 }

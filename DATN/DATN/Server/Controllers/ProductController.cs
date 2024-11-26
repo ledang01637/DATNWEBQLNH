@@ -24,9 +24,9 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("GetProductInclude")]
-        public List<Product> GetProductInclude()
+        public ActionResult<List<Product>> GetProductInclude()
         {
-            return _ProductService.GetProductInclude();
+            return Ok(_ProductService.GetProductInclude());
         }
         [HttpPost("AddProduct")]
         public Product AddProduct(Product Product)

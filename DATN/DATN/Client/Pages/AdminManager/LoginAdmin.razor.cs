@@ -14,10 +14,7 @@ namespace DATN.Client.Pages.AdminManager
     {
         private LoginRequest loginUser = new LoginRequest();
         private bool loginFailed = false;
-        private string currentPassword = string.Empty;
-        private string confirmNewPassword = string.Empty;
         private string Token = "";
-        private Type CurrentLayout { get; set; }
 
         private async Task HandleLogin()
         {
@@ -55,7 +52,7 @@ namespace DATN.Client.Pages.AdminManager
                         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
                         var user = authState.User;
 
-                        if (user.Identity.IsAuthenticated && (user.IsInRole("1") || user.IsInRole("2") || user.IsInRole("3")))
+                        if (user.Identity.IsAuthenticated && (user.IsInRole("admin")) || user.Identity.IsAuthenticated && (user.IsInRole("employee")))
                         {
                             var res = await httpClient.PostAsJsonAsync("api/AuthJWT/ManagerToken/", loginUser);
                             if (res.IsSuccessStatusCode)
@@ -69,22 +66,17 @@ namespace DATN.Client.Pages.AdminManager
                                     await _localStorageService.SetItemAsync("AccountId", accountId);
                                 }
                             }
-                            CurrentLayout = typeof(LayoutAdmin);
                             await JS.InvokeVoidAsync("showAlert", "success", "Thành công");
-                            Navigation.NavigateTo("/admin", true);
+                            Navigation.NavigateTo("/manager", true);
                         }
                         else
                         {
-                            CurrentLayout = typeof(MainLayout);
-                            await _localStorageService.SetItemAsync("userName", Username);
-                            await _localStorageService.SetItemAsync("expiryTime", expiryTime);
-                            await _localStorageService.SetItemAsync("AccountId", accountId);
-                            Navigation.NavigateTo("/", true);
+                            await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo","Tài khoản không có quyền truy cập");
                         }
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning", "Tài khoản hoặc mật khẩu không đúng!", "");
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo", "Tài khoản hoặc mật khẩu không đúng! hoặc không có quyền truy cập", "");
                     }
                 }
                 catch (JsonException ex)

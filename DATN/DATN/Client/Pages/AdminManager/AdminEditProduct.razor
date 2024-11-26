@@ -5,13 +5,13 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">CHỈNH SỬA MÓN ĂN</h5>
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-12">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Edit Product</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
                     <EditForm Model="@prod" OnValidSubmit="EditProd" Context="editFormContext">
@@ -19,57 +19,83 @@
                         <div class="text-danger mb-3">
                             <ValidationSummary />
                         </div>
-                        <div class="form-group">
-                            <label for="ProductId" class="control-label"><strong>Mã Món Ăn</strong></label>
-                            <input id="ProductId" @bind="prod.ProductId" class="form-control" placeholder="Mã món ăn" disabled />
-                            <ValidationMessage For="@(() => prod.ProductId)" />
-                        </div>
-                        <div class="form-group">
-                            <label for="ProductName" class="control-label"><strong>Tên món ăn</strong></label>
-                            <input id="ProductName" @bind="prod.ProductName" class="form-control" placeholder="Nhập tên món ăn" />
-                            <ValidationMessage For="@(() => prod.ProductName)" />
+
+                        <div class="row text-black m-auto">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="UnitId" class="control-label"><strong>UnitId</strong></label>
+                                <select id="UnitId" @bind="prod.UnitId" class="form-control text-white">
+                                    <option value="">Chọn UnitId</option>
+                                    @if (listunit != null && listunit.Any())
+                                    {
+                                        @foreach (var unit in listunit)
+                                        {
+                                            <option value="@unit.UnitId">@unit.UnitName</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => prod.UnitId)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="ProductName" class="control-label"><strong>Product Name</strong></label>
+                                <input id="ProductName" @bind="prod.ProductName" class="form-control p-3 text-white" placeholder="Product Name" />
+                                <ValidationMessage For="@(() => prod.ProductName)" />
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="ProductImage" class="control-label"><strong>Chọn ảnh</strong></label>
-                            <InputFile OnChange="HandleFileSelected" />
+                        <div class="row text-black m-auto">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="Price" class="control-label"><strong>Price</strong></label>
+                                <input type="number" id="Price" @bind="prod.Price" class="form-control p-3 text-white" placeholder="Price" />
+                                <ValidationMessage For="@(() => prod.Price)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="CategoryId" class="control-label"><strong>CategoryId</strong></label>
+                                <select id="CategoryId" @bind="prod.CategoryId" class="form-control text-white">
+                                    <option value="">Chọn CategoryId</option>
+                                    @if (listcategory != null && listcategory.Any())
+                                    {
+                                        @foreach (var category in listcategory)
+                                        {
+                                            <option value="@category.CategoryId">@category.CategoryName</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => prod.UnitId)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-3 p-3">
+                            <label for="ProductImage" class="control-label"><strong>Choose Image</strong></label>
+                            <InputFile OnChange="HandleFileSelected" class="" />
                             <ValidationMessage For="@(() => prod.ProductImage)" />
                         </div>
 
-                        <div class="form-group">
-                            <label for="CategoryId" class="control-label"><strong>Danh mục</strong></label>
-                            <input id="CategoryId" @bind="prod.CategoryId" class="form-control" placeholder="Nhập mã danh mục" />
-                            <ValidationMessage For="@(() => prod.CategoryId)" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="Price" class="control-label"><strong>Giá</strong></label>
-                            <input id="Price" @bind="prod.Price" class="form-control" placeholder="Nhập giá món ăn" />
-                            <ValidationMessage For="@(() => prod.Price)" />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ProductDescripntion" class="control-label"><strong>Ghi chú</strong></label>
-                            <textarea id="ProductDescripntion" @bind="prod.ProductDescription" class="form-control" placeholder="Nhập ghi chú"></textarea>
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ProductDescription" class="control-label"><strong>Product Description</strong></label>
+                            <textarea id="ProductDescription" @bind="prod.ProductDescription" class="form-control p-3 text-white" placeholder="Enter product description" style="height: 200px;"></textarea>
                             <ValidationMessage For="@(() => prod.ProductDescription)" />
                         </div>
 
-                        <div class="form-group text-center">
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Cập Nhật</button>
-                                <a href="/adminproduct" class="btn btn-secondary mx-2">Quay Về</a>
+
+                        <div class="form-group text-center mt-3">
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-danger mx-2">Edit</button>
+                                <a href="/adminproduct" class="btn btn-secondary mx-2">Back</a>
                             </div>
                         </div>
                     </EditForm>
+
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -89,6 +115,8 @@
     private string errorMessage;
     private string successMessage;
     private DATN.Shared.Product prod = new DATN.Shared.Product();
+    private List<DATN.Shared.Unit> listunit = new List<DATN.Shared.Unit>();
+    private List<DATN.Shared.Category> listcategory = new List<DATN.Shared.Category>();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
@@ -97,10 +125,13 @@
         isLoaded = true;
     }
 
+
     private async Task LoadEditProduct()
     {
         try
         {
+            listunit = await httpClient.GetFromJsonAsync<List<DATN.Shared.Unit>>("api/Unit/GetUnit");
+            listcategory = await httpClient.GetFromJsonAsync<List<DATN.Shared.Category>>("api/Category/GetCategories");
             var response = await httpClient.GetFromJsonAsync<Product>($"api/Product/{ProductId}");
             if (response != null)
             {

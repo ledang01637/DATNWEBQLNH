@@ -18,6 +18,11 @@ namespace DATN.Server.Service
         {
             return _context.Vouchers.ToList();
         }
+        public Voucher GetVoucherByCode(string voucherCode)
+        {
+            var voucher = _context.Vouchers.FirstOrDefault(a => a.VoucherCode.Equals(voucherCode) && !a.IsDeleted);
+            return voucher == null ? new Voucher() : voucher;
+        }
         public Voucher AddVoucher(Voucher Voucher)
         {
             _context.Add(Voucher);

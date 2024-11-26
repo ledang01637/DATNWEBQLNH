@@ -1,35 +1,39 @@
 ﻿@page "/userinfo"
 @layout MainLayout
-<body>
-    <div class="container container-custom">
-        <div class="profile-section">
-            <div class="points">1000 điểm <span class="icon">🏅</span></div>
-            <div class="profile-img">
-                <img src="./css/UserCss/Image/user1.jpg" alt="User Image">
-            </div>
-            <div class="user-info">
-                <h2>username</h2>
-                <p>+84 123456789</p>
-            </div>
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject CartService _cartService
+
+
+<div class="container container-custom">
+    <div class="profile-section">
+        <div class="profile-img">
+            <img src="./css/UserCss/Image/user1.jpg" alt="User Image">
         </div>
-
-        <ul class="menu-list">
-            <li><a href="personalinformation">Thông tin cá nhân <span>></span></a></li>
-            <li><a href="paswordchange">Đổi mật khẩu <span>></span></a></li>
-            <li><a href="connnectbank">Liên kết ngân hàng <span>></span></a></li>
-            <li><a href="accumulatedpoints">Đổi điểm tích lũy <span>></span></a></li>
-            <li><a href="purchasehistory">Lịch sử mua hàng <span>></span></a></li>
-        </ul>
-
-        <button class="logout-btn bg-dark border-dark shadow">Đăng xuất</button>
-
-        <nav class="navbar fixed-bottom navbar-light bg-light">
-            <div class="container-fluid justify-content-around">
-                <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
-                <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
-                <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
-                <a href="/userinfo" class="nav-link"><i class="bi bi-person" style="color: orange"></i></a>
-            </div>
-        </nav>
+        <div class="user-info">
+            <h2>@customer.CustomerName</h2>
+            <p>@customer.PhoneNumber</p>
+        </div>
     </div>
-</body>
+
+    <ul class="menu-list">
+        <li><a href="personalinformation">Thông tin cá nhân <span>></span></a></li>
+        <li><a href="paswordchange">Đổi mật khẩu <span>></span></a></li>
+        <li><a href="connnectbank">Liên kết ngân hàng <span>></span></a></li>
+        <li><a @onclick="() => Naviga(urlAccumulated)">Đổi điểm tích lũy <span>></span></a></li>
+        <li><a href="purchasehistory">Lịch sử mua hàng <span>></span></a></li>
+    </ul>
+
+    <button class="logout-btn bg-dark border-dark shadow" @onclick="Logout">Đăng xuất</button>
+</div>
+
+<nav class="navbar fixed-bottom navbar-light bg-light">
+    <div class="container-fluid justify-content-around">
+        <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
+        <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
+        <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
+        <a href="/userinfo" class="nav-link"><i class="bi bi-person" style="color: orange"></i></a>
+    </div>
+</nav>

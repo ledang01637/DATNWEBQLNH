@@ -23,6 +23,18 @@ namespace DATN.Server.Controllers
             return _VoucherService.GetVoucher();
         }
 
+        [HttpPost("GetVoucherByCode")]
+        public ActionResult<Voucher> GetVoucherByCode([FromBody] string voucherCode)
+        {
+            if(string.IsNullOrEmpty(voucherCode))
+            {
+                return BadRequest(new { message = "voucher code must be not null." });
+            }
+            var voucher = _VoucherService.GetVoucherByCode(voucherCode);
+
+            return Ok(voucher);
+        }
+
         [HttpPost("AddVoucher")]
         public Voucher AddVoucher(Voucher Voucher)
         {

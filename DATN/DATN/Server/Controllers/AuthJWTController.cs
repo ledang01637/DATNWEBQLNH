@@ -43,7 +43,7 @@ namespace DATN.Server.Controllers
             var successLogin = _appDBContext.Accounts
                 .FirstOrDefault(x => x.Email == loginModel.Email && isSuccess);
 
-            if (successLogin != null && successLogin.Email.Equals("Customer"))
+            if (successLogin != null && successLogin.AccountType.Trim().ToLower().Equals("noaccount"))
             {
                 var token = GenerateJwtTokenV2(successLogin);
                 return Ok(new LoginRespone
@@ -52,8 +52,7 @@ namespace DATN.Server.Controllers
                     Token = token
                 });
             }
-
-            if (successLogin != null && !successLogin.Email.Equals("Customer"))
+            else if(successLogin != null)
             {
                 var roles = _appDBContext.Roles.ToList();
                 var roleAccount = _appDBContext.RoleAccounts
@@ -87,6 +86,8 @@ namespace DATN.Server.Controllers
                     Error = "Tài khoản hoặc mật khẩu không chính xác."
                 });
             }
+
+
         }
         private string GenerateJwtToken(Account account, RoleAccount roleAccount)
         {
@@ -110,7 +111,7 @@ namespace DATN.Server.Controllers
                 new Claim("IsActive", account.IsActive.ToString()), 
 
                 new Claim("RoleId", roleAccount.RoleId.ToString()),
-                new Claim(ClaimTypes.Role, roleAccount.RoleId.ToString())
+                new Claim(ClaimTypes.Role, account.AccountType)
 
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
@@ -120,7 +121,7 @@ namespace DATN.Server.Controllers
                 jwt.Issuer,
                 jwt.Audience,
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddMinutes(60),
                 signingCredentials: signIn
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -135,8 +136,8 @@ namespace DATN.Server.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
 
-                new Claim("Username", account.Email),
-                new Claim(ClaimTypes.Role, "Customer")
+                new Claim("AccountType", account.AccountType),
+                new Claim(ClaimTypes.Role, account.AccountType)
 
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key));
@@ -178,7 +179,7 @@ namespace DATN.Server.Controllers
 
             if (successLogin != null)
             {
-                var token = AccessTokenStringee(successLogin.AccountType);
+                var token = AccessTokenStringee(successLogin.Email);
 
                 return Ok(new QRResponse
                 {
@@ -227,7 +228,7 @@ namespace DATN.Server.Controllers
                 byte[] hashedBytes = sha1.ComputeHash(passwordBytes);
                 password = Convert.ToBase64String(hashedBytes);
             }
-            var user = _appDBContext.Accounts.FirstOrDefault(u => u.Email.Equals(username) && u.Password.Equals(password));
+            var user = _appDBContext.Accounts.FirstOrDefault(u => u.Email.Equals(username) && u.Password.Trim().Equals(password.Trim()));
             if (user == null)
                 return false;
             else

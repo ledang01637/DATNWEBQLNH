@@ -26,6 +26,36 @@ namespace DATN.Server.Controllers
             
         }
 
+        [HttpPost("GetOrderStatus")]
+        public ActionResult<Order> GetOrderStatus([FromBody] int tableId)
+        {
+            if (tableId <= 0) {return BadRequest("Value must be...");}
+
+            return Ok(_OrderService.GetOrderStatus(tableId));
+        }
+
+        [HttpPost("GetOrderInvoice")]
+        public ActionResult<Order> GetOrderInvoice([FromBody] int orderId)
+        {
+            if (orderId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_OrderService.GetOrderInvoice(orderId));
+        }
+
+        [HttpGet("GetOrderLstInclude")]
+        public ActionResult<List<Order>> GetOrderLstInclude()
+        {
+            return Ok(_OrderService.GetOrderLstInclude());
+        }
+
+        [HttpGet("GetOrderLstByCustomer")]
+        public ActionResult<List<Order>> GetOrderLstByCustomer([FromQuery] int customerId)
+        {
+            if (customerId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_OrderService.GetOrderLstByCustomer(customerId));
+        }
+
 
         [HttpPost("AddOrder")]
         public Order AddOrder(Order Order)
@@ -39,14 +69,16 @@ namespace DATN.Server.Controllers
                 PaymentMethod = Order.PaymentMethod,
                 CustomerId = Order.CustomerId,
                 CustomerVoucherId = Order.CustomerVoucherId,
-
+                EmployeeId = Order.EmployeeId,
+                Note = Order.Note,
+                IsDeleted = Order.IsDeleted
             });
         }
 
         [HttpGet("{id}")]
         public ActionResult<Order> GetIdOrder(int id)
         {
-            if (id == 0)
+            if (id <= 0)
             {
                 return BadRequest("Value must be...");
 

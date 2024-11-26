@@ -4,6 +4,8 @@ using System;
 using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace DATN.Server.Service
 {
@@ -18,6 +20,19 @@ namespace DATN.Server.Service
         {
             return _context.Tables.ToList();
         }
+
+        public Table GetTableByNumber(int numberTable)
+        {
+            var table = _context.Tables.FirstOrDefault(a => a.TableNumber == numberTable);
+            return table ?? new Table();
+        }
+        public Table GetTableInclude(int tableId)
+        {
+            return _context.Tables
+                .Include(t => t.Orders)
+                .FirstOrDefault(t => t.TableId == tableId && t.Status == "Đang xử lý");
+        }
+
         public Table AddTable(Table Table)
         {
             _context.Add(Table);

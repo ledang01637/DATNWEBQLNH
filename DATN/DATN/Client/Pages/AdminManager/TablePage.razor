@@ -2,6 +2,10 @@
 @inject IJSRuntime JS
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@layout EmployeeLayout
+@inject LocalStorageService _localStorageService
+
+
 <style>
     .table-card {
         transition: transform 0.2s;
@@ -18,20 +22,13 @@
     }
 
     .grid-item {
-        cursor: move;
+        cursor: pointer;
         height: auto;
     }
 
     .floor {
         margin-bottom: 20px;
     }
-
-/*     .sortable {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 10px;
-        border: 2px dashed #ccc;
-    } */
     .highlight {
         background-color: #ffc107;
         border: 2px solid #ff9800;
@@ -40,7 +37,6 @@
 </style>
 
 <div class="container my-4">
-    <h1 class="text-center">Floor Management</h1>
     <div class="btn-create mb-2">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#CreateModel">Thêm mới bàn</button>
         <button class="btn btn-secondary" @onclick="() => ActivateMoveTable(false)">Chỉnh sửa vị trí bàn</button>
@@ -70,7 +66,11 @@
                              data-id="@table.TableId" 
                              data-position="@table.Position"
                              style="@(isMoveTable ? "col-md-2" : $"grid-column: {GetColumnFromPosition(table.Position)}; grid-row: {GetRowFromPosition(table.Position)};")">
-                            <div class="card table-card" style="background-color:@(isDuplicatePosition ? "red" : "transparent");">
+                            <div class="card table-card" 
+                                style="background-color:@(isDuplicatePosition ? "red" : "transparent");" 
+                                data-bs-toggle="modal"
+                                 data-bs-target="#GenQRModel"
+                                 @onclick="() => LoadTableForEdit(table.TableId)">
                                 <div class="card-body text-center position-relative">
                                     <img src="/images/png/table.png" class="img-fluid" alt="Table Image" style="height: 50px;">
                                     <div class="position-absolute top-0 end-0 fw-bold m-1">
@@ -94,7 +94,6 @@
                                 </div>
                             </div>
                         </div>
-
                     }
                 </div>
             </div>
@@ -102,12 +101,12 @@
     }
 </div>
 
-
 @* AddTable *@
 <div class="modal fade" id="CreateModel" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
+                <h5 class="modal-title">Thêm mới bàn</h5>
                 <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <EditForm Model="@tableModel" OnValidSubmit="AddTable">
@@ -176,79 +175,80 @@
 <div class="modal fade" id="UpdateModel" tabindex="-1" aria-labelledby="UpdateModelLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="UpdateModelLabel">Sửa sản phẩm</h5>
-                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <EditForm Model="@tableModel" OnValidSubmit="UpdateTable">
-                <DataAnnotationsValidator />
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="tableNumber" class="form-label">Số bàn:</label>
-                        <InputNumber class="form-control" min="1" @bind-Value="tableModel.TableNumber" id="tableNumber" name="tableNumber" />
-                        <ValidationMessage For="@(() => tableModel.TableNumber)" />
-                    </div>
-                    <div class="form-group">
-                        <label for="raw" class="form-label">Chọn hàng</label>
-                        <InputSelect class="form-control" @bind-Value="row" id="raw" name="raw">
-                            <option value="" disabled selected>Chọn hàng</option>
-                            @{
-                                for (int i = 0; i < rowCount; i++)
-                                {
-                                    <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="UpdateModelLabel">Sửa sản phẩm</h5>
+                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <EditForm Model="@tableModel" OnValidSubmit="UpdateTable">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="tableNumber" class="form-label">Số bàn:</label>
+                            <InputNumber class="form-control" min="1" @bind-Value="tableModel.TableNumber" id="tableNumber" name="tableNumber" />
+                            <ValidationMessage For="@(() => tableModel.TableNumber)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="raw" class="form-label">Chọn hàng</label>
+                            <InputSelect class="form-control" @bind-Value="row" id="raw" name="raw">
+                                <option value="" disabled selected>Chọn hàng</option>
+                                @{
+                                    for (int i = 0; i < rowCount; i++)
+                                    {
+                                        <option value="Hàng @(i + 1)">Hàng @(i + 1)</option>
+                                    }
                                 }
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="form-group">
-                        <label for="column" class="form-label">Chọn cột</label>
-                        <InputSelect class="form-control" @bind-Value="column" id="column" name="column">
-                            <option value="" disabled selected>Chọn cột</option>
-                            @for (int i = 0; i <= 5; i++)
-                            {
-                                <option value="Cột @(i + 1)">Cột @(i + 1)</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="form-group">
-                        <label for="Status" class="form-label">Trạng thái</label>
-                        <InputSelect class="form-control" @bind-Value="tableModel.Status" id="Status" name="Status">
-                            @{
-                                <option value="" disabled selected>Chọn trạng thái</option>
-                                <option value="Bàn trống">Bàn trống</option>
-                                <option value="Đã đặt">Đã đặt</option>
-                                <option value="Đang dùng">Đang dùng</option>
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="column" class="form-label">Chọn cột</label>
+                            <InputSelect class="form-control" @bind-Value="column" id="column" name="column">
+                                <option value="" disabled selected>Chọn cột</option>
+                                @for (int i = 0; i <= 5; i++)
+                                {
+                                    <option value="Cột @(i + 1)">Cột @(i + 1)</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="Status" class="form-label">Trạng thái</label>
+                            <InputSelect class="form-control" @bind-Value="tableModel.Status" id="Status" name="Status">
+                                @{
+                                    <option value="" disabled selected>Chọn trạng thái</option>
+                                    <option value="Bàn trống">Bàn trống</option>
+                                    <option value="Đã đặt">Đã đặt</option>
+                                    <option value="Đang dùng">Đang dùng</option>
 
-                            }
-                        </InputSelect>
-                        <ValidationMessage For="@(() => tableModel.FloorId)" />
-                    </div>
-                    <div class="form-group">
-                        <label for="seatingCapacity" class="form-label">Sức chứa</label>
-                        <InputNumber class="form-control" min="1" @bind-Value="tableModel.SeatingCapacity" id="seatingCapacity" name="seatingCapacity" />
-                        <ValidationMessage For="@(() => tableModel.SeatingCapacity)" />
-                    </div>
-                    <div class="form-group">
-                        <label for="FloorId" class="form-label">Số tầng:</label>
-                        <InputSelect class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
-                            @{
-                                <option value="" disabled selected>Chọn tầng</option>
-                                foreach (var floor in floors)
-                                {
-                                    <option value="@floor.FloorId">@floor.NumberFloor</option>
                                 }
-                            }
-                        </InputSelect>
-                        <ValidationMessage For="@(() => tableModel.FloorId)" />
+                            </InputSelect>
+                            <ValidationMessage For="@(() => tableModel.FloorId)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="seatingCapacity" class="form-label">Sức chứa</label>
+                            <InputNumber class="form-control" min="1" @bind-Value="tableModel.SeatingCapacity" id="seatingCapacity" name="seatingCapacity" />
+                            <ValidationMessage For="@(() => tableModel.SeatingCapacity)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="FloorId" class="form-label">Số tầng:</label>
+                            <InputSelect class="form-control" @bind-Value="tableModel.FloorId" id="FloorId" name="FloorId">
+                                @{
+                                    <option value="" disabled selected>Chọn tầng</option>
+                                    foreach (var floor in floors)
+                                    {
+                                        <option value="@floor.FloorId">@floor.NumberFloor</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => tableModel.FloorId)" />
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Cập nhật</button>
-                </div>
-            </EditForm>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Cập nhật</button>
+                    </div>
+                </EditForm>
         </div> 
     </div>
 </div>
+
 @* Delete *@
 <div class="modal fade" id="ConfirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -263,6 +263,38 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-danger" @onclick="DeleteTable">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* GenQR *@
+<div class="modal fade" id="GenQRModel" tabindex="-1" aria-labelledby="GenQRModelLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo mã QR cho bàn</h5>
+                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <EditForm Model="@qrModel" OnValidSubmit="GenerateQrCode">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="tableUrl" class="form-label">URL:</label>
+                        <InputText @bind-Value="qrModel.Url" class="form-control" id="tableUrl" name="tableUrl" />
+                        <ValidationMessage For="@(() => qrModel.Url)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="numberTable" class="form-label">Số bàn</label>
+                        <InputNumber @bind-Value="qrModel.NumberTable" class="form-control" id="tableNumber" name="tableNumber" readonly />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Tạo</button>
+                </div>
+            </EditForm>
+            <div class="d-flex justify-content-center my-3">
+                <div id="qrcode"></div>
             </div>
         </div>
     </div>

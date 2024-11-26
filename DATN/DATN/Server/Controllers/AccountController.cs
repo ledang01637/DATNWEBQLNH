@@ -22,6 +22,15 @@ namespace DATN.Server.Controllers
         {
             return _AccountService.GetAccount();
         }
+
+        [HttpGet("GetAccountExist")]
+        public ActionResult<Account> GetAccountExist([FromQuery] string Email)
+        {
+            if (string.IsNullOrEmpty(Email)) { return BadRequest(string.Empty); }
+
+            return Ok(_AccountService.GetAccountExist(Email));
+        }
+
         [HttpPost("AddAccount")]
         public Account AddAccount(Account Account)
         {
