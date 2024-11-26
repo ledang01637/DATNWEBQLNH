@@ -25,10 +25,18 @@ namespace DATN.Client.Pages
             if (string.IsNullOrEmpty(accountId))
             {
                 await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập lại");
+                Navigation.NavigateTo("/login");
                 return;
             }
 
             customer = await FetchCustomerByAccountAsync(int.Parse(accountId)) ?? new Customer();
+
+            if (customer == null || customer.CustomerId <= 0)
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập lại và cập nhật thông tin");
+                Navigation.NavigateTo("/login");
+                return;
+            }
         }
 
         private async Task<string> CheckTypeAccount()

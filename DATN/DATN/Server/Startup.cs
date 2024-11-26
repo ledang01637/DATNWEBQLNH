@@ -16,6 +16,8 @@ using System.Linq;
 using DATN.Server.Hubs;
 using DATN.Server.Hash;
 using DATN.Server.Payment.ServicePayment;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Facebook;
 
 namespace DATN.Server
 {
@@ -60,9 +62,23 @@ namespace DATN.Server
             {
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                
+
             })
-            .AddCookie();
+            .AddCookie()
+            .AddGoogle(googleOptions =>
+            {
+                IConfigurationSection googleAuthNSection = Configuration.GetSection("Authentication:Google");
+                googleOptions.ClientId = googleAuthNSection["ClientId"];
+                googleOptions.ClientSecret = googleAuthNSection["ClientSecret"];
+                googleOptions.CallbackPath = "/signin-google";
+            })
+            .AddFacebook(facebookOptions =>
+            {
+                IConfigurationSection facebookAuthNSection = Configuration.GetSection("Authentication:Facebook");
+                facebookOptions.AppId = facebookAuthNSection["AppId"];
+                facebookOptions.AppSecret = facebookAuthNSection["AppSecret"];
+                facebookOptions.CallbackPath = "/signin-facebook";
+            });
 
             //ConnectDB
             services.AddDbContext<AppDBContext>(options =>

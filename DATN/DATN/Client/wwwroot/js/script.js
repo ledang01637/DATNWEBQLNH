@@ -201,5 +201,3 @@ function initCallButton(callButtonId, expandButtonId, closeBtnId) {
 
 
 
-
-

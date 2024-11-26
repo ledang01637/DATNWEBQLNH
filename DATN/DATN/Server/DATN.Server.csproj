@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="jquery.iframeDialog" Version="1.2.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="5.0.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.17" />
