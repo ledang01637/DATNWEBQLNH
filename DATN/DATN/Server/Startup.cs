@@ -90,6 +90,12 @@ namespace DATN.Server
             services.AddScoped<FileEncryptionService>();
             services.AddScoped<NetworkService>();
             services.AddScoped<MessageService>();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
@@ -138,6 +144,7 @@ namespace DATN.Server
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("AllowAllOrigins");
