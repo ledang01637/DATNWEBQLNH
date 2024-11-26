@@ -5,6 +5,7 @@ using DATN.Server.Service;
 using System.Linq;
 using DATN.Server.Data;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace DATN.Server.Service
 {
@@ -18,6 +19,12 @@ namespace DATN.Server.Service
         public List<Reservation> GetReservation()
         {
             return _context.Reservations.ToList();
+        }
+
+        public List<Reservation> GetReservationInclude()
+        {
+            var reservations = _context.Reservations.Where(a => !a.IsDeleted).Include(a => a.Tables).ToList();
+            return reservations ?? new List<Reservation>();
         }
         public Reservation AddReservation(Reservation Reservation)
         {

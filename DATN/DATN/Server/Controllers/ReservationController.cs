@@ -24,6 +24,12 @@ namespace DATN.Server.Controllers
             return _ReservationService.GetReservation();
         }
 
+        [HttpGet("GetReservationInclude")]
+        public ActionResult<List<Reservation>> GetReservationInclude()
+        {
+            return _ReservationService.GetReservationInclude();
+        }
+
         [HttpPost("AddReservation")]
         public Reservation AddReservation(Reservation Reservation)
         {

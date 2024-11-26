@@ -8,9 +8,10 @@ namespace DATN.Client.Shared
     {
         private string wifiIpAddress;
         private bool isAcceptWifi;
-        private string errorMessage;
         private bool isLoading;
         private string Username;
+        private bool isCheckBookTable = false;
+        private bool isShow = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -30,7 +31,7 @@ namespace DATN.Client.Shared
             catch (HttpRequestException ex)
             {
                 isAcceptWifi = false;
-                errorMessage = "Access denied: " + ex.Message;
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", ex.Message);
             }
             finally
             {
@@ -41,6 +42,14 @@ namespace DATN.Client.Shared
         {
             await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);
         }
+
+        private void GoToManager(bool isCheck)
+        {
+            isShow = isCheck;
+            string query = "?isCheckBookTable="+ isCheck;
+            Navigation.NavigateTo("/manager" + query,true);
+        }
+
         private void Logout()
         {
             Navigation.NavigateTo("/logout");

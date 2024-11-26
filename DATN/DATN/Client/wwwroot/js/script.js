@@ -83,6 +83,7 @@ function selectPaymentMethod(isCash, cashBtnId, transferBtnId) {
 }
 
 
+
 //Scroll
 function initScrollToTop() {
     let scrollToTopBtn = document.getElementById("scrollToTopBtn");

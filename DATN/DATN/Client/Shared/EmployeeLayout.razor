@@ -28,10 +28,6 @@
             transition: 0.3s;
         }
 
-            .sidebar a:hover {
-                color: #f1f1f1;
-            }
-
         .sidebar .closebtn {
             position: absolute;
             top: 10px;
@@ -50,6 +46,41 @@
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 999;
     }
+
+        .sidebar .nav-link {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #ddd;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+            .sidebar .nav-link:hover {
+                background-color: #fff;
+                color: #000 !important;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .sidebar .nav-link.active {
+                background-color: #fff;
+                color: #000 !important;
+                font-weight: bold;
+            }
+
+    /* Xử lý cho icon đóng sidebar */
+    .closebtn {
+        font-size: 36px;
+        color: white;
+        position: absolute;
+        top: 0;
+        right: 25px;
+        padding: 16px;
+        background: transparent;
+        border: none;
+    }
+
 </style>
 
 <CascadingAuthenticationState>
@@ -65,11 +96,14 @@
             }
             else if (isAcceptWifi)
             {
-                <div class="container mt-1 mb-3 foodcustom">
+                <div class="container mt-1 mb-3 foodcustom p-3">
                     <!-- Sidebar -->
                     <div id="mySidebar" class="sidebar">
                         <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>
+                        <a class="nav-link custom-link text-white mt-3 @(isShow ? "": "acctive")" @onclick="() => GoToManager(false)" id="manageLink">Quản lý bàn ăn</a>
+                        <a class="nav-link custom-link text-white @(isShow ? "acctive": "")" @onclick="() => GoToManager(true)" id="lstLink">Danh sách đặt bàn</a>
                     </div>
+
 
                     <!-- Overlay -->
                     <div id="overlay" class="overlay" @onclick="() => Navbar(false)"></div>

@@ -13,7 +13,7 @@ using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 using System.Dynamic;
-using System.Threading;
+using System.Timers;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -25,6 +25,8 @@ namespace DATN.Client.Pages.AdminManager
         private List<Order> orders = new();
         private List<CallInfo> callInfos = new();
         private List<Reservation> reservations = new();
+        private List<Reservation> reservationsLst = new();
+        private List<Reservation> reservationsProcess = new();
         private Reservation reservationModel = new();
         private Order order = new();
         private Employee employee = new();
@@ -52,12 +54,28 @@ namespace DATN.Client.Pages.AdminManager
         private string to;
         private bool isEdit = false;
         private int selectedTableId ;
+        private bool isCheckBookTable = false;
         private DateTime selectedDate;
         private DateTime selectedTime;
         private Timer _timer;
+        private Dictionary<int, string> timeLeftText = new();
+        private int updateCounter = 0;
 
         protected override async Task OnInitializedAsync()
         {
+
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+            if (query.ContainsKey("isCheckBookTable") && !string.IsNullOrEmpty(query["isCheckBookTable"]))
+            {
+                isCheckBookTable = bool.Parse(query["isCheckBookTable"]);
+            }
+            else
+            {
+                isCheckBookTable = false;
+            }
+
             hubConnection = new HubConnectionBuilder()
                 .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
                 .Build();
@@ -75,7 +93,74 @@ namespace DATN.Client.Pages.AdminManager
 
             await GetLocalStorageAsync();
             await LoadAll();
-            _timer = new Timer(UpdateReservations, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            await SetupTimer();
+        }
+
+        private Task SetupTimer()
+        {
+            foreach (var table in tables)
+            {
+                var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
+
+                if (reservation != null && reservation.ReservationTime > DateTime.Now)
+                {
+                    timeLeftText[table.TableNumber] = FormatTimeLeft(reservation.ReservationTime - DateTime.Now);
+                }
+                else
+                {
+                    timeLeftText[table.TableNumber] = null;
+                }
+            }
+
+            _timer = new Timer(1000);
+            _timer.Elapsed += UpdateCountdown;
+            _timer.AutoReset = true;
+            _timer.Start();
+
+            return Task.CompletedTask;
+        }
+
+        private async void UpdateCountdown(object sender, ElapsedEventArgs e)
+        {
+            foreach (var table in tables)
+            {
+                var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
+                if (reservation != null && reservation.ReservationTime > DateTime.Now)
+                {
+                    var timeLeft = reservation.ReservationTime - DateTime.Now;
+                    bool checkTime = FormatTimeLeft(timeLeft) == "Đến giờ hẹn!";
+
+                    if(checkTime)
+                    {
+                       await ReceivedTableAsync(reservation);
+                    }
+                    else
+                    {
+                        timeLeftText[table.TableNumber] = FormatTimeLeft(timeLeft);
+                    }
+                }
+                else
+                {
+                    timeLeftText[table.TableNumber] = null;
+                }
+            }
+
+            if (++updateCounter % 2 == 0)
+            {
+                UpdateReservations();
+            }
+
+             _ = InvokeAsync(StateHasChanged);
+        }
+
+        private string FormatTimeLeft(TimeSpan timeLeft)
+        {
+            if (timeLeft.TotalSeconds <= 0)
+            {
+                return "Đến giờ hẹn!";
+            }
+
+            return $"Khách đến sau: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
         }
 
         private async Task GetLocalStorageAsync()
@@ -138,22 +223,30 @@ namespace DATN.Client.Pages.AdminManager
         {
             try
             {
-                // Bắt đầu tất cả các tác vụ bất đồng bộ đồng thời
                 var loadTablesTask = httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
                 var loadFloorsTask = httpClient.GetFromJsonAsync<List<Floor>>("api/Floor/GetFloor");
                 var loadProductsTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
                 var loadOrdersTask = httpClient.GetFromJsonAsync<List<Order>>("api/Order/GetOrderLstInclude");
                 var loadReservationsTask = httpClient.GetFromJsonAsync<List<Reservation>>("api/Reservation/GetReservation");
+                var loadReservationsIncludeTask = httpClient.GetFromJsonAsync<List<Reservation>>("api/Reservation/GetReservationInclude");
 
-                // Đợi tất cả các tác vụ hoàn thành
-                await Task.WhenAll(loadTablesTask, loadFloorsTask, loadProductsTask, loadOrdersTask, loadReservationsTask);
 
-                // Xử lý kết quả sau khi tất cả đã hoàn thành
+                await Task.WhenAll(loadTablesTask, loadFloorsTask, loadProductsTask, loadOrdersTask,  loadReservationsIncludeTask, loadReservationsTask);
+
                 tables = loadTablesTask.Result?.Where(a => !a.IsDeleted).ToList() ?? new List<Table>();
                 floors = loadFloorsTask.Result?.Where(a => !a.IsDeleted).ToList() ?? new List<Floor>();
                 products = loadProductsTask.Result?.Where(a => !a.IsDeleted).ToList() ?? new List<Product>();
                 orders = loadOrdersTask.Result?.Where(a => !a.IsDeleted).ToList() ?? new List<Order>();
+                reservationsLst = loadReservationsIncludeTask.Result?.ToList() ?? new List<Reservation>(); ;
                 reservations = loadReservationsTask.Result?.Where(a => !a.IsDeleted && a.ReservationStatus.Equals("Đang xử lý")).ToList() ?? new List<Reservation>();
+                reservationsProcess = loadReservationsTask.Result?.Where(a => !a.IsDeleted && a.ReservationStatus.Equals("Đặt bàn thành công")).ToList() ?? new List<Reservation>();
+
+                if (tables == null || floors == null || products == null || orders == null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể tải dữ liệu từ server. Vui lòng thử lại!");
+                    return;
+                }
+
 
                 // Kiểm tra tài khoản nhân viên
                 var accountId = await CheckTypeAccountId();
@@ -574,7 +667,7 @@ namespace DATN.Client.Pages.AdminManager
         }
         private async Task HandleError(Exception ex)
         {
-            var query = $"[C#] fix error: {ex.Message}";
+            var query = $"[C#] fix error bằng tiếng Việt: {ex.Message}";
             await JS.InvokeVoidAsync("openChatGPT", query);
             Console.WriteLine($"{ex.Message}");
         }
@@ -684,7 +777,9 @@ namespace DATN.Client.Pages.AdminManager
         }
         #endregion
 
-        private async Task ProcessBookTable(int reservationId)
+        #region BookTable
+
+        private async Task ProcessBookTable(int reservationId, bool isCancel)
         {
             try
             {
@@ -692,14 +787,22 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (reservationModel != null)
                 {
-                    selectedDate = reservationModel.ReservationTime.Date;
-                    selectedTime = reservationModel.ReservationTime;
-
-                    await JS.InvokeVoidAsync("showModal", "bookTableModal");
+                    if (isCancel)
+                    {
+                        reservationModel.ReservationStatus = "Đã hủy";
+                        reservationModel.UpdatedDate = DateTime.Now;
+                        await JS.InvokeVoidAsync("showModal", "ConfirmCancelModal");
+                    }
+                    else
+                    {
+                        selectedDate = reservationModel.ReservationTime.Date;
+                        selectedTime = reservationModel.ReservationTime;
+                        await JS.InvokeVoidAsync("showModal", "bookTableModal");
+                    }
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Không tìm thấy đơn hàng");
+                    await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Không tìm thấy đơn đặt bàn");
                 }
             }
             catch (Exception ex)
@@ -708,7 +811,8 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
-        private async void UpdateReservations(object state)
+        //Update số lượng thông báo
+        private async void UpdateReservations()
         {
             var loadReservationsTask = httpClient.GetFromJsonAsync<List<Reservation>>("api/Reservation/GetReservation");
 
@@ -724,7 +828,7 @@ namespace DATN.Client.Pages.AdminManager
             StateHasChanged();
         }
 
-        private void ConformInforCustomer()
+        private void ConfirmInforCustomer()
         {
             CatulatorDepositPaymentAsync();
             isEdit = false;
@@ -773,6 +877,31 @@ namespace DATN.Client.Pages.AdminManager
             await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đã xác nhận đặt bàn.");
         }
 
+        private async void ConfirmCancelBookTable()
+        {
+            await JS.InvokeVoidAsync("closeModal", "ConfirmCancelModal");
+            var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservationModel.ReservationId}", reservationModel);
+            if (!response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Hủy đặt bàn thất bại");
+                return;
+            }
+            await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Hủy đặt bàn thành công");
+            await Task.Delay(1000);
+            Navigation.NavigateTo(Navigation.Uri, true);
+        }
+
+        private async Task ReceivedTableAsync(Reservation reservation)
+        {
+            reservation.ReservationStatus = "Đã nhận bàn";
+            var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservation.ReservationId}", reservation);
+            if (!response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật bàn thất bại");
+                return;
+            }
+        }
+
         private Task CatulatorDepositPaymentAsync()
         {
             const decimal adultDeposit = 50000;
@@ -785,7 +914,7 @@ namespace DATN.Client.Pages.AdminManager
             StateHasChanged();
             return Task.CompletedTask;
         }
-
+        #endregion
         private async Task<Employee> GetEmployeeByAccountId(int accountId)
         {
             var response = await httpClient.PostAsJsonAsync("api/Employee/GetEmployeeByAccountId", accountId);
@@ -828,11 +957,12 @@ namespace DATN.Client.Pages.AdminManager
             return null;
         }
 
-
         public void Dispose()
         {
             dotNetObjectReference?.Dispose();
+            _timer?.Stop();
             _timer?.Dispose();
+
         }
         public async ValueTask DisposeAsync()
         {
@@ -841,8 +971,6 @@ namespace DATN.Client.Pages.AdminManager
                 await hubConnection.DisposeAsync();
             }
         }
-
-
     }
     public class CartNote
     {
