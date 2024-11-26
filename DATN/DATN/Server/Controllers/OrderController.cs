@@ -62,15 +62,16 @@ namespace DATN.Server.Controllers
         {
             return _OrderService.AddOrder(new Order
             {
+                OrderId = Order.OrderId,
                 TableId = Order.TableId,
+                EmployeeId = Order.EmployeeId,
                 CreateDate = Order.CreateDate,
                 TotalAmount = Order.TotalAmount,
                 Status = Order.Status,
-                PaymentMethod = Order.PaymentMethod,
                 CustomerId = Order.CustomerId,
-                CustomerVoucherId = Order.CustomerVoucherId,
-                EmployeeId = Order.EmployeeId,
+                PaymentMethod = Order.PaymentMethod,
                 Note = Order.Note,
+                CustomerVoucherId = Order.CustomerVoucherId,
                 IsDeleted = Order.IsDeleted
             });
         }

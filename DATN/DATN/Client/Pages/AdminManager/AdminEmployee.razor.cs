@@ -14,6 +14,7 @@ namespace DATN.Client.Pages.AdminManager
     public partial class AdminEmployee
     {
         private List<DATN.Shared.Employee> listEmployee = new List<DATN.Shared.Employee>();
+        private List<DATN.Shared.Account> listAccount = new List<DATN.Shared.Account>();
         private List<DATN.Shared.Employee> filter = new List<DATN.Shared.Employee>();
         private bool isLoaded = false;
         private string errorMessage;
@@ -29,6 +30,7 @@ namespace DATN.Client.Pages.AdminManager
             try
             {
                 listEmployee = await httpClient.GetFromJsonAsync<List<DATN.Shared.Employee>>("api/Employee/GetEmployee");
+                listAccount = await httpClient.GetFromJsonAsync<List<DATN.Shared.Account>>("api/Account/GetAccount");
                 filter = listEmployee;
             }
             catch (Exception ex)
@@ -37,21 +39,39 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
-        private async Task DeleteEmployee(int employeeId)
+        private async Task HideEmployee(int employeeId)
         {
             try
             {
                 var employee = listEmployee.FirstOrDefault(p => p.EmployeeId == employeeId);
                 if (employee != null)
                 {
-                    await httpClient.DeleteAsync($"api/Employee/{employeeId}");
-                    await LoadEmployee(); // Load lại dữ liệu sau khi xóa
+                    await httpClient.PutAsJsonAsync($"api/Employee/{employeeId}", employee);
+                    await LoadEmployee();
                     StateHasChanged();
                 }
             }
             catch (Exception ex)
             {
-                errorMessage = $"Error deleting employee: {ex.Message}";
+                Console.WriteLine($"Error hiding menuitem: {ex.Message}");
+            }
+        }
+
+        private async Task RestoreEmployee(int employeeId)
+        {
+            try
+            {
+                var employee = listEmployee.FirstOrDefault(p => p.EmployeeId == employeeId);
+                if (employee != null)
+                {
+                    await httpClient.PutAsJsonAsync($"api/Employee/{employeeId}", employee);
+                    await LoadEmployee();
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error : {ex.Message}");
             }
         }
 

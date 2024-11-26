@@ -1,9 +1,9 @@
-﻿@* @page "/tablestatus"
+﻿@page "/tablestatus"
 @using System.Timers
 @inject IJSRuntime JS
-@layout EmployeeLayout
-@inject HttpClient httpClient
-@inject NavigationManager Navigation
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
     body {
@@ -177,7 +177,7 @@
                 <div class="row">
                     @foreach (var table in tables.Where(t => t.Floor == 1))
                     {
-                        <div class="col-6 col-md-2 mb-3">
+                        <div class="col-6 col-md-3 mb-3">
                             <button class="btn btn-table w-100 @GetTableClass(table.Status)" @onclick="() => HandleTableClick(table)">
                                 @table.Label
                             </button>
@@ -214,6 +214,7 @@
                                 @order.Name <span>$@order.Price.ToString("0.00")</span>
                             </li>
                         }
+                        }
                     </ul>
                     <div class="d-flex justify-content-between mb-3">
                         <span>Tổng cộng</span>
@@ -237,11 +238,6 @@
         new Table { Id = 1, Status = "available", Label = "Bàn 1", Floor = 1 },
         new Table { Id = 2, Status = "occupied", Label = "Bàn 2", Floor = 1 },
         new Table { Id = 3, Status = "pending", Label = "Bàn 3", Floor = 1 },
-        new Table { Id = 7, Status = "pending", Label = "Bàn 7", Floor = 1 },
-        new Table { Id = 1, Status = "available", Label = "Bàn 1", Floor = 1 },
-        new Table { Id = 2, Status = "occupied", Label = "Bàn 2", Floor = 1 },
-        new Table { Id = 3, Status = "pending", Label = "Bàn 3", Floor = 1 },
-        new Table { Id = 7, Status = "pending", Label = "Bàn 7", Floor = 1 },
         new Table { Id = 4, Status = "available", Label = "Bàn 4", Floor = 2 },
         new Table { Id = 5, Status = "occupied", Label = "Bàn 5", Floor = 2 },
         new Table { Id = 6, Status = "pending", Label = "Bàn 6", Floor = 2 }
@@ -298,4 +294,3 @@
         public decimal Price { get; set; }
     }
 }
- *@

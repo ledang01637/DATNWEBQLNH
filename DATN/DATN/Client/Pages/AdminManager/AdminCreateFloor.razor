@@ -1,47 +1,26 @@
-﻿@page "/createvoucher"
+﻿@page "/createfloor"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Voucher</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Add Floor</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@voucher" OnValidSubmit="CreateVoucher" Context="editFormContext">
+                    <EditForm Model="@floor" OnValidSubmit="CreateFloor">
                         <DataAnnotationsValidator />
-                        <div class="text-danger mb-3">
-                            <ValidationSummary />
-                        </div>
+                        <ValidationSummary />
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="VoucherCode" class="control-label"><strong>Voucher Code</strong></label>
-                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" />
-                            <ValidationMessage For="@(() => voucher.VoucherCode)" />
-                        </div>
-
-                        <div class="form-group col-md-12 mb-3">
-                            <label for="PointRequired" class="control-label"><strong>PointRequired</strong></label>
-                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" />
-                            <ValidationMessage For="@(() => voucher.PointRequired)" />
-                        </div>
-
-                        <div class="form-group col-md-12 mb-3">
-                            <label for="DiscountValue" class="control-label"><strong>DiscountValue</strong></label>
-                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" />
-                            <ValidationMessage For="@(() => voucher.DiscountValue)" />
-                        </div>
-
-                        <div class="form-group col-md-12 mb-3">
-                            <label for="ExpriationDate" class="control-label"><strong>PointRequired</strong></label>
-                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" />
-                            <ValidationMessage For="@(() => voucher.ExpriationDate)" />
+                            <label for="NumberFloor" class="control-label"><strong>NumberFloor</strong></label>
+                            <input id="NumberFloor" @bind="floor.NumberFloor" class="form-control" placeholder="NumberFloor" />
+                            <ValidationMessage For="@(() => floor.NumberFloor)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
@@ -75,7 +54,7 @@
 @code {
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Voucher voucher = new DATN.Shared.Voucher();
+    private DATN.Shared.Floor floor = new DATN.Shared.Floor();
     private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
@@ -84,17 +63,17 @@
         isLoaded = true;
     }
 
-    private async Task CreateVoucher()
+    private async Task CreateFloor()
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync("api/Voucher/AddVoucher", voucher);
+            var response = await httpClient.PostAsJsonAsync("api/Floor/AddFloor", floor);
 
             if (response.IsSuccessStatusCode)
             {
                 successMessage = "Success";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/adminvoucher");
+                Navigation.NavigateTo("/adminunit");
             }
             else
             {

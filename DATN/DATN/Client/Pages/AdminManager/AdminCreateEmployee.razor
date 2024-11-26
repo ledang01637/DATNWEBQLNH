@@ -4,65 +4,64 @@
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add Unit</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@employee" OnValidSubmit="CreateEmployee" Context="editFormContext">
+                    <EditForm Model="@employee" OnValidSubmit="CreateEmployee">
                         <DataAnnotationsValidator />
-                        <div class="text-danger mb-3">
-                            <ValidationSummary />
-                        </div>
+                        <ValidationSummary />
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="EmployeeName" class="control-label"><strong>EmployeeName</strong></label>
                             <input id="EmployeeName" @bind="employee.EmployeeName" class="form-control" placeholder="EmployeeName" />
                             <ValidationMessage For="@(() => employee.EmployeeName)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="Address" class="control-label"><strong>Address</strong></label>
                             <input id="Address" @bind="employee.Address" class="form-control" placeholder="Address" />
                             <ValidationMessage For="@(() => employee.Address)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="PhoneNumber" class="control-label"><strong>PhoneNumber</strong></label>
                             <input type="number" id="PhoneNumber" @bind="employee.PhoneNumber" class="form-control" placeholder="PhoneNumber" />
                             <ValidationMessage For="@(() => employee.PhoneNumber)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="Email" class="control-label"><strong>Email</strong></label>
                             <input type="email" id="Email" @bind="employee.Email" class="form-control" placeholder="Email" />
                             <ValidationMessage For="@(() => employee.Email)" />
                         </div>
 
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="Position" class="control-label"><strong>Position</strong></label>
                             <input id="Position" @bind="employee.Position" class="form-control" placeholder="Position" />
                             <ValidationMessage For="@(() => employee.Position)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="HireDate" class="control-label"><strong>HireDate</strong></label>
                             <input type="date" id="HireDate" @bind="employee.HireDate" class="form-control" placeholder="HireDate" />
                             <ValidationMessage For="@(() => employee.HireDate)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="TotalRewardPoint" class="control-label"><strong>Salary</strong></label>
                             <input type="number" id="TotalRewardPoint" @bind="employee.Salary" class="form-control" placeholder="Salary" />
                             <ValidationMessage For="@(() => employee.Salary)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="AccountId" class="control-label"><strong>AccountId</strong></label>
                             <select id="AccountId" @bind="employee.AccountId" class="form-control">
                                 <option value="">Chọn Account</option>
@@ -77,24 +76,21 @@
                             <ValidationMessage For="@(() => employee.AccountId)" />
                         </div>
 
-
-                        <div class="form-group text-center">
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                                <a class="btn btn-secondary mx-2" data-bs-target="#carouselExample" data-bs-slide="prev">Quay Về</a>
-                            </div>
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminemployee" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -107,6 +103,7 @@
         </div>
     </div>
 </div>
+
 
 @code {
     private string errorMessage;

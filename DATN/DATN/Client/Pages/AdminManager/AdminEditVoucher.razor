@@ -1,5 +1,5 @@
 
-@page "/editshifte/{ShifteId:int}"
+@page "/editvoucher/{VoucherId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -9,41 +9,44 @@
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Edit Shifte</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Add Unit</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@shifte" OnValidSubmit="EditShifte" Context="editFormContext">
+                    <EditForm Model="@voucher" OnValidSubmit="EditVoucher" Context="editFormContext">
                         <DataAnnotationsValidator />
                         <div class="text-danger mb-3">
                             <ValidationSummary />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="Shifte_Name" class="control-label"><strong>Shifte_Name</strong></label>
-                            <input id="Shifte_Name" @bind="shifte.ShifteName" class="form-control" placeholder="Shifte_Name" />
-                            <ValidationMessage For="@(() => shifte.ShifteName)" />
+                            <label for="VoucherCode" class="control-label"><strong>Voucher Code</strong></label>
+                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" />
+                            <ValidationMessage For="@(() => voucher.VoucherCode)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="StartTime" class="control-label"><strong>StartTime</strong></label>
-                            <input id="StartTime" type="time" @bind="shifte.StartTime" class="form-control" placeholder="StartTime" />
-                            <ValidationMessage For="@(() => shifte.StartTime)" />
+                            <label for="PointRequired" class="control-label"><strong>PointRequired</strong></label>
+                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" />
+                            <ValidationMessage For="@(() => voucher.PointRequired)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="EndTime" class="control-label"><strong>EndTime</strong></label>
-                            <input id="EndTime" type="time" @bind="shifte.EndTime" class="form-control" placeholder="EndTime" />
-                            <ValidationMessage For="@(() => shifte.EndTime)" />
+                            <label for="DiscountValue" class="control-label"><strong>DiscountValue</strong></label>
+                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" />
+                            <ValidationMessage For="@(() => voucher.DiscountValue)" />
                         </div>
 
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ExpriationDate" class="control-label"><strong>PointRequired</strong></label>
+                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" />
+                            <ValidationMessage For="@(() => voucher.ExpriationDate)" />
+                        </div>
 
                         <div class="form-group text-center mt-3">
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-danger mx-2">Add</button>
-                                <a href="/adminshifte" class="btn btn-secondary mx-2">Back</a>
-                            </div>
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminunit" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
@@ -70,27 +73,27 @@
 </div>
 
 @code {
-    [Parameter] public int ShifteId { get; set; }
+    [Parameter] public int VoucherId { get; set; }
 
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Shifte shifte = new DATN.Shared.Shifte();
+    private DATN.Shared.Voucher voucher = new DATN.Shared.Voucher();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadEditShifte();
+        await LoadEditVoucher();
         isLoaded = true;
     }
 
-    private async Task LoadEditShifte()
+    private async Task LoadEditVoucher()
     {
         try
         {
-            var response = await httpClient.GetFromJsonAsync<Shifte>($"api/Shifte/{ShifteId}");
+            var response = await httpClient.GetFromJsonAsync<Voucher>($"api/Voucher/{VoucherId}");
             if (response != null)
             {
-                shifte = response;
+                voucher = response;
             }
             else
             {
@@ -103,17 +106,17 @@
         }
     }
 
-    private async Task EditShifte()
+    private async Task EditVoucher()
     {
         try
         {
-            var response = await httpClient.PutAsJsonAsync($"api/Shifte/{ShifteId}", shifte);
+            var response = await httpClient.PutAsJsonAsync($"api/Voucher/{VoucherId}", voucher);
 
             if (response.IsSuccessStatusCode)
             {
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/adminshifte");
+                Navigation.NavigateTo("/adminvoucher");
             }
             else
             {
