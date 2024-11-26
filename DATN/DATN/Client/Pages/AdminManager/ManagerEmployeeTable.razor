@@ -261,7 +261,8 @@
                 <th>Email</th>
                 <th>Số người lớn</th>
                 <th>Số trẻ em</th>
-                <th>Thời gian</th>
+                <th>Ngày đặt</th>
+                <th>Thời gian đến</th>
                 <th>Số bàn</th>
                 <th>Ghi chú</th>
                 <th>Trạng thái</th>
@@ -277,7 +278,7 @@
             }
             else
             {
-                foreach (var r in reservationsLst)
+                foreach (var r in reservationsLst.OrderByDescending(a => a.CreatedDate))
                 {
                     <tr>
                         <td>@r.CustomerName</td>
@@ -285,6 +286,7 @@
                         <td>@r.CustomerEmail</td>
                         <td>@r.Adults</td>
                         <td>@r.Children</td>
+                        <td>@r.CreatedDate</td>
                         <td>@r.ReservationTime</td>
                         <td>@r.Tables.TableNumber</td>
                         <td>@r.CustomerNote</td>

@@ -33,6 +33,16 @@ namespace DATN.Server.Controllers
             return Ok(_CustomerService.GetCustomerExist(customer));
         }
 
+
+        [HttpPost("GetCustomerExistByEmail")]
+
+        public ActionResult<Customer> GetCustomerExistByEmail([FromBody] string customerEmail)
+        {
+            if (customerEmail == null) { return BadRequest(); }
+
+            return Ok(_CustomerService.GetCustomerExistByEmail(customerEmail));
+        }
+
         [HttpPost("GetCustomerByAccountId")]
         public ActionResult<Customer> GetCustomerByAccountId([FromBody] int accountId)
         {

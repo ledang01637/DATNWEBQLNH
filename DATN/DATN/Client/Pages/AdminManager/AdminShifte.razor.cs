@@ -41,7 +41,7 @@ namespace DATN.Client.Pages.AdminManager
         {
             try
             {
-                var shifte = listShifte.FirstOrDefault(p => p.Shifte_Id == shifteId);
+                var shifte = listShifte.FirstOrDefault(p => p.ShifteId == shifteId);
                 if (shifte != null)
                 {
                     shifte.IsDeleted = true;
@@ -60,7 +60,7 @@ namespace DATN.Client.Pages.AdminManager
         {
             try
             {
-                var shifte = listShifte.FirstOrDefault(p => p.Shifte_Id == shifteId);
+                var shifte = listShifte.FirstOrDefault(p => p.ShifteId == shifteId);
                 if (shifte != null)
                 {
                     shifte.IsDeleted = false;
@@ -90,7 +90,7 @@ namespace DATN.Client.Pages.AdminManager
             var searchTerm = e.Value.ToString().ToLower();
             filter = string.IsNullOrWhiteSpace(searchTerm)
                 ? listShifte
-                : listShifte.Where(p => p.Shifte_Name.ToLower().Contains(searchTerm)).ToList();
+                : listShifte.Where(p => p.ShifteName.ToLower().Contains(searchTerm)).ToList();
         }
 
 

@@ -63,7 +63,6 @@ namespace DATN.Client.Pages.AdminManager
 
         protected override async Task OnInitializedAsync()
         {
-
             var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
             var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -145,7 +144,7 @@ namespace DATN.Client.Pages.AdminManager
                 }
             }
 
-            if (++updateCounter % 2 == 0)
+            if (++updateCounter % 5 == 0)
             {
                 UpdateReservations();
             }

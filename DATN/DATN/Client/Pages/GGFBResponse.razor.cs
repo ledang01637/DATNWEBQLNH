@@ -22,6 +22,7 @@ namespace DATN.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            isLoading = true;
             var uri = new Uri(Navigation.Uri);
             var queryParams = QueryHelpers.ParseQuery(uri.Query);
             var token = queryParams.ContainsKey("token") ? queryParams["token"].ToString() : null;
@@ -46,6 +47,23 @@ namespace DATN.Client.Pages
 
                         customer.Email = account.Email;
 
+                        var exitsCustomerRes = await httpClient.PostAsJsonAsync("api/Customer/GetCustomerExistByEmail", customer.Email);
+                        if (exitsCustomerRes.IsSuccessStatusCode)
+                        {
+                            var exitsCustomer = await exitsCustomerRes.Content.ReadFromJsonAsync<Customer>();
+                            if (exitsCustomer != null && exitsCustomer.CustomerId > 0)
+                            {
+                                Navigation.NavigateTo("/");
+                                return;
+                            }
+                            isLoading = false;
+                        }
+                        else
+                        {
+                            await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Lỗi kiểm tra khách hàng");
+                            return;
+                        }
+
                     }
                     else
                     {
@@ -68,31 +86,24 @@ namespace DATN.Client.Pages
 
         private async Task HandleValidSubmitAsync()
         {
-            var exitsEmail = await httpClient.GetFromJsonAsync<Account>($"api/Account/GetAccountExist?Email={customer.Email}");
-
-            if (exitsEmail != null && exitsEmail.AccountId > 0)
-            {
-                await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Email đã tồn tại");
-                return;
-            }
-            var exitsCustomerRes = await httpClient.PostAsJsonAsync("api/Customer/GetCustomerExist", customer);
-            if (exitsCustomerRes.IsSuccessStatusCode)
-            {
-                var exitsCustomer = await exitsCustomerRes.Content.ReadFromJsonAsync<Customer>();
-                if (exitsCustomer != null && exitsCustomer.CustomerId > 0)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Khách hàng đã tồn tại");
-                    return;
-                }
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Lỗi kiểm tra khách hàng");
-                return;
-            }
             isLoading = true;
             try
             {
+                var exitsCustomerRes = await httpClient.PostAsJsonAsync("api/Customer/GetCustomerExist", customer);
+                if (exitsCustomerRes.IsSuccessStatusCode)
+                {
+                    var exitsCustomer = await exitsCustomerRes.Content.ReadFromJsonAsync<Customer>();
+                    if (exitsCustomer != null && exitsCustomer.CustomerId > 0)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Khách hàng đã tồn tại");
+                        return;
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Lỗi kiểm tra khách hàng");
+                    return;
+                }
                 customer.AccountId = account.AccountId;
 
                 var isAddCustomer = await AddNewCustomer(customer);
