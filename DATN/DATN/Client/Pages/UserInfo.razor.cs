@@ -18,6 +18,7 @@ namespace DATN.Client.Pages
             var accountType = await CheckTypeAccount();
             if(accountType != null && accountType != "customer") 
             {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập lại");
                 Navigation.NavigateTo("/login");
                 return;
             }

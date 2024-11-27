@@ -24,10 +24,7 @@ namespace DATN.Client.Pages
         private List<Customer> customers = new();
         private Customer customer = new();
         private List<Table> tables = new();
-        private Order order = new Order();
-        private OrderItem orderItem = new();
-        private List<RewardPointe> rewardPointes = new();
-        private RewardPointe rewardPointe = new();
+        private Order order = new();
 
         private bool isSaveOrder = false;
         private bool isUseVoucher = false;
@@ -216,6 +213,7 @@ namespace DATN.Client.Pages
                         await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note);
 
                         await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
+                        Navigation.NavigateTo("/");
                     }
                 }
                 else
