@@ -21,6 +21,20 @@ namespace DATN.Server.Service
             return _context.Reservations.ToList();
         }
 
+        public Reservation GetReservationByTimeTableId(int tableId)
+        {
+            var now = DateTime.Now;
+            var reservation = _context.Reservations.FirstOrDefault(a => a.TableId == tableId && a.ReservationStatus == "Đã nhận bàn");
+
+            return reservation ?? new Reservation();
+        }
+
+        public List<Reservation> GetReservationByTableId(int tableId)
+        {
+            var reservations = _context.Reservations.Where(a => a.TableId == tableId).ToList();
+            return reservations ?? new List<Reservation>();
+        }
+
         public List<Reservation> GetReservationInclude()
         {
             var reservations = _context.Reservations.Where(a => !a.IsDeleted).Include(a => a.Tables).ToList();

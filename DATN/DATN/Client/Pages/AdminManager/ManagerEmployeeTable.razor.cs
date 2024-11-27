@@ -14,6 +14,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Dynamic;
 using System.Timers;
+using DATN.Client.Service;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -28,7 +29,9 @@ namespace DATN.Client.Pages.AdminManager
         private List<Reservation> reservationsLst = new();
         private List<Reservation> reservationsProcess = new();
         private Reservation reservationModel = new();
+        private Reservation getReservation = new();
         private Order order = new();
+        private Table getTable = new();
         private Employee employee = new();
         private HubConnection hubConnection;
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
@@ -63,6 +66,7 @@ namespace DATN.Client.Pages.AdminManager
 
         protected override async Task OnInitializedAsync()
         {
+
             var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
             var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -93,73 +97,6 @@ namespace DATN.Client.Pages.AdminManager
             await GetLocalStorageAsync();
             await LoadAll();
             await SetupTimer();
-        }
-
-        private Task SetupTimer()
-        {
-            foreach (var table in tables)
-            {
-                var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
-
-                if (reservation != null && reservation.ReservationTime > DateTime.Now)
-                {
-                    timeLeftText[table.TableNumber] = FormatTimeLeft(reservation.ReservationTime - DateTime.Now);
-                }
-                else
-                {
-                    timeLeftText[table.TableNumber] = null;
-                }
-            }
-
-            _timer = new Timer(1000);
-            _timer.Elapsed += UpdateCountdown;
-            _timer.AutoReset = true;
-            _timer.Start();
-
-            return Task.CompletedTask;
-        }
-
-        private async void UpdateCountdown(object sender, ElapsedEventArgs e)
-        {
-            foreach (var table in tables)
-            {
-                var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
-                if (reservation != null && reservation.ReservationTime > DateTime.Now)
-                {
-                    var timeLeft = reservation.ReservationTime - DateTime.Now;
-                    bool checkTime = FormatTimeLeft(timeLeft) == "Đến giờ hẹn!";
-
-                    if(checkTime)
-                    {
-                       await ReceivedTableAsync(reservation);
-                    }
-                    else
-                    {
-                        timeLeftText[table.TableNumber] = FormatTimeLeft(timeLeft);
-                    }
-                }
-                else
-                {
-                    timeLeftText[table.TableNumber] = null;
-                }
-            }
-
-            if (++updateCounter % 5 == 0)
-            {
-                UpdateReservations();
-            }
-
-             _ = InvokeAsync(StateHasChanged);
-        }
-
-        private string FormatTimeLeft(TimeSpan timeLeft)
-        {
-            if (timeLeft.TotalSeconds <= 0)
-            {
-                return "Đến giờ hẹn!";
-            }
-
-            return $"Khách đến sau: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
         }
 
         private async Task GetLocalStorageAsync()
@@ -409,6 +346,47 @@ namespace DATN.Client.Pages.AdminManager
 
         }
 
+        private async void CalculatorAmount()
+        {
+            getTable = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
+            if (getTable == null || getTable.TableId <= 0)
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn"); return;
+            }
+
+            if (getTable.Status == "inusebooktable")
+            {
+
+                getReservation = await httpClient.GetFromJsonAsync<Reservation>($"api/Reservation/GetReservationByTimeTableId?tableId={getTable.TableId}");
+
+                if (getReservation == null || getReservation.ReservationId <= 0)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy đơn đặt bàn"); return;
+                }
+                getReservation.ReservationStatus = "Hoàn tất";
+                getReservation.UpdatedDate = DateTime.Now;
+
+                var resReser = await httpClient.PutAsJsonAsync($"api/Reservation/{getTable.TableId}", getTable);
+
+                if (!resReser.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật đơn đặt bàn"); return; }
+
+                order.TotalAmount = TotalAmount;
+
+            }
+            else
+            {
+                order.TotalAmount = TotalAmount;
+            }
+
+            getTable.Status = "empty";
+
+            var res = await httpClient.PutAsJsonAsync($"api/Table/{getTable.TableId}", getTable);
+
+            if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
+
+            order.TableId = getTable.TableId;
+        }
+
         private async void ProcessPayment()
         {
             if (string.IsNullOrEmpty(messagePay))
@@ -442,12 +420,14 @@ namespace DATN.Client.Pages.AdminManager
             if (order != null && order.OrderId > 0)
             {
                 order.Status = "Đã thanh toán";
-                order.EmployeeId = employee.EmployeeId;
                 order.TotalAmount = TotalAmount;
+                order.EmployeeId = employee.EmployeeId;
                 order.Note = _cartNote.Note;
+
 
                 if(customer != null && customer.CustomerId > 0)
                 {
+                    order.CustomerId = customer.CustomerId;
                     await SaveRewarPointes(order);
                 }
 
@@ -455,20 +435,6 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
 
-                var table = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
-
-                if (table != null && table.TableId > 0) {
-
-                    table.Status = "Trống";
-
-                    var res = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
-
-                    if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
-                }
-                else
-                {
-                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn"); return;
-                }
 
                 TotalAmount = 0;
                 IsUsing = false;
@@ -574,9 +540,9 @@ namespace DATN.Client.Pages.AdminManager
 
         }
 
-        private void CancelOrder()
+        private async void CancelOrder()
         {
-            
+            await JS.InvokeVoidAsync("showAlert","success","Thông báo","Hủy thành công");
         }
 
         private async Task ConfirmRequestAsync(int RequestId)
@@ -683,7 +649,6 @@ namespace DATN.Client.Pages.AdminManager
             }
             return $"{existingNote}; {newNote}";
         }
-
         #endregion
 
         #region VoiceCall
@@ -778,6 +743,82 @@ namespace DATN.Client.Pages.AdminManager
 
         #region BookTable
 
+        private Task SetupTimer()
+        {
+            foreach (var table in tables)
+            {
+                var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
+
+                if (reservation != null && reservation.ReservationTime > DateTime.Now)
+                {
+                    timeLeftText[table.TableNumber] = FormatTimeLeft(reservation.ReservationTime - DateTime.Now);
+                }
+                else
+                {
+                    timeLeftText[table.TableNumber] = null;
+                }
+            }
+
+            _timer = new Timer(1000);
+            _timer.Elapsed += UpdateCountdown;
+            _timer.AutoReset = true;
+            _timer.Start();
+
+            return Task.CompletedTask;
+        }
+
+        private  void UpdateCountdown(object sender, ElapsedEventArgs e)
+        {
+            foreach (var table in tables)
+            {
+                var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
+                if (reservation != null && reservation.ReservationTime > DateTime.Now)
+                {
+                    var timeLeft = reservation.ReservationTime - DateTime.Now;
+
+                    if (timeLeft.TotalSeconds <= 0)
+                    {
+                        _ = ReceivedTableAsync(reservation,table);
+                        StateHasChanged();
+                    }
+                    else if (timeLeft.TotalHours <= 2.5 && table.Status != "availableuntil")
+                    {
+                        table.Status = "availableuntil";
+
+                        _ = UpdateTableStatusAsync(table);
+
+                        timeLeftText[table.TableNumber] = FormatTimeLeft(timeLeft);
+                    }
+                    else
+                    {
+                        timeLeftText[table.TableNumber] = FormatTimeLeft(timeLeft);
+                    }
+                }
+                else
+                {
+                    timeLeftText[table.TableNumber] = null;
+                }
+            }
+
+            if (++updateCounter % 2 == 0)
+            {
+                UpdateReservations();
+            }
+
+            _ = InvokeAsync(StateHasChanged);
+        }
+
+        private string FormatTimeLeft(TimeSpan timeLeft)
+        {
+            if (timeLeft.TotalHours <= 2.5)
+            {
+                return $"Đến giờ giữ bàn: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
+            }
+
+            return $"Khách đến sau: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
+        }
+
+
         private async Task ProcessBookTable(int reservationId, bool isCancel)
         {
             try
@@ -818,6 +859,7 @@ namespace DATN.Client.Pages.AdminManager
             await Task.WhenAll(loadReservationsTask);
 
             reservations = loadReservationsTask.Result?.Where(a => !a.IsDeleted && a.ReservationStatus.Equals("Đang xử lý")).ToList() ?? new List<Reservation>();
+            reservationsProcess = loadReservationsTask.Result?.Where(a => !a.IsDeleted && a.ReservationStatus.Equals("Đặt bàn thành công")).ToList() ?? new List<Reservation>();
             StateHasChanged(); 
         }
 
@@ -868,12 +910,44 @@ namespace DATN.Client.Pages.AdminManager
                 return;
             }
 
+            var hasConflict = reservationsProcess.Any(r =>
+                r.TableId == reservationModel.TableId &&
+                !r.IsDeleted &&
+                r.ReservationTime.AddMinutes(-150) < reservationModel.ReservationTime && 
+                r.ReservationTime.AddMinutes(150) > reservationModel.ReservationTime); 
+
+            if (hasConflict)
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Bàn đã được đặt trong khoảng thời gian này. Vui lòng chọn bàn hoặc thời gian khác cách ít nhất 2 giờ 30 phút.");
+                return;
+            }
+
+            var tableBook = await httpClient.GetFromJsonAsync<Table>($"api/Table/{selectedTableId}");
+
+            if( tableBook != null && tableBook.TableId > 0)
+            {
+                tableBook.Status = "reserved";
+                var updateTableStatus = await httpClient.PutAsJsonAsync($"api/Table/{selectedTableId}", tableBook);
+
+                if(!updateTableStatus.IsSuccessStatusCode) 
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật trạng thái bàn thất bại.");
+                    return;
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn.");
+                return;
+            }
+
             var response =  await httpClient.PutAsJsonAsync($"api/Reservation/{reservationModel.ReservationId}", reservationModel);
 
             if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xác nhận đặt bàn"); return; }
 
             await JS.InvokeVoidAsync("closeModal", "bookTableModal");
             await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đã xác nhận đặt bàn.");
+            StateHasChanged();
         }
 
         private async void ConfirmCancelBookTable()
@@ -890,10 +964,31 @@ namespace DATN.Client.Pages.AdminManager
             Navigation.NavigateTo(Navigation.Uri, true);
         }
 
-        private async Task ReceivedTableAsync(Reservation reservation)
+        private async Task ReceivedTableAsync(Reservation reservation, Table table)
         {
             reservation.ReservationStatus = "Đã nhận bàn";
+            reservation.UpdatedDate = DateTime.Now;
+            table.Status = "inusebooktable";
             var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservation.ReservationId}", reservation);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật trạng thái thất bại");
+                return;
+            }
+            var resTable = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
+
+            if (!resTable.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật trạng thái thất bại");
+                return;
+            }
+        }
+
+        private async Task UpdateTableStatusAsync(Table table)
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
+
             if (!response.IsSuccessStatusCode)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật bàn thất bại");

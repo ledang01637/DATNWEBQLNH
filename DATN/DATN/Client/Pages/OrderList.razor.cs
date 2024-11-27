@@ -117,6 +117,7 @@ namespace DATN.Client.Pages
         #region Order
         private async Task Order()
         {
+            await JS.InvokeVoidAsync("closeModal", "ConfirmOrderModal");
             if (Carts != null && Carts.Count > 0)
             {
                 try
@@ -204,7 +205,7 @@ namespace DATN.Client.Pages
                             carts.Add(cartDto);
                         }
 
-                        table.Status = "Đang dùng";
+                        table.Status = "occupied";
 
                         var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
 

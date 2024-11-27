@@ -96,6 +96,7 @@ namespace DATN.Client.Pages
         private async void OnSubmitForm()
         {
             await JS.InvokeVoidAsync("closeModal", "ConformInfo");
+
             reservationModel.ReservationTime = new DateTime(
                     selectedDate.Year,
                     selectedDate.Month,
@@ -105,11 +106,32 @@ namespace DATN.Client.Pages
                     0
                 );
 
-            if (reservationModel.ReservationTime < DateTime.Now.AddHours(2))
+            if (reservationModel.ReservationTime < DateTime.Now)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải ít nhất sau 2 giờ kể từ hiện tại.");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải lớn hơn thời gian hiện tại.");
                 return;
             }
+
+            if (reservationModel.ReservationTime < DateTime.Now.AddHours(2).AddMinutes(30))
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải ít nhất sau 2 giờ 30 phút kể từ hiện tại.");
+                return;
+            }
+
+
+
+            var tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+
+            if(tables.Count > 0) 
+            {
+                var isHasTable = tables.Any(r => !r.IsDeleted && r.Status == "empty");
+                if (!isHasTable)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hiện đã hết bàn trống vui lòng quay lại sau");
+                    return;
+                }
+            }
+            
 
             await JS.InvokeVoidAsync("showModal", "ConformInfo");
             await CatulatorDepositPaymentAsync();

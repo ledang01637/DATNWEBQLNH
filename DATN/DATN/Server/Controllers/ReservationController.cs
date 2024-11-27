@@ -24,6 +24,25 @@ namespace DATN.Server.Controllers
             return _ReservationService.GetReservation();
         }
 
+        [HttpGet("GetReservationByTimeTableId")]
+        public ActionResult<Reservation> GetReservationByTimeTableId(int tableId)
+        {
+            if(tableId <= 0)
+            {
+                return BadRequest();
+            }
+            return Ok(_ReservationService.GetReservationByTimeTableId(tableId));
+        }
+
+        [HttpGet("GetReservationByTableId")]
+
+        public ActionResult<List<Reservation>> GetReservationByTableId([FromQuery] int tableId)
+        {
+            if(tableId <= 0) { return BadRequest(); }
+
+            return Ok(_ReservationService.GetReservationByTableId(tableId));
+        }
+
         [HttpGet("GetReservationInclude")]
         public ActionResult<List<Reservation>> GetReservationInclude()
         {
