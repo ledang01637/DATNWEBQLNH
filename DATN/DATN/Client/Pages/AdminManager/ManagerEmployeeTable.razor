@@ -804,14 +804,14 @@ else
                                 {
                                     @if (getReservation != null && getReservation.ReservationId > 0)
                                     {
-                                        totalPayable = TotalAmount + totalTax + serviceFee - getReservation.DepositPayment;
+                                        TotalAmount = totalPayable = (TotalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
                                         <span>Tiền đặt cọc: @getReservation.DepositPayment.ToString("N0") VND</span>                        <br />
                                         <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
                                     }
                                 }
                                 else
                                 {
-                                    totalPayable = TotalAmount + totalTax + serviceFee;
+                                    TotalAmount = totalPayable = TotalAmount + totalTax + serviceFee;
                                     <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
                                 }
                             }

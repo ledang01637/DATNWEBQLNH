@@ -366,7 +366,7 @@ namespace DATN.Client.Pages.AdminManager
                 getReservation.ReservationStatus = "Hoàn tất";
                 getReservation.UpdatedDate = DateTime.Now;
 
-                var resReser = await httpClient.PutAsJsonAsync($"api/Reservation/{getTable.TableId}", getTable);
+                var resReser = await httpClient.PutAsJsonAsync($"api/Reservation/{getReservation.ReservationId}", getReservation);
 
                 if (!resReser.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật đơn đặt bàn"); return; }
 
@@ -377,12 +377,6 @@ namespace DATN.Client.Pages.AdminManager
             {
                 order.TotalAmount = TotalAmount;
             }
-
-            getTable.Status = "empty";
-
-            var res = await httpClient.PutAsJsonAsync($"api/Table/{getTable.TableId}", getTable);
-
-            if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
 
             order.TableId = getTable.TableId;
         }
@@ -434,6 +428,12 @@ namespace DATN.Client.Pages.AdminManager
                 var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 
                 if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
+
+                getTable.Status = "empty";
+
+                var res = await httpClient.PutAsJsonAsync($"api/Table/{getTable.TableId}", getTable);
+
+                if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
 
 
                 TotalAmount = 0;
@@ -760,26 +760,31 @@ namespace DATN.Client.Pages.AdminManager
             }
 
             _timer = new Timer(1000);
-            _timer.Elapsed += UpdateCountdown;
+            _timer.Elapsed += UpdateCountdownAsync;
             _timer.AutoReset = true;
             _timer.Start();
 
             return Task.CompletedTask;
         }
 
-        private  void UpdateCountdown(object sender, ElapsedEventArgs e)
+        private async void UpdateCountdownAsync(object sender, ElapsedEventArgs e)
         {
             foreach (var table in tables)
             {
                 var reservation = reservationsProcess.FirstOrDefault(r => r.TableId == table.TableId);
-                if (reservation != null && reservation.ReservationTime > DateTime.Now)
+
+                if (reservation != null)
                 {
                     var timeLeft = reservation.ReservationTime - DateTime.Now;
 
-                    if (timeLeft.TotalSeconds <= 0)
+                    if (timeLeft.TotalSeconds <= 0 && table.Status != "inusebooktable")
                     {
-                        _ = ReceivedTableAsync(reservation,table);
-                        StateHasChanged();
+                        Console.WriteLine($"timeLeft.TotalSeconds: {timeLeft.TotalSeconds}, table.Status: {table.Status}");
+                        table.Status = "inusebooktable";
+
+                        reservation.ReservationStatus = "Đã nhận bàn";
+
+                        await ReceivedTableAsync(reservation, table);
                     }
                     else if (timeLeft.TotalHours <= 2.5 && table.Status != "availableuntil")
                     {
@@ -812,10 +817,10 @@ namespace DATN.Client.Pages.AdminManager
         {
             if (timeLeft.TotalHours <= 2.5)
             {
-                return $"Đến giờ giữ bàn: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
+                return $"Khách đến sau: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
             }
 
-            return $"Khách đến sau: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
+            return $"Bàn sẽ khóa sau: {timeLeft.Hours}h {timeLeft.Minutes}m {timeLeft.Seconds}s";
         }
 
 
@@ -966,9 +971,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task ReceivedTableAsync(Reservation reservation, Table table)
         {
-            reservation.ReservationStatus = "Đã nhận bàn";
             reservation.UpdatedDate = DateTime.Now;
-            table.Status = "inusebooktable";
             var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservation.ReservationId}", reservation);
 
             if (!response.IsSuccessStatusCode)

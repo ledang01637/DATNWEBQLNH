@@ -25,7 +25,7 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("GetReservationByTimeTableId")]
-        public ActionResult<Reservation> GetReservationByTimeTableId(int tableId)
+        public ActionResult<Reservation> GetReservationByTimeTableId([FromQuery] int tableId)
         {
             if(tableId <= 0)
             {

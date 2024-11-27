@@ -204,8 +204,10 @@ namespace DATN.Client.Pages
                             };
                             carts.Add(cartDto);
                         }
-
-                        table.Status = "occupied";
+                        if(table.Status != "inusebooktable")
+                        {
+                            table.Status = "occupied";
+                        }
 
                         var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
 
