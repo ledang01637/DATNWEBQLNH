@@ -26,7 +26,7 @@ namespace DATN.Server.Controllers
             _CustomerService = customerService;
         }
         [HttpPost("SendOtp")]
-        public IActionResult SendOtp([FromBody] EmailRequest request)
+        public IActionResult SendOtp([FromBody] EmailRequestForgetPass request)
         {
             try
             {

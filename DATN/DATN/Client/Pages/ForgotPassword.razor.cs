@@ -7,7 +7,7 @@ namespace DATN.Client.Pages
 {
     public partial class ForgotPassword
     {
-        private EmailRequest emailRequest = new EmailRequest();
+        private EmailRequestForgetPass emailRequest = new();
         private string errorMessage;
 
         private async Task SendOtp()
