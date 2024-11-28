@@ -5,6 +5,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
@@ -25,7 +27,7 @@
                         <div class="row text-black m-auto">
                             <div class="form-group col-md-6 mb-3">
                                 <label for="AccountType" class="control-label"><strong>AccountType</strong></label>
-                                <input id="AccountType" @bind="account.AccountType" class="form-control" placeholder="AccountType" />
+                                <input id="AccountType" @bind="account.AccountType" class="form-control" placeholder="AccountType" required />
                                 <ValidationMessage For="@(() => account.AccountType)" />
                             </div>
 
@@ -109,6 +111,7 @@
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
+                StateHasChanged();
 
             }
             else
@@ -122,11 +125,6 @@
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
         }
-
-        StateHasChanged();
-
-        // Navigation.NavigateTo("/createcustomer");
-        // Navigation.NavigateTo("/createcustomer");
 
     }
 

@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="row justify-content-center mt-3 p-5">
     <div class="col-md-6">
@@ -21,38 +23,38 @@
 
                         <div class="form-group">
                             <label for="CustomerName" class="control-label"><strong>CustomerName</strong></label>
-                            <input id="CustomerName" @bind="customer.CustomerName" class="form-control" placeholder="CustomerName" />
+                            <input id="CustomerName" @bind="customer.CustomerName" class="form-control" placeholder="CustomerName" required/>
                             <ValidationMessage For="@(() => customer.CustomerName)" />
                         </div>
 
                         <div class="form-group">
                             <label for="PhoneNumber" class="control-label"><strong>PhoneNumber</strong></label>
-                            <input type="number" id="PhoneNumber" @bind="customer.PhoneNumber" class="form-control" placeholder="PhoneNumber" />
+                            <input type="number" id="PhoneNumber" @bind="customer.PhoneNumber" class="form-control" placeholder="PhoneNumber" required />
                             <ValidationMessage For="@(() => customer.PhoneNumber)" />
                         </div>
 
                         <div class="form-group">
                             <label for="Address" class="control-label"><strong>Address</strong></label>
-                            <input id="Address" @bind="customer.Address" class="form-control" placeholder="Address" />
+                            <input id="Address" @bind="customer.Address" class="form-control" placeholder="Address" required />
                             <ValidationMessage For="@(() => customer.Address)" />
                         </div>
 
                         <div class="form-group">
                             <label for="Email" class="control-label"><strong>Email</strong></label>
-                            <input type="email" id="Email" @bind="customer.Email" class="form-control" placeholder="Email" />
+                            <input type="email" id="Email" @bind="customer.Email" class="form-control" placeholder="Email" required />
                             <ValidationMessage For="@(() => customer.Email)" />
                         </div>
 
 
                         <div class="form-group">
                             <label for="AccountId" class="control-label"><strong>AccountId</strong></label>
-                            <input id="AccountId" @bind="customer.AccountId" class="form-control" placeholder="AccountId" />
+                            <input id="AccountId" @bind="customer.AccountId" class="form-control" placeholder="AccountId" required />
                             <ValidationMessage For="@(() => customer.AccountId)" />
                         </div>
 
                         <div class="form-group">
                             <label for="TotalRewardPoint" class="control-label"><strong>TotalRewardPoint</strong></label>
-                            <input id="TotalRewardPoint" @bind="customer.TotalRewardPoint" class="form-control" placeholder="TotalRewardPoint" />
+                            <input id="TotalRewardPoint" @bind="customer.TotalRewardPoint" class="form-control" placeholder="TotalRewardPoint" required />
                             <ValidationMessage For="@(() => customer.TotalRewardPoint)" />
                         </div>
 
@@ -109,12 +111,14 @@
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
 
             }
             else
             {
                 var errorContent = await responseCustomer.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)

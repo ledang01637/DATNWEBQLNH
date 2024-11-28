@@ -1,4 +1,4 @@
-﻿@page "/editcategory/{CategoryId:int}"
+﻿@page "/createfloor"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -10,30 +10,24 @@
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Edit Category</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Add Floor</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@cate" OnValidSubmit="EditCate">
+                    <EditForm Model="@floor" OnValidSubmit="CreateFloor">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="CategoryName" class="control-label"><strong>CategoryName</strong></label>
-                            <input id="CategoryName" @bind="cate.CategoryName" class="form-control" placeholder="CategoryName" required />
-                            <ValidationMessage For="@(() => cate.CategoryName)" />
-                        </div>
-
-                        <div class="form-group col-md-12 mb-3">
-                            <label for="CategoryDescription" class="control-label"><strong>CategoryDescription</strong></label>
-                            <input id="CategoryDescription" @bind="cate.CategoryDescription" class="form-control" placeholder="CategoryDescription" required />
-                            <ValidationMessage For="@(() => cate.CategoryDescription)" />
+                            <label for="NumberFloor" class="control-label"><strong>NumberFloor</strong></label>
+                            <input id="NumberFloor" @bind="floor.NumberFloor" class="form-control" placeholder="NumberFloor" required/>
+                            <ValidationMessage For="@(() => floor.NumberFloor)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
-                            <button type="submit" class="btn btn-danger mx-2">Edit</button>
-                            <a href="/admincategory" class="btn btn-secondary mx-2">Back</a>
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminunit" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
 
@@ -59,66 +53,46 @@
     </div>
 </div>
 
-
 @code {
-    [Parameter] public int CategoryId { get; set; }
-
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Category cate = new DATN.Shared.Category();
+    private DATN.Shared.Floor floor = new DATN.Shared.Floor();
+    private IBrowserFile selectedFile;
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadEditCategory();
         isLoaded = true;
     }
 
-    private async Task LoadEditCategory()
+    private async Task CreateFloor()
     {
         try
         {
-            var response = await httpClient.GetFromJsonAsync<Category>($"api/Category/GetCategoryById/{CategoryId}");
-            if (response != null)
-            {
-                cate = response;
-            }
-            else
-            {
-                errorMessage = "Không tìm thấy danh mục.";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
-        }
-    }
-
-    private async Task EditCate()
-    {
-        try
-        {
-            var response = await httpClient.PutAsJsonAsync($"api/Category/EditCategory/{CategoryId}", cate);
+            var response = await httpClient.PostAsJsonAsync("api/Floor/AddFloor", floor);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Cập nhật thành công!";
+                successMessage = "Success";
                 errorMessage = string.Empty;
+                Navigation.NavigateTo("/adminunit");
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/admincategory");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Lỗi khi cập nhật danh mục: {errorContent}";
+                errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();
     }
+
 }

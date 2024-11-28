@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="row justify-content-center mt-3 p-5">
     <div class="col-md-6">
@@ -21,25 +23,25 @@
 
                         <div class="form-group">
                             <label for="VoucherCode" class="control-label"><strong>Voucher Code</strong></label>
-                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" />
+                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" required />
                             <ValidationMessage For="@(() => voucher.VoucherCode)" />
                         </div>
 
                         <div class="form-group">
                             <label for="PointRequired" class="control-label"><strong>PointRequired</strong></label>
-                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" />
+                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" required />
                             <ValidationMessage For="@(() => voucher.PointRequired)" />
                         </div>
 
                         <div class="form-group">
                             <label for="DiscountValue" class="control-label"><strong>DiscountValue</strong></label>
-                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" />
+                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" required />
                             <ValidationMessage For="@(() => voucher.DiscountValue)" />
                         </div>
 
                         <div class="form-group">
                             <label for="ExpriationDate" class="control-label"><strong>PointRequired</strong></label>
-                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" />
+                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" required />
                             <ValidationMessage For="@(() => voucher.ExpriationDate)" />
                         </div>
 
@@ -94,18 +96,21 @@
             {
                 successMessage = "Success";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminvoucher");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

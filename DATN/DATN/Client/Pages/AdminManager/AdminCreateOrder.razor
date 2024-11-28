@@ -1,0 +1,288 @@
+﻿@page "/createorder"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-12 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add Order</h5>
+            </div>
+            <div class="card-body col-md-12 m-auto">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@order" OnValidSubmit="CreateOrder">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="col-md-12 row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="TableId" class="control-label"><strong>TableId</strong></label>
+                                <select id="TableId" @bind="order.TableId" class="form-control">
+                                    <option value="">Chọn tables</option>
+                                    @if (tables != null && tables.Any())
+                                    {
+                                        @foreach (var table in tables)
+                                        {
+                                            <option value="@table.TableId">@table.TableNumber</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => order.TableId)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="EmployeeId" class="control-label"><strong>EmployeeId</strong></label>
+                                <select id="EmployeeId" @bind="order.EmployeeId" class="form-control">
+                                    <option value="">Chọn tables</option>
+                                    @if (employees != null && employees.Any())
+                                    {
+                                        @foreach (var employee in employees)
+                                        {
+                                            <option value="@employee.EmployeeId">@employee.EmployeeName</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => order.EmployeeId)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="CreateDate" class="control-label"><strong>CreateDate</strong></label>
+                                <input type="date" id="CreateDate" @bind="order.CreateDate" class="form-control" placeholder="CreateDate" required/>
+                                <ValidationMessage For="@(() => order.CreateDate)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="TotalAmount" class="control-label"><strong>TotalAmount</strong></label>
+                                <input type="number" id="TotalAmount" @bind="order.TotalAmount" class="form-control" placeholder="TotalAmount" required />
+                                <ValidationMessage For="@(() => order.TotalAmount)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="Status" class="control-label"><strong>Status</strong></label>
+                                <select id="Status" @bind="order.Status" class="form-control">
+                                    <option value="">--Status--</option>
+                                    <option value="Đã Thanh Toán">Đã Thanh Toán</option>
+                                    <option value="Chưa Thanh Toán">Chưa Thanh Toán</option>
+                                </select>
+                                <ValidationMessage For="@(() => order.Status)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="CustomerId" class="control-label"><strong>CustomerId</strong></label>
+                                <select id="CustomerId" @bind="order.CustomerId" class="form-control">
+                                    <option value="">Chọn tables</option>
+                                    @if (customers != null && customers.Any())
+                                    {
+                                        @foreach (var customer in customers)
+                                        {
+                                            <option value="@customer.CustomerId">@customer.CustomerName</option>
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => order.CustomerId)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="PaymentMethod" class="control-label"><strong>PaymentMethod</strong></label>
+                                <select id="PaymentMethod" @bind="order.PaymentMethod" class="form-control">
+                                    <option value="">--PaymentMethod--</option>
+                                    <option value="True">True</option>
+                                    <option value="False">False</option>
+                                </select>
+                                <ValidationMessage For="@(() => order.PaymentMethod)" />
+                            </div>
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="Note" class="control-label"><strong>Note</strong></label>
+                                <input id="Note" @bind="order.Note" class="form-control" placeholder="Note" required />
+                                <ValidationMessage For="@(() => order.Note)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 row">
+
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="CustomerVoucherId" class="control-label"><strong>CustomerVoucherId</strong></label>
+                                <input id="CustomerVoucherId" @bind="order.CustomerVoucherId" class="form-control" placeholder="CustomerVoucherId" />
+                                <ValidationMessage For="@(() => order.CustomerVoucherId)" />
+                            </div>
+@*                             <div class="form-group col-md-6 mb-3">
+                                <label for="CustomerVoucherId" class="control-label"><strong>CustomerVoucherId</strong></label>
+                                <select id="CustomerVoucherId" @bind="order.CustomerVoucherId" class="form-control">
+                                    <option value="">Chọn CustomerVoucherId</option>
+                                    @if (customervouchers != null && customervouchers.Any())
+                                    {
+                                        @foreach (var customervoucher in customervouchers)
+                                        {
+                                            if (customervoucher != null)
+                                            {
+                                                var connect = customers.FirstOrDefault(e => e.CustomerId == customervoucher.CustomerId);
+                                                if (connect != null)
+                                                {
+                                                    <option value="@customervoucher.CustomerVoucherId">@connect.CustomerName</option>
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => order.CustomerVoucherId)" />
+                            </div> *@
+                        </div>
+
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
+                            <a href="/adminorder" class="btn btn-secondary mx-2">Back</a>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Order order = new DATN.Shared.Order();
+    private List<Table> tables = new List<Table>();
+    private List<Employee> employees = new List<Employee>();
+    private List<Customer> customers = new List<Customer>();
+    private List<CustomerVoucher> customervouchers = new List<CustomerVoucher>();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTable();
+        await LoadEmployee();
+        await LoadCustomer();
+        await LoadCustomerVoucher();
+        isLoaded = true;
+    }
+
+    private async Task LoadTable()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
+
+            if (response != null)
+            {
+                tables = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
+    }
+    private async Task LoadEmployee()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Employee>>("api/Employee/GetEmployee");
+
+            if (response != null)
+            {
+                employees = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
+    }
+    private async Task LoadCustomer()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Customer>>("api/Customer/GetCustomer");
+
+            if (response != null)
+            {
+                customers = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
+    }
+    private async Task LoadCustomerVoucher()
+    {
+        try
+        {
+            
+            var response = await httpClient.GetFromJsonAsync<List<CustomerVoucher>>("api/CustomerVoucher/GetCustomerVoucher");
+
+            if (response != null)
+            {
+                customervouchers = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
+    }
+
+    private async Task CreateOrder()
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/Order/AddOrder", order);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Success";
+                errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
+                Navigation.NavigateTo("/adminorder");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi Order: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+        }
+
+        StateHasChanged();
+    }
+
+}

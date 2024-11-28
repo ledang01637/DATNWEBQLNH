@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="row justify-content-center mt-3 p-5">
     <div class="col-md-6">
@@ -21,44 +23,44 @@
 
                         <div class="form-group">
                             <label for="EmployeeName" class="control-label"><strong>EmployeeName</strong></label>
-                            <input id="EmployeeName" @bind="employee.EmployeeName" class="form-control" placeholder="EmployeeName" />
+                            <input id="EmployeeName" @bind="employee.EmployeeName" class="form-control" placeholder="EmployeeName" required />
                             <ValidationMessage For="@(() => employee.EmployeeName)" />
                         </div>
 
                         <div class="form-group">
                             <label for="Address" class="control-label"><strong>Address</strong></label>
-                            <input id="Address" @bind="employee.Address" class="form-control" placeholder="Address" />
+                            <input id="Address" @bind="employee.Address" class="form-control" placeholder="Address" required />
                             <ValidationMessage For="@(() => employee.Address)" />
                         </div>
 
                         <div class="form-group">
                             <label for="PhoneNumber" class="control-label"><strong>PhoneNumber</strong></label>
-                            <input type="number" id="PhoneNumber" @bind="employee.PhoneNumber" class="form-control" placeholder="PhoneNumber" />
+                            <input type="number" id="PhoneNumber" @bind="employee.PhoneNumber" class="form-control" placeholder="PhoneNumber" required />
                             <ValidationMessage For="@(() => employee.PhoneNumber)" />
                         </div>
 
                         <div class="form-group">
                             <label for="Email" class="control-label"><strong>Email</strong></label>
-                            <input type="email" id="Email" @bind="employee.Email" class="form-control" placeholder="Email" />
+                            <input type="email" id="Email" @bind="employee.Email" class="form-control" placeholder="Email" required />
                             <ValidationMessage For="@(() => employee.Email)" />
                         </div>
 
 
                         <div class="form-group">
                             <label for="Position" class="control-label"><strong>Position</strong></label>
-                            <input id="Position" @bind="employee.Position" class="form-control" placeholder="Position" />
+                            <input id="Position" @bind="employee.Position" class="form-control" placeholder="Position" required />
                             <ValidationMessage For="@(() => employee.Position)" />
                         </div>
 
                         <div class="form-group">
                             <label for="HireDate" class="control-label"><strong>HireDate</strong></label>
-                            <input type="date" id="HireDate" @bind="employee.HireDate" class="form-control" placeholder="HireDate" />
+                            <input type="date" id="HireDate" @bind="employee.HireDate" class="form-control" placeholder="HireDate" required />
                             <ValidationMessage For="@(() => employee.HireDate)" />
                         </div>
 
                         <div class="form-group">
                             <label for="TotalRewardPoint" class="control-label"><strong>Salary</strong></label>
-                            <input type="number" id="TotalRewardPoint" @bind="employee.Salary" class="form-control" placeholder="Salary" />
+                            <input type="number" id="TotalRewardPoint" @bind="employee.Salary" class="form-control" placeholder="Salary" required />
                             <ValidationMessage For="@(() => employee.Salary)" />
                         </div>
 
@@ -117,11 +119,13 @@
             else
             {
                 errorMessage = "Không tìm thấy danh mục.";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
     }
 
@@ -135,6 +139,7 @@
             {
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminemployee");
             }
             else

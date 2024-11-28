@@ -1,5 +1,5 @@
 
-@page "/editunit/{UnitId:int}"
+@page "/editvoucher/{VoucherId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -16,24 +16,38 @@
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
-                    <EditForm Model="@unit" OnValidSubmit="EditUnit">
+                    <EditForm Model="@voucher" OnValidSubmit="EditVoucher" Context="editFormContext">
                         <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <div class="form-group col-md-12 mb-3">
-                            <label for="UnitName" class="control-label"><strong>UnitName</strong></label>
-                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" required />
-                            <ValidationMessage For="@(() => unit.UnitName)" />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="UnitDescription" class="control-label"><strong>UnitDescription</strong></label>
-                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" required />
-                            <ValidationMessage For="@(() => unit.UnitDescription)" />
+                            <label for="VoucherCode" class="control-label"><strong>Voucher Code</strong></label>
+                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" required />
+                            <ValidationMessage For="@(() => voucher.VoucherCode)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="PointRequired" class="control-label"><strong>PointRequired</strong></label>
+                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" required />
+                            <ValidationMessage For="@(() => voucher.PointRequired)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="DiscountValue" class="control-label"><strong>DiscountValue</strong></label>
+                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" required />
+                            <ValidationMessage For="@(() => voucher.DiscountValue)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ExpriationDate" class="control-label"><strong>PointRequired</strong></label>
+                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" required />
+                            <ValidationMessage For="@(() => voucher.ExpriationDate)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
-                            <button type="submit" class="btn btn-danger mx-2">Edit</button>
+                            <button type="submit" class="btn btn-danger mx-2">Add</button>
                             <a href="/adminunit" class="btn btn-secondary mx-2">Back</a>
                         </div>
                     </EditForm>
@@ -61,27 +75,27 @@
 </div>
 
 @code {
-    [Parameter] public int UnitId { get; set; }
+    [Parameter] public int VoucherId { get; set; }
 
     private string errorMessage;
     private string successMessage;
-    private DATN.Shared.Unit unit = new DATN.Shared.Unit();
+    private DATN.Shared.Voucher voucher = new DATN.Shared.Voucher();
     private bool isLoaded = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadEditUnit();
+        await LoadEditVoucher();
         isLoaded = true;
     }
 
-    private async Task LoadEditUnit()
+    private async Task LoadEditVoucher()
     {
         try
         {
-            var response = await httpClient.GetFromJsonAsync<Unit>($"api/Unit/{UnitId}");
+            var response = await httpClient.GetFromJsonAsync<Voucher>($"api/Voucher/{VoucherId}");
             if (response != null)
             {
-                unit = response;
+                voucher = response;
             }
             else
             {
@@ -94,18 +108,18 @@
         }
     }
 
-    private async Task EditUnit()
+    private async Task EditVoucher()
     {
         try
         {
-            var response = await httpClient.PutAsJsonAsync($"api/Unit/{UnitId}", unit);
+            var response = await httpClient.PutAsJsonAsync($"api/Voucher/{VoucherId}", voucher);
 
             if (response.IsSuccessStatusCode)
             {
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminunit");
+                Navigation.NavigateTo("/adminvoucher");
             }
             else
             {

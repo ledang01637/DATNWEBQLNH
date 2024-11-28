@@ -3,12 +3,14 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">Thêm DANH MỤC</h5>
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Add EmployeeShifte</h5>
             </div>
             <div class="card-body">
                 @if (isLoaded)
@@ -21,7 +23,7 @@
 
                         <div class="form-group">
                             <label for="ShifteDay" class="control-label"><strong>ShifteDay</strong></label>
-                            <input type="date" id="ShifteDay" @bind="employeeshifte.ShifteDay" class="form-control" placeholder="ShifteDay" />
+                            <input type="date" id="ShifteDay" @bind="employeeshifte.ShifteDay" class="form-control" placeholder="ShifteDay" required/>
                             <ValidationMessage For="@(() => employeeshifte.ShifteDay)" />
                         </div>
 
@@ -92,20 +94,22 @@
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/adminemployee");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"error: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
-
+        Navigation.NavigateTo("/adminshifte");
         StateHasChanged();
 
 
