@@ -37,7 +37,7 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
-        private async Task HideProd(int categoryId)
+        private async Task HideCategory(int categoryId)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
 
-        private async Task RestoreProd(int categoryId)
+        private async Task RestoreCategory(int categoryId)
         {
             try
             {

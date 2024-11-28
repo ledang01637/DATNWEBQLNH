@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
@@ -124,18 +126,21 @@
             {
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminaccount");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi cập nhật account: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

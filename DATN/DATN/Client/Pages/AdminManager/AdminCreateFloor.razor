@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
@@ -19,7 +21,7 @@
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="NumberFloor" class="control-label"><strong>NumberFloor</strong></label>
-                            <input id="NumberFloor" @bind="floor.NumberFloor" class="form-control" placeholder="NumberFloor" />
+                            <input id="NumberFloor" @bind="floor.NumberFloor" class="form-control" placeholder="NumberFloor" required/>
                             <ValidationMessage For="@(() => floor.NumberFloor)" />
                         </div>
 
@@ -74,17 +76,20 @@
                 successMessage = "Success";
                 errorMessage = string.Empty;
                 Navigation.NavigateTo("/adminunit");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

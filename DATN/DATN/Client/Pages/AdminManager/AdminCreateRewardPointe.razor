@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="row justify-content-center mt-3 p-5">
     <div class="col-md-6">
@@ -21,25 +23,25 @@
 
                         <div class="form-group">
                         <label for="CustomerId" class="control-label"><strong>CustomerId</strong></label>
-                        <input id="CustomerId" @bind="rewardpointe.CustomerId" class="form-control" placeholder="CustomerId" />
+                            <input id="CustomerId" @bind="rewardpointe.CustomerId" class="form-control" placeholder="CustomerId" required />
                         <ValidationMessage For="@(() => rewardpointe.CustomerId)" />
                         </div>
 
                         <div class="form-group">
                         <label for="RewardPoint" class="control-label"><strong>RewardPoints</strong></label>
-                        <input type="number" id="RewardPoint" @bind="rewardpointe.RewardPoint" class="form-control" placeholder="RewardPoints" />
+                            <input type="number" id="RewardPoint" @bind="rewardpointe.RewardPoint" class="form-control" placeholder="RewardPoints" required />
                         <ValidationMessage For="@(() => rewardpointe.RewardPoint)" />
                         </div>
 
                         <div class="form-group">
                         <label for="UpdateDate" class="control-label"><strong>UpdateDate</strong></label>
-                        <input type="date" id="UpdateDate" @bind="rewardpointe.UpdateDate" class="form-control" placeholder="UpdateDate" />
+                            <input type="date" id="UpdateDate" @bind="rewardpointe.UpdateDate" class="form-control" placeholder="UpdateDate" required />
                         <ValidationMessage For="@(() => rewardpointe.UpdateDate)" />
                         </div>
 
                         <div class="form-group">
                         <label for="OrderId" class="control-label"><strong>OrderId</strong></label>
-                        <input id="OrderId" @bind="rewardpointe.OrderId" class="form-control" placeholder="OrderId" />
+                            <input id="OrderId" @bind="rewardpointe.OrderId" class="form-control" placeholder="OrderId" required />
                         <ValidationMessage For="@(() => rewardpointe.OrderId)" />
                         </div>
 
@@ -93,18 +95,21 @@
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminaccount");
             }
             else
             {
                 var errorContent = await responseRewardPointe.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

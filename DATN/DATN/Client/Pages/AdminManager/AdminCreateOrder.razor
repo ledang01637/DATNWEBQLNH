@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-12 m-auto">
@@ -52,13 +54,13 @@
                         <div class="col-md-12 row">
                             <div class="form-group col-md-6 mb-3">
                                 <label for="CreateDate" class="control-label"><strong>CreateDate</strong></label>
-                                <input type="date" id="CreateDate" @bind="order.CreateDate" class="form-control" placeholder="CreateDate" />
+                                <input type="date" id="CreateDate" @bind="order.CreateDate" class="form-control" placeholder="CreateDate" required/>
                                 <ValidationMessage For="@(() => order.CreateDate)" />
                             </div>
 
                             <div class="form-group col-md-6 mb-3">
                                 <label for="TotalAmount" class="control-label"><strong>TotalAmount</strong></label>
-                                <input type="number" id="TotalAmount" @bind="order.TotalAmount" class="form-control" placeholder="TotalAmount" />
+                                <input type="number" id="TotalAmount" @bind="order.TotalAmount" class="form-control" placeholder="TotalAmount" required />
                                 <ValidationMessage For="@(() => order.TotalAmount)" />
                             </div>
                         </div>
@@ -103,7 +105,7 @@
 
                             <div class="form-group col-md-6 mb-3">
                                 <label for="Note" class="control-label"><strong>Note</strong></label>
-                                <input id="Note" @bind="order.Note" class="form-control" placeholder="Note" />
+                                <input id="Note" @bind="order.Note" class="form-control" placeholder="Note" required />
                                 <ValidationMessage For="@(() => order.Note)" />
                             </div>
                         </div>
@@ -263,18 +265,21 @@
             {
                 successMessage = "Success";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminorder");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi Order: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

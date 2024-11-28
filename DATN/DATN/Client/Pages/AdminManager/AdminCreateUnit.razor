@@ -3,6 +3,8 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
@@ -19,13 +21,13 @@
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="UnitName" class="control-label"><strong>UnitName</strong></label>
-                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" />
+                            <input id="UnitName" @bind="unit.UnitName" class="form-control" placeholder="UnitName" required />
                             <ValidationMessage For="@(() => unit.UnitName)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="UnitDescription" class="control-label"><strong>UnitDescription</strong></label>
-                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" />
+                            <input id="UnitDescription" @bind="unit.UnitDescription" class="form-control" placeholder="UnitDescription" required />
                             <ValidationMessage For="@(() => unit.UnitDescription)" />
                         </div>
 
@@ -79,18 +81,21 @@
             {
                 successMessage = "Success";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminunit");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();
