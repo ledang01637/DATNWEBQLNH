@@ -242,6 +242,23 @@
         color: #28a745 !important;
     }
 
+    .marker-reserved {
+        width: 15px;
+        height: 15px;
+        background-color: #FFD700;
+        border-radius: 50%;
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .marker-reserved i {
+            font-size: 10px;
+            color: #FFFFFF;
+        }
+
+
 </style>
 
 @if (isCheckBookTable)
@@ -330,7 +347,7 @@ else
 
                             <div id="sortable-floor1">
                                 <div class="mt-2">
-                                    <div class="card table-card" style="background-color: @(tableColor)"
+                                    <div class="card table-card" style="background-color: @(table.Status == "availableuntil" ? "#FF5B5B" : tableColor)"
                                          @onclick="() => ShowModalForTable(table.TableNumber)" data-bs-toggle="modal" data-bs-target="#tableModal">
                                         <div class="card-body text-center position-relative">
                                             <img src="/Image/dinner-table.png" style="height: 50px" alt="Table Image">
@@ -341,6 +358,12 @@ else
                                             {
                                                 <div class="position-absolute bottom-0 start-0 m-1 text-white small countdown-timer">
                                                     @timeLeftText[table.TableNumber]
+                                                </div>
+                                            }
+                                            @if (table.Status == "inusebooktable")
+                                            {
+                                                <div class="position-absolute bottom-0 end-0 marker-reserved">
+                                                    <i class="fas fa-bookmark text-danger"></i>
                                                 </div>
                                             }
                                         </div>
@@ -456,6 +479,7 @@ else
                     </tbody>
                 </table>
             }
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#CheckColorModal">Chú thích</button>
         </div>
 
 
@@ -688,6 +712,75 @@ else
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="CheckColorModal" tabindex="-1" aria-labelledby="CheckColorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kiểm tra màu của bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>Mã màu</th>
+                            <th>Màu sắc</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#32CD32</td>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #32CD32; margin: 0 auto;"></div>
+                            </td>
+                            <td>Bàn trống</td>
+                        </tr>
+                        <tr>
+                            <td>#ADD8E6</td>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #ADD8E6; margin: 0 auto;"></div>
+                            </td>
+                            <td>Yêu cầu đặt món</td>
+                        </tr>
+                        <tr>
+                            <td>#FFD700</td>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FFD700; margin: 0 auto;"></div>
+                            </td>
+                            <td>Yêu cầu thanh toán</td>
+                        </tr>
+                        <tr>
+                            <td>#FFA500</td>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FFA500; margin: 0 auto;"></div>
+                            </td>
+                            <td>Đang sử dụng</td>
+                        </tr>
+                        <tr>
+                            <td>#FF5B5B</td>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FF5B5B; margin: 0 auto;"></div>
+                            </td>
+                            <td>Bàn đang chờ khách đến</td>
+                        </tr>
+                        <tr>
+                            <td>#FFD700 <br /> #DC3545</td>
+                            <td class="position-relative">
+                                <div class="marker-reserved position-absolute top-50 start-50 translate-middle" style="width: 30px; height: 30px">
+                                    <i class="fas fa-bookmark text-danger fs-6"></i>
+                                </div>
+                            </td>
+                            <td>Đánh dấu bàn sử dụng có đặt trước</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">

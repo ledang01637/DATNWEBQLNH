@@ -63,6 +63,7 @@ namespace DATN.Client.Pages.AdminManager
         private Timer _timer;
         private Dictionary<int, string> timeLeftText = new();
         private int updateCounter = 0;
+        private string availableUntil;
 
         protected override async Task OnInitializedAsync()
         {
@@ -586,6 +587,7 @@ namespace DATN.Client.Pages.AdminManager
                 else if (!string.IsNullOrEmpty(numberTable))
                 {
                     color.Color = "#ADD8E6";
+
                 }
                 else
                 {
@@ -779,7 +781,6 @@ namespace DATN.Client.Pages.AdminManager
 
                     if (timeLeft.TotalSeconds <= 0 && table.Status != "inusebooktable")
                     {
-                        Console.WriteLine($"timeLeft.TotalSeconds: {timeLeft.TotalSeconds}, table.Status: {table.Status}");
                         table.Status = "inusebooktable";
 
                         reservation.ReservationStatus = "Đã nhận bàn";
@@ -789,6 +790,8 @@ namespace DATN.Client.Pages.AdminManager
                     else if (timeLeft.TotalHours <= 2.5 && table.Status != "availableuntil")
                     {
                         table.Status = "availableuntil";
+
+                        availableUntil = "availableuntil";
 
                         _ = UpdateTableStatusAsync(table);
 
@@ -997,6 +1000,7 @@ namespace DATN.Client.Pages.AdminManager
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật bàn thất bại");
                 return;
             }
+            StateHasChanged();
         }
 
         private Task CatulatorDepositPaymentAsync()
