@@ -186,11 +186,11 @@ namespace DATN.Client.Pages.AdminManager
         })
         .ToList();
 
-        private async Task OnMonthSelected(ChangeEventArgs e)
-        {
-            selectedFoodMonth = int.Parse(e.Value.ToString());
-            await LoadPopularDishesChart();
-        }
+        //private async Task OnMonthSelected(ChangeEventArgs e)
+        //{
+        //    selectedFoodMonth = int.Parse(e.Value.ToString());
+        //    await LoadPopularDishesChart();
+        //}
 		private async Task OnCustomerYearSelected(ChangeEventArgs e)
 		{
 			selectedCustomerYear = int.Parse(e.Value.ToString());
@@ -311,15 +311,14 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task LoadPopularDishesChart()
         {
-            // Fetch data from different endpoints
             Orders = await httpClient.GetFromJsonAsync<List<Order>>("api/Order/GetOrder");
             OrderItems = await httpClient.GetFromJsonAsync<List<OrderItem>>("api/OrderItem/GetOrderItem");
             Products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
             Categories = await httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
 
+            Console.WriteLine("Orders"+ Orders);
             if (Orders != null && OrderItems != null && Products != null && Categories != null)
             {
-                // Use LINQ to get the top popular dishes with CategoryId = 1
                 var popularDishes = OrderItems
                     .GroupBy(item => item.ProductId)
                     .Select(group => new
@@ -335,9 +334,8 @@ namespace DATN.Client.Pages.AdminManager
                               ProductId = product.ProductId,
                               ProductName = product.ProductName,
                               Quantity = orderItemGroup.Quantity,
-                              CategoryId = product.CategoryId  // Retrieve CategoryId to filter by category
+                              CategoryId = product.CategoryId 
                           })
-                    .Where(dish => dish.CategoryId == 1)  // Filter by CategoryId = 1
                     .OrderByDescending(dish => dish.Quantity)
                     .Take(5)
                     .Select(dish => new PopularDish
@@ -354,12 +352,12 @@ namespace DATN.Client.Pages.AdminManager
                     labels = popularDishes.Select(d => d.ProductName).ToArray(),
                     datasets = new[]
                     {
-                new
-                {
-                    data = popularDishes.Select(d => d.Quantity).ToArray(),
-                    backgroundColor = new[] { "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF" }
-                }
-            }
+                        new
+                        {
+                            data = popularDishes.Select(d => d.Quantity).ToArray(),
+                            backgroundColor = new[] { "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF" }
+                        }
+                    }
                 };
 
                 var options = new
