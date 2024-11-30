@@ -658,6 +658,14 @@ else
                                         </div>
                                     </div>
                                     <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
+                                            <span class="fw-bold">-</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCartAsync(c)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </li>
                             }
                         }
@@ -777,7 +785,7 @@ else
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
-            @if (order == null || order.OrderId <= 0)
+            @if (messagePay != "payReq")
             {
                 <div class="modal-header">
                     <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
@@ -855,7 +863,7 @@ else
                                 }
                                 else
                                 {
-                                    foreach (var c in order.OrderItems)
+                                    foreach (var c in order.OrderItems.Where(a => !a.IsDeleted && a.Quantity > 0).ToList())
                                     {
                                         <tr>
                                             <td><img src="data:image/png;base64,@Convert.ToBase64String(c.Products.ProductImage)" alt="Product"></td>

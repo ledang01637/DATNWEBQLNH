@@ -213,7 +213,7 @@ namespace DATN.Client.Pages
 
                         if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
 
-                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note);
+                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note,order.OrderId);
 
                         await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm");
                         Carts.Clear();

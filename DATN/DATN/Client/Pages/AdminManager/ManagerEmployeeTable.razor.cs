@@ -8,6 +8,7 @@ using DATN.Shared;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Timers;
+using DATN.Client.Service;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -56,6 +57,7 @@ namespace DATN.Client.Pages.AdminManager
         private Timer _timer;
         private Dictionary<int, string> timeLeftText = new();
         private int updateCounter = 0;
+        private int _orderId;
         private string availableUntil;
 
         protected override async Task OnInitializedAsync()
@@ -122,10 +124,10 @@ namespace DATN.Client.Pages.AdminManager
                 await InvokeAsync(StateHasChanged);
             });
 
-            hubConnection.On<string, List<CartDTO>, string>("UpdateTable", async (_numTable, carts, note) =>
+            hubConnection.On<string, List<CartDTO>, string, int>("UpdateTable", async (_numTable, carts, note,orderId) =>
             {
                 numberTable = _numTable;
-
+                _orderId = orderId;
                 if (int.TryParse(numberTable, out int tableNumber))
                 {
                     await UpdateCartNoteAsync(tableNumber, carts, note);
@@ -142,7 +144,10 @@ namespace DATN.Client.Pages.AdminManager
                 await GetTableColorAsync(numberTablePay);
                 orderIdPay = _orderId;
                 order = await GetOrderInvoice(orderIdPay) ?? new Order();
-                customer = await GetCustomerById(_customerId) ?? new Customer();
+                if(_customerId > 0)
+                {
+                    customer = await GetCustomerById(_customerId) ?? new Customer();
+                }
             });
 
             return Task.CompletedTask;
@@ -232,6 +237,7 @@ namespace DATN.Client.Pages.AdminManager
                 await _localStorageService.SetListAsync("numtables", numtables);
             }
             IsUsing = true;
+            order = await GetOrderInvoice(_orderId);
             await _localStorageService.SetAsync("_cartNote", existingCartNote);
             await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
         }
@@ -338,6 +344,80 @@ namespace DATN.Client.Pages.AdminManager
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng gọi Admin: " + ex);
             }
 
+        }
+
+        private async Task RemoveFromCartAsync(CartDTO product)
+        {
+            if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
+            {
+                var existingCart = existingCartNote.CartDTOs.FirstOrDefault(c => c.ProductId == product.ProductId);
+                if (existingCart != null)
+                {
+                    existingCartNote.CartDTOs.Remove(existingCart);
+
+                    var oi = order.OrderItems.FirstOrDefault(p => p.ProductId == existingCart.ProductId);
+
+                    if (oi != null)
+                    {
+                        oi.IsDeleted = true;
+                        await UpdateQuantityOrderItem(oi);
+                        order = await GetOrderInvoice(order.OrderId);
+                    }
+                }
+                
+            }
+            await _localStorageService.SetAsync("_cartNote", existingCartNote);
+            _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote");
+            await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
+            StateHasChanged();
+        }
+        private async Task DecreaseQuantity(int productId)
+        {
+            await ModifyQuantity(productId, -1);
+        }
+        private async Task ModifyQuantity(int productId, int change)
+        {
+            if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
+            {
+                var existingCart = existingCartNote.CartDTOs.FirstOrDefault(c => c.ProductId == productId);
+
+                if (existingCart == null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng thêm món ăn");
+                    return;
+                }
+
+                existingCart.Quantity += change;
+
+                if (existingCart.Quantity <= 0)
+                {
+                  await RemoveFromCartAsync(existingCart);
+                }
+
+                var oi = order.OrderItems.FirstOrDefault(p => p.ProductId == existingCart.ProductId);
+
+                if (oi != null)
+                {
+                    oi.Quantity = existingCart.Quantity;
+
+                    if(oi.Quantity <=0)
+                    {
+                        oi.IsDeleted = true;
+                    }
+                    await UpdateQuantityOrderItem(oi);
+                    order = await GetOrderInvoice(order.OrderId);
+                }
+            }
+
+            await _localStorageService.SetAsync("_cartNote", existingCartNote);
+            await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
+            StateHasChanged();
+        }
+
+        private async Task UpdateQuantityOrderItem(OrderItem orderItem)
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/OrderItem/{orderItem.OrderItemId}", orderItem);
+            if(!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "Lỗi", "Không thể cập nhật đơn hàng"); return; }
         }
 
         private async void CalculatorAmount()

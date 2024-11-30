@@ -20,9 +20,9 @@ namespace DATN.Server.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendTable(string message, List<CartDTO> carts, string note)
+        public async Task SendTable(string message, List<CartDTO> carts, string note, int orderId)
         {
-            await Clients.All.SendAsync("UpdateTable", message, carts, note);
+            await Clients.All.SendAsync("UpdateTable", message, carts, note, orderId);
         }
         public async Task SendChef(string message, List<CartDTO> carts, string note)
         {
