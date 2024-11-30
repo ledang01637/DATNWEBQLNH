@@ -1,29 +1,62 @@
 @page "/register"
-
 @layout MainLayout
 @inject HttpClient httpClient
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-
-
 <style>
-    .register-card {
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to bottom, #ff9a9e, #fad0c4); /* Gradient background */
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-primary-custom, .btn-secondary-custom {
+        border: none;
+        border-radius: 20px;
+        padding: 10px 0;
         width: 100%;
-        max-width: 400px;
-        padding: 20px;
-        background-color: #fff;
+        font-weight: bold;
+    }
+
+    .btn-secondary-custom {
+        background-color: #4444;
     }
 
     .btn-primary-custom {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
+        background-color: #d35400;
     }
 
-        .btn-primary-custom:hover {
-            background-color: #0056b3;
-        }
+    .btn-secondary-custom:hover {
+        background-color: #444;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #e67e22;
+    }
+
+    .mobile-footer {
+        display: none !important;
+    }
+
+    .custom-link:hover {
+        cursor: pointer;
+    }
+
+    .register-container {
+        position: relative;
+        max-width: 400px;
+        width: 100%;
+        background: #fff; /* Card background */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
     .validation-message {
         font-size: 14px;
@@ -51,41 +84,34 @@
 }
 else
 {
-    <div class="register-card position-absolute top-50 start-50 translate-middle shadow rounded">
+    <div class="register-container">
         <h3 class="text-center mb-4">Đăng ký</h3>
         <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">
             <DataAnnotationsValidator />
 
             <div class="mb-3">
-                <label class="form-label">Họ Tên</label>
-                <InputText class="form-control" placeholder="Nhập họ tên" @bind-Value="customer.CustomerName" />
+                <InputText class="form-control" placeholder="Họ Tên" @bind-Value="customer.CustomerName" />
                 <ValidationMessage For="@(() => customer.CustomerName)" class="validation-message" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Số điện thoại</label>
-                <InputText class="form-control" placeholder="Nhập số điện thoại" @bind-Value="customer.PhoneNumber" min="10" max="12" />
+                <InputText class="form-control" placeholder="Số điện thoại" @bind-Value="customer.PhoneNumber" min="10" max="12" />
                 <ValidationMessage For="@(() => customer.PhoneNumber)" class="validation-message" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Địa chỉ</label>
-                <InputText class="form-control" placeholder="Nhập địa chỉ" @bind-Value="customer.Address" />
+                <InputText class="form-control" placeholder="Địa chỉ" @bind-Value="customer.Address" />
                 <ValidationMessage For="@(() => customer.Address)" class="validation-message" />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Email</label>
-                <InputText class="form-control" placeholder="Nhập email" @bind-Value="customer.Email" />
+                <InputText class="form-control" placeholder="Email" @bind-Value="customer.Email" />
                 <ValidationMessage For="@(() => customer.Email)" class="validation-message" />
             </div>
 
-            <button type="submit" class="btn btn-primary-custom" disabled="@isLoading">
-                Xác nhận
-            </button>
+            <button type="submit" class="btn btn-primary-custom w-100" disabled="@isLoading">Xác nhận</button>
+
 
         </EditForm>
     </div>
 }
-
-
