@@ -279,7 +279,7 @@
             <EditForm Model="@qrModel" OnValidSubmit="GenerateQrCode">
                 <DataAnnotationsValidator />
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group" style="display: none">
                         <label for="tableUrl" class="form-label">URL:</label>
                         <InputText @bind-Value="qrModel.Url" class="form-control" id="tableUrl" name="tableUrl" />
                         <ValidationMessage For="@(() => qrModel.Url)" />

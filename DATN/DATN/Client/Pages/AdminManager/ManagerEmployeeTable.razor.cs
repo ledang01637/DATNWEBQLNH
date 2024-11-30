@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using System;
 using Microsoft.JSInterop;
@@ -9,12 +7,7 @@ using System.Linq;
 using DATN.Shared;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.SignalR.Client;
-using System.Text.Json;
-using System.Xml;
-using System.Xml.Linq;
-using System.Dynamic;
 using System.Timers;
-using DATN.Client.Service;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -677,7 +670,7 @@ namespace DATN.Client.Pages.AdminManager
 
                     if (handler.ReadToken(token) is not JwtSecurityToken jsonToken)
                     {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Token is invalid");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng thử đăng nhập lại nếu không được thì liên hệ Admin");
                     }
                     else
                     {
@@ -689,7 +682,8 @@ namespace DATN.Client.Pages.AdminManager
                         }
                         else
                         {
-                            await JS.InvokeVoidAsync("showAlert", "warning", "Token is null");
+                            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng đăng nhập lại");
+                            Navigation.NavigateTo("/login-admin");
                         }
                     }
                 }

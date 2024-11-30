@@ -215,7 +215,9 @@ namespace DATN.Client.Pages
 
                         await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note);
 
-                        await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
+                        await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm");
+                        Carts.Clear();
+                        await _cartService.SaveCartAsync(Carts);
                         Navigation.NavigateTo("/");
                     }
                 }

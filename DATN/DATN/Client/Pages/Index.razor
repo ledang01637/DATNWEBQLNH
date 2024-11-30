@@ -287,7 +287,7 @@
                             <textarea rows="2" @bind="note" class="form-control" placeholder="Thêm ghi chú nếu có..."></textarea>
                         </li>
                         <li class="list-group-item">
-                            <button class="btn btn-danger" @onclick="RemoveAllCarts">Xóa tất cả</button>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#ConfirmDeleteProductModal">Xóa tất cả</button>
                         </li>
                     }
                     else
@@ -318,6 +318,25 @@
 
             <div class="modal-footer">
                 <button class="checkout-btn-model" @onclick="SendMessage">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal remove all -->
+
+<div class="modal fade" id="ConfirmDeleteProductModal" tabindex="-1" aria-labelledby="ConfirmDeleteProductLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ConfirmDeleteProductLabel">Xác nhận xóa tất cả món ăn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Xác nhận xóa tất cả món ăn đã thêm?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" @onclick="RemoveAllCarts">Xóa</button>
             </div>
         </div>
     </div>

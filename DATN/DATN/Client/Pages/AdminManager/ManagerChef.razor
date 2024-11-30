@@ -38,6 +38,10 @@
         opacity: 0.7;
         transition: transform 0.3s ease, opacity 0.3s ease;
     }
+
+    .card {
+        pointer-events: auto !important;
+    }
 </style>
 
 <div class="container">
@@ -48,39 +52,51 @@
             {
                 <div class="card mb-3" data-id="@cn.TableNumber">
                     <div class="card-header">
-                        Bàn số: @cn.TableNumber
+                        <strong>Bàn số: @cn.TableNumber</strong>
                     </div>
-                    <div class="card-body" id="foodList">
+                    <div class="card-body">
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Tên</th>
-                                    <th>Số lượng</th>
-                                    <th></th>
+                                    <th>Tên món</th>
+                                    <th>Số lượng chư làm</th>
+                                    <th>Số lượng đã làm</th>
+                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
-                            @foreach (var p in cn.ProdReqs)
-                            {
-                                <tbody>
+                            <tbody>
+                                @foreach (var p in cn.ProdReqs)
+                                {
                                     <tr class="@(p.IsComplete ? "table-success" : "")">
                                         <td>@p.ProductName</td>
                                         <td>@p.Quantity</td>
+                                        <td>@p.CompletedQuantity</td>
                                         <td>
-                                            <button disabled="@p.IsComplete" class="btn btn-sm fw-bold custom-table btn-success" @onclick="() => ConfirmRequestAsync(p.ProductId)">
-                                                Xác nhận
+                                            <button class="btn btn-sm @(p.IsComplete ? "btn-success" : "btn-warning") fw-bold"
+                                                    disabled="@p.IsComplete"
+                                                    @onclick="() => ConfirmRequestAsync(cn.TableNumber, p.ProductId, 1)">
+                                                @if (p.IsComplete)
+                                                {
+                                                    <i class="bi bi-check-circle"></i>
+                                                    <span>Hoàn thành</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Xác nhận </span>
+                                                }
                                             </button>
+
                                         </td>
                                     </tr>
-
-                                </tbody>
-                            }
+                                }
+                            </tbody>
                         </table>
                     </div>
                     <div class="card-footer">
-                        Ghi chú: @cn.Note
+                        Ghi chú: @(!string.IsNullOrWhiteSpace(cn.Note) ? cn.Note : "Không có ghi chú")
                     </div>
                 </div>
-            } 
+            }
         }
         else
         {
@@ -90,6 +106,5 @@
                 </div>
             </div>
         }
-
     </div>
 </div>

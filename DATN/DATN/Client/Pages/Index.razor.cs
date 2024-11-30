@@ -25,7 +25,6 @@ namespace DATN.Client.Pages
         private readonly LoginRequest loginUser = new();
         private HubConnection hubConnection;
         private string ComboName;
-        private bool isGridView = true;
         private int TotalQuantity;
         private decimal TotalAmount;
         private bool isProcessing = false;
@@ -175,6 +174,7 @@ namespace DATN.Client.Pages
         }
         private async Task RemoveFromCart(Cart product)
         {
+           
             var existingCart = carts.FirstOrDefault(c => c.ProductId == product.ProductId);
 
             if (existingCart != null)
@@ -185,8 +185,10 @@ namespace DATN.Client.Pages
             }
         }
 
+
         private async Task RemoveAllCarts()
         {
+            await JS.InvokeVoidAsync("closeModal", "ConfirmDeleteProductModal");
             carts.Clear();
             TotalQuantity = 0;
             TotalAmount = 0;
@@ -325,19 +327,5 @@ namespace DATN.Client.Pages
             }
             return null;
         }
-
-        //private async void Navbar(bool isClose)
-        //{
-        //    await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);
-        //}
-
-        //private string GetGridColumnClass()
-        //{
-        //    return isGridView ? "col-sm-6 col-lg-4" : "col-lg-4";
-        //}
-        //private void ToggleGridView()
-        //{
-        //    isGridView = !isGridView;
-        //}
     }
 }

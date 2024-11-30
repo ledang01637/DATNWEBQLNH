@@ -83,7 +83,7 @@
                     <img src="/image/Voucher/award.png" alt="Điểm" class="me-2" style="width: 20px;" />
                     <button @onclick="() => RedeemPointsAsync(v.PointRequired, v.VoucherId,v.ExpriationDate)"
                             class="btn btn-success ms-2 px-3 py-1 rounded-pill"
-                            disabled="@(DateTime.Now > v.ExpriationDate )">
+                            disabled="@(DateTime.Now > v.ExpriationDate)">
                         Đổi
                     </button>
                 </div>

@@ -292,6 +292,25 @@ namespace DATN.Client.Pages
             }
         }
 
+        private bool IsCompleteAllProd(int tableNumber)
+        {
+            var notePR = NoteProdReq.noteProdReqs[tableNumber];
+
+            if (notePR == null || notePR.ProdReqs.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var i in notePR.ProdReqs)
+            {
+                if (!i.IsComplete)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private async Task Payment()
         {
             try
@@ -352,9 +371,10 @@ namespace DATN.Client.Pages
                             }
                         }
                     }
+
                     carts.Clear();
                     await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
-                    await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát");
 
                     Navigation.NavigateTo("/");
                 }
@@ -363,9 +383,9 @@ namespace DATN.Client.Pages
                     await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán", ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán","Vui lòng liên hệ Admin");
             }
         }
 
