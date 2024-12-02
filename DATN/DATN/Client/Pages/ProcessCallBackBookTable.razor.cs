@@ -13,17 +13,9 @@ namespace DATN.Client.Pages
     public partial class ProcessCallBackBookTable
     {
         private Order order = new();
-        private Voucher voucher = new();
-        private CustomerVoucher customerVoucher = new();
         private Customer customer = new();
         private List<OrderItem> orderItems = new();
         private List<Cart> carts = new();
-        private List<CustomerVoucher> customerVouchers = new();
-        private bool isHasAccount = false;
-        private string Code;
-        private bool isCorrectVoucher = false;
-        private decimal originalTotalAmount;
-        private char payMenthod;
 
         private HubConnection hubConnection;
         protected override async Task OnInitializedAsync()
@@ -69,9 +61,9 @@ namespace DATN.Client.Pages
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin: " + ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thanh toán thất bại");
             }
             finally
             {
@@ -140,7 +132,7 @@ namespace DATN.Client.Pages
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
+                    await JS.InvokeVoidAsync("showAlert", "error","Lỗi","Không thể kết nối tới server!");
                 }
             }
             catch
@@ -150,25 +142,11 @@ namespace DATN.Client.Pages
         }
         private async Task LoadInit()
         {
-            string accountType = await CheckTypeAccount();
+            string accountId = await CheckAccountId();
+            if (string.IsNullOrEmpty(accountId)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại tài khoản"); return; }
 
-            if (!string.IsNullOrEmpty(accountType) && accountType.ToLower().Equals("no account"))
-            {
-                isHasAccount = false;
-            }
-            else
-            {
-                isHasAccount = true;
-                string accountId = await CheckAccountId();
-                if (string.IsNullOrEmpty(accountId)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại tài khoản"); return; }
+            customer = await GetCustomerByAccount(int.Parse(accountId));
 
-                customer = await GetCustomerByAccount(int.Parse(accountId));
-
-                if (customer != null)
-                {
-                    customerVouchers = await GetCustomerVoucherByCustomerId(customer.CustomerId);
-                }
-            }
 
             var tbid = await _localStorageService.GetItemAsync("tbid");
             if (tbid == null) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui thêm món ăn"); return; }
@@ -271,17 +249,6 @@ namespace DATN.Client.Pages
 
             }
         }
-        private async Task<string> CheckTypeAccount()
-        {
-            var token = await _localStorageService.GetItemAsync("authToken");
-            if (!String.IsNullOrEmpty(token))
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
-                return jwtToken.Claims.FirstOrDefault(c => c.Type == "AccountType")?.Value;
-            }
-            return null;
-        }
         private async Task<string> CheckAccountId()
         {
             var token = await _localStorageService.GetItemAsync("authToken");
@@ -291,51 +258,6 @@ namespace DATN.Client.Pages
                 var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
                 return jwtToken.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
             }
-            return null;
-        }
-
-
-        private async Task<Voucher> GetCustomerVoucherByVoucherCode(string voucherCode)
-        {
-            var response = await httpClient.PostAsJsonAsync("api/Voucher/GetVoucherByCode", voucherCode);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadFromJsonAsync<Voucher>();
-
-                if (responseContent != null)
-                {
-                    return responseContent;
-                }
-                return null;
-            }
-            else
-            {
-                voucher = null;
-            }
-
-            return null;
-        }
-
-        private async Task<List<CustomerVoucher>> GetCustomerVoucherByCustomerId(int customerId)
-        {
-            var response = await httpClient.PostAsJsonAsync("api/CustomerVoucher/GetCustomerVoucherByCustomerId", customerId);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadFromJsonAsync<List<CustomerVoucher>>();
-
-                if (responseContent != null)
-                {
-                    return responseContent;
-                }
-                return null;
-            }
-            else
-            {
-                customerVouchers = null;
-            }
-
             return null;
         }
 
