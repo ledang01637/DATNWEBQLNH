@@ -336,9 +336,16 @@ namespace DATN.Client.Pages
                     {
                         order.PaymentMethod = (payMenthod == 'c') ? "Tiền mặt" : "Chuyển khoản";
 
+                        if(payMenthod == 't')
+                        {
+                            await Transfer(order);
+                            return;
+                        }
+
                         if (voucher != null && voucher.VoucherId > 0)
                         {
                             if(order.Status.Equals("Đang chờ xác nhận")){ await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hóa đơn đang chờ nhân viên xác nhận bạn vui lòng đợi tý nhé"); return; }
+
                             order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
                             order.Status = "Đang chờ xác nhận";
                             var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
@@ -374,7 +381,7 @@ namespace DATN.Client.Pages
 
                     carts.Clear();
                     await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
-                    await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Bạn vui lòng đợi giây lát");
 
                     Navigation.NavigateTo("/");
                 }
@@ -394,10 +401,10 @@ namespace DATN.Client.Pages
             var vnpRequest = new VNPayRequest
             {
                 OrderId = new Random().Next(10000, 99999),
-                Amount = order.TotalAmount,
-                Description = "Thanh toán đặt bàn",
+                Amount = (long)order.TotalAmount,
+                Description = "Thanh toán hóa đơn",
                 CreatedDate = DateTime.Now,
-                FullName = "",
+                FullName = "no name",
             };
 
             var response = await httpClient.PostAsJsonAsync("api/VNPay/CreateUrlVNPay", vnpRequest);

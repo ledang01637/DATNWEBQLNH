@@ -59,6 +59,8 @@ namespace DATN.Client.Pages.AdminManager
         private int updateCounter = 0;
         private int _orderId;
         private string availableUntil;
+        private readonly string urlBookTable = "/employee-book-table";
+
 
         protected override async Task OnInitializedAsync()
         {

@@ -1,15 +1,16 @@
 ﻿using DATN.Shared;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.JSInterop;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System;
+using System.Net.Http.Json;
+using Microsoft.JSInterop;
+using System.Linq;
 
-namespace DATN.Client.Pages
+namespace DATN.Client.Pages.AdminManager
 {
-    public partial class BookTable
+    public partial class EmployeeBookTable
     {
         private readonly Reservation reservationModel = new();
         private List<Table> tables = new();
@@ -22,9 +23,9 @@ namespace DATN.Client.Pages
             reservationModel.Adults = 1;
             reservationModel.PaymentMethod = "Transfer";
             tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTableEmplty");
-            if(tables.Count > 0)
+            if (tables.Count > 0)
             {
-                foreach(Table table in tables)
+                foreach (Table table in tables)
                 {
                     countSeat += table.SeatingCapacity;
                 }
@@ -33,7 +34,7 @@ namespace DATN.Client.Pages
 
         public async Task HandleBookTableAsync()
         {
-            
+
             try
             {
 
@@ -45,10 +46,9 @@ namespace DATN.Client.Pages
                 reservationModel.IsPayment = false;
                 reservationModel.ReservationStatus = "Đang xử lý";
 
-
                 await _localStorageService.SetAsync("reservation", reservationModel);
 
-                if(reservationModel.PaymentMethod != "Cash")
+                if (reservationModel.PaymentMethod != "Cash")
                 {
                     var vnpRequest = new VNPayRequest
                     {
@@ -81,7 +81,7 @@ namespace DATN.Client.Pages
 
                     }
                     await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đặt bàn thành công");
-                    Navigation.NavigateTo("/", true);
+                    Navigation.NavigateTo("/manager", true);
                 }
             }
             catch (Exception ex)
@@ -129,6 +129,8 @@ namespace DATN.Client.Pages
                 return;
             }
 
+
+
             var totalCustomer = reservationModel.Adults + reservationModel.Children;
 
             if (totalCustomer > countSeat)
@@ -137,12 +139,6 @@ namespace DATN.Client.Pages
                 return;
             }
 
-            if(countSeat <= 0) 
-            {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hiện đã hết bàn trống vui lòng quay lại sau");
-                return;
-            }
-            
 
             await JS.InvokeVoidAsync("showModal", "ConformInfo");
             await CatulatorDepositPaymentAsync();

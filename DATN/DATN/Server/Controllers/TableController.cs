@@ -23,6 +23,12 @@ namespace DATN.Server.Controllers
             return _TableService.GetTable();
         }
 
+        [HttpGet("GetTableEmplty")]
+        public ActionResult GetTableEmplty()
+        {
+            return Ok(_TableService.GetTableEmplty());
+        }
+
         [HttpGet("GetTableByNumber")]
         public ActionResult GetTableByNumber([FromQuery] int numberTable)
         {
