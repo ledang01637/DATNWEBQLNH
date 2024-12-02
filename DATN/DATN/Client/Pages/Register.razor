@@ -9,7 +9,7 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
-        background: linear-gradient(to bottom, #ff9a9e, #fad0c4); /* Gradient background */
+        background: #F2F2F2;
         height: 100vh;
         display: flex;
         justify-content: center;
@@ -20,6 +20,8 @@
         border: none;
         border-radius: 20px;
         padding: 10px 0;
+    }
+
     .register-card {
         width: 100%;
         font-weight: bold;
@@ -41,10 +43,6 @@
         background-color: #e67e22;
     }
 
-    .mobile-footer {
-        display: none !important;
-    }
-
     .custom-link:hover {
         cursor: pointer;
     }
@@ -53,7 +51,7 @@
         position: relative;
         max-width: 400px;
         width: 100%;
-        background: #fff; /* Card background */
+        background: #fff;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -82,8 +80,7 @@
 }
 else
 {
-    <div class="register-container">
-    <div class="register-card position-absolute start-50 translate-middle shadow rounded" style="top: 35%;">
+    <div class="register-container position-absolute start-50 translate-middle shadow rounded" style="top: 35%;">
         <h3 class="text-center mb-4">Đăng ký</h3>
         <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">
             <DataAnnotationsValidator />
@@ -109,8 +106,6 @@ else
             </div>
 
             <button type="submit" class="btn btn-primary-custom w-100" disabled="@isLoading">Xác nhận</button>
-
-
         </EditForm>
     </div>
 }
