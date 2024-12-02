@@ -20,6 +20,7 @@
         border: none;
         border-radius: 20px;
         padding: 10px 0;
+    .register-card {
         width: 100%;
         font-weight: bold;
     }
@@ -63,9 +64,6 @@
         color: #dc3545;
     }
 
-    .mobile-footer {
-        display: none !important;
-    }
 </style>
 
 <div class="align-items-start">
@@ -85,6 +83,7 @@
 else
 {
     <div class="register-container">
+    <div class="register-card position-absolute start-50 translate-middle shadow rounded" style="top: 35%;">
         <h3 class="text-center mb-4">Đăng ký</h3>
         <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">
             <DataAnnotationsValidator />

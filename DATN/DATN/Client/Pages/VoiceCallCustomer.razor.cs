@@ -33,20 +33,20 @@ namespace DATN.Client.Pages
 
                 if (token is null)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Token is null");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng quét QR");
                     Navigation.NavigateTo("/");
                     return;
                 }
                 from = GetTableNumberFromToken(token);
                 if (from is null)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "From is null");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng quét QR");
                     Navigation.NavigateTo("/");
                     return;
                 }
                 if(to is null)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "To is null");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không tìm thấy người nhận");
                     Navigation.NavigateTo("/");
                     return;
                 }
@@ -56,7 +56,7 @@ namespace DATN.Client.Pages
             catch (Exception ex)
             {
                 Console.WriteLine($"Không thể kết nối: {ex.Message}");
-                await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không thể kết nối tới server!");
                 Navigation.NavigateTo("/");
                 return;
             }
@@ -73,7 +73,7 @@ namespace DATN.Client.Pages
 
                     if (handler.ReadToken(token) is not JwtSecurityToken jsonToken)
                     {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Token is invalid");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng quét mã QR");
                     }
                     else
                     {
@@ -85,9 +85,9 @@ namespace DATN.Client.Pages
 
                 
             }
-            catch(Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", ex);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng liên hệ Admin");
                 Navigation.NavigateTo("/");
             }
         }

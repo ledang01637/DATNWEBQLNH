@@ -8,17 +8,9 @@
 @inject LocalStorageService _localStorageService
 
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(to bottom, #ff9a9e, #fad0c4); /* Gradient background */
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    body{
+        background: #F2F2F2;
     }
-
     .btn-primary-custom, .btn-secondary-custom {
         border: none;
         border-radius: 20px;
@@ -43,11 +35,7 @@
         background-color: #e67e22;
     }
 
-    .mobile-footer {
-        display: none !important;
-    }
-
-    .custom-link:hover {
+    .custom-link:hover{
         cursor: pointer;
     }
 
@@ -68,7 +56,7 @@
     </a>
 </div>
 
-<div class="login-container">
+<div class="position-absolute start-50 translate-middle p-4 shadow rounded ms-2" style="width: 100%; max-width: 400px; background: #fff; top: 35%;">
     <h3 class="text-center mb-4">Đăng nhập</h3>
     <EditForm Model="@loginUser" OnValidSubmit="HandleLogin">
         <DataAnnotationsValidator />
