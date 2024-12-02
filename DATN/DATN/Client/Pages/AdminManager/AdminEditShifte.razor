@@ -24,27 +24,27 @@
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="Shifte_Name" class="control-label"><strong>Shifte_Name</strong></label>
-                            <input id="Shifte_Name" @bind="shifte.ShifteName" class="form-control" placeholder="Shifte_Name" required />
+                            <input id="Shifte_Name" @bind="shifte.ShifteName" class="form-control" placeholder="Shifte_Name" />
                             <ValidationMessage For="@(() => shifte.ShifteName)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="StartTime" class="control-label"><strong>StartTime</strong></label>
-                            <input id="StartTime" type="time" @bind="shifte.StartTime" class="form-control" placeholder="StartTime" required />
+                            <input id="StartTime" type="time" @bind="shifte.StartTime" class="form-control" placeholder="StartTime" />
                             <ValidationMessage For="@(() => shifte.StartTime)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="EndTime" class="control-label"><strong>EndTime</strong></label>
-                            <input id="EndTime" type="time" @bind="shifte.EndTime" class="form-control" placeholder="EndTime" required />
+                            <input id="EndTime" type="time" @bind="shifte.EndTime" class="form-control" placeholder="EndTime" />
                             <ValidationMessage For="@(() => shifte.EndTime)" />
                         </div>
 
 
                         <div class="form-group text-center mt-3">
                             <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-danger mx-2">Add</button>
-                                <a href="/adminshifte" class="btn btn-secondary mx-2">Back</a>
+                                <button type="submit" class="btn btn-danger mx-2">Sửa</button>
+                                <a href="/adminshifte" class="btn btn-secondary mx-2">Trở Về</a>
                             </div>
                         </div>
                     </EditForm>
@@ -107,6 +107,40 @@
 
     private async Task EditShifte()
     {
+
+        if (shifte.ShifteName == null || shifte.StartTime == null || shifte.EndTime == null)
+        {
+            errorMessage = "Vui lòng nhập đầy đủ thông tin";
+            successMessage = string.Empty;
+            return;
+        }
+
+        var checkResponseshifte = await httpClient.GetAsync($"api/Shifte/{shifte.ShifteName}");
+        if (checkResponseshifte.IsSuccessStatusCode)
+        {
+            var isNameExists = await checkResponseshifte.Content.ReadAsStringAsync();
+            if (bool.TryParse(isNameExists, out bool exists) && exists)
+            {
+                errorMessage = "Tên ca làm đã tồn tại";
+                successMessage = string.Empty;
+                return;
+            }
+        }
+
+        if (shifte.StartTime == default || shifte.EndTime == default)
+        {
+            errorMessage = "thời gian bắt đầu phải nhỏ hơn thời gian kết thúc";
+            successMessage = string.Empty;
+            return;
+        }
+
+        if (shifte.StartTime.Date > shifte.EndTime.Date)
+        {
+            errorMessage = "The start date must not be later than the end date.";
+            successMessage = string.Empty;
+            return;
+        }
+
         try
         {
             var response = await httpClient.PutAsJsonAsync($"api/Shifte/{ShifteId}", shifte);

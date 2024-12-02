@@ -95,19 +95,15 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (account != null && role != null)
                 {
-                    account.AccountType = "Employee"; // Cập nhật loại tài khoản
-                    role.RoleId = 2; // Cập nhật vai trò thành Employee
+                    account.AccountType = "Employee";
+                    role.RoleId = 2;
 
-                    // Gửi yêu cầu cập nhật tài khoản
                     var accountResponse = await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
 
-                    // Kiểm tra nếu tài khoản được cập nhật thành công, tiếp tục cập nhật role
                     if (accountResponse.IsSuccessStatusCode)
                     {
-                        // Gửi yêu cầu cập nhật vai trò
                         var roleResponse = await httpClient.PutAsJsonAsync($"api/RoleAccount/{accountId}", role);
 
-                        // Nếu cả hai yêu cầu đều thành công, load lại dữ liệu
                         if (roleResponse.IsSuccessStatusCode)
                         {
                             await Load();
@@ -131,19 +127,16 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (account != null && role != null)
                 {
-                    account.AccountType = "Customer"; // Cập nhật loại tài khoản
-                    role.RoleId = 3; // Cập nhật vai trò thành Customer
+                    account.AccountType = "Customer";
+                    role.RoleId = 3;
 
-                    // Gửi yêu cầu cập nhật tài khoản
                     var accountResponse = await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
 
-                    // Kiểm tra nếu tài khoản được cập nhật thành công, tiếp tục cập nhật role
+
                     if (accountResponse.IsSuccessStatusCode)
                     {
-                        // Gửi yêu cầu cập nhật vai trò
                         var roleResponse = await httpClient.PutAsJsonAsync($"api/RoleAccount/{accountId}", role);
 
-                        // Nếu cả hai yêu cầu đều thành công, load lại dữ liệu
                         if (roleResponse.IsSuccessStatusCode)
                         {
                             await Load();
@@ -157,48 +150,6 @@ namespace DATN.Client.Pages.AdminManager
                 Console.WriteLine($"Đã xảy ra lỗi khi cập nhật tài khoản: {ex.Message}");
             }
         }
-
-
-        //private async Task UpdateAccount(int accountId)
-        //{
-        //    try
-        //    {
-        //        var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
-        //        var role = listRoleAccount.FirstOrDefault(r => r.AccountId == accountId);
-        //        if (account != null)
-        //        {
-        //            account.AccountType = "Employee";
-        //            role.Roleid = 2;
-        //            await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
-        //            await Load();
-        //            StateHasChanged();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
-        //    }
-        //}
-        //private async Task DefaultAccount(int accountId)
-        //{
-        //    try
-        //    {
-        //        var account = listAccount.FirstOrDefault(p => p.AccountId == accountId);
-        //        var role = listRoleAccount.FirstOrDefault(r => r.AccountId == accountId);
-        //        if (account != null)
-        //        {
-        //            account.AccountType = "Customer";
-        //            role.Roleid = 3;
-        //            await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
-        //            await Load();
-        //            StateHasChanged();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Đã xảy ra lỗi khi khôi phục : {ex.Message}");
-        //    }
-        //}
 
 
         private void EditAccount(int accountId)

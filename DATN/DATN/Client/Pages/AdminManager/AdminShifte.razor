@@ -23,11 +23,11 @@
 {
     <div class="col-md-12 row">
         <div class="col-md-6">
-            <button class="btn btn-success" @onclick="() => CreateShifte()">Add Shifte</button>
+            <button class="btn btn-success" @onclick="() => CreateShifte()">Thêm Ca Làm</button>
             <hr />
-            <h4>Shifte</h4>
+            <h4>Ca Làm</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search Shifte..." @oninput="Filter" />
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Ca Làm..." @oninput="Filter" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -51,12 +51,12 @@
                                     <td class="text-center">
                                         @if (!item.IsDeleted)
                                         {
-                                            <button class="btn btn-primary" @onclick="() => EditShifte(item.ShifteId)">Edit</button>
-                                            <button class="btn btn-danger" @onclick="() => HideShifte(item.ShifteId)">Hide</button>
+                                            <button class="btn btn-primary" @onclick="() => EditShifte(item.ShifteId)">Sửa</button>
+                                            <button class="btn btn-danger" @onclick="() => HideShifte(item.ShifteId)">Ẩn</button>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-warning" @onclick="() => RestoreShifte(item.ShifteId)">Restore</button>
+                                            <button class="btn btn-warning" @onclick="() => RestoreShifte(item.ShifteId)">Khôi Phục</button>
                                         }
                                     </td>
                                 </tr>
@@ -67,11 +67,11 @@
             </div>
         </div>
         <div class="col-md-6">
-            <button class="btn btn-success" @onclick="() => CreateEmployeeShifte()">Add EmployeeShifte</button>
+            <button class="btn btn-success" @onclick="() => CreateEmployeeShifte()">Thêm Phân Công Ca Làm</button>
             <hr />
-            <h4>EmployeeShifte</h4>
+            <h4>Phân Công Ca Làm</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search EmployeeShifte..." @oninput="FilterEmployee" />
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Phân Công Ca Làm..." @oninput="FilterEmployee" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -101,12 +101,12 @@
                                             <td class="text-center">
                                                 @if (!itememployee.IsDeleted)
                                                 {
-                                                    <button class="btn btn-primary" @onclick="() => EditEmployeeShifte(itememployee.EmployeeShifteId)">Edit</button>
-                                                    <button class="btn btn-danger" @onclick="() => HideEmployeeShifte(itememployee.EmployeeShifteId)">Hide</button>
+                                                    <button class="btn btn-primary" @onclick="() => EditEmployeeShifte(itememployee.EmployeeShifteId)">Sửa</button>
+                                                    <button class="btn btn-danger" @onclick="() => HideEmployeeShifte(itememployee.EmployeeShifteId)">Ẩn</button>
                                                 }
                                                 else
                                                 {
-                                                    <button class="btn btn-warning" @onclick="() => RestoreEmployeeShifte(itememployee.EmployeeShifteId)">Restore</button>
+                                                    <button class="btn btn-warning" @onclick="() => RestoreEmployeeShifte(itememployee.EmployeeShifteId)">Khôi Phục</button>
                                                 }
                                             </td>
                                         </tr>

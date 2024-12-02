@@ -26,11 +26,11 @@
         {
             <div class="col-md-12 row">
                 <div class="col-md-6">
-                    <button class="btn btn-success" @onclick="() => CreateMenu()">Add Menu</button>
+                    <button class="btn btn-success" @onclick="() => CreateMenu()">Thêm Menu</button>
                     <hr />
                     <h4>Menu</h4>
                     <div class="search-bar">
-                        <input type="text" class="form-control" placeholder="Search Menu..." @oninput="Filter" />
+                        <input type="text" class="form-control" placeholder="Tìm Kiếm Menu..." @oninput="Filter" />
                     </div>
                     <div class="product-table-container">
                         <table class="table table-striped">
@@ -55,12 +55,12 @@
                                             <td class="text-center">
                                                 @if (!item.IsDeleted)
                                                 {
-                                                    <button class="btn btn-primary" @onclick="() => EditMenu(item.MenuId)">Edit</button>
-                                                    <button class="btn btn-danger" @onclick="() => HideMenu(item.MenuId)">Hide</button>
+                                                    <button class="btn btn-primary" @onclick="() => EditMenu(item.MenuId)">Sửa</button>
+                                                    <button class="btn btn-danger" @onclick="() => HideMenu(item.MenuId)">Ẩn</button>
                                                 }
                                                 else
                                                 {
-                                                    <button class="btn btn-warning" @onclick="() => RestoreMenu(item.MenuId)">Restore</button>
+                                                    <button class="btn btn-warning" @onclick="() => RestoreMenu(item.MenuId)">Khôi Phục</button>
                                                 }
                                             </td>
                                         </tr>
@@ -71,11 +71,11 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <button class="btn btn-success" @onclick="() => CreateMenuItem()">Add MenuItem</button>
+                    <button class="btn btn-success" @onclick="() => CreateMenuItem()">Thêm MenuItem</button>
                     <hr />
                     <h4>MenuItem</h4>
                     <div class="search-bar">
-                        <input type="text" class="form-control" placeholder="Search MenuItem..."  @oninput="FilterMenuItem" />
+                        <input type="text" class="form-control" placeholder="Tìm Kiếm MenuItem..."  @oninput="FilterMenuItem" />
                     </div>
                     <div class="product-table-container">
                         <table class="table table-striped">
@@ -105,12 +105,12 @@
                                                     <td class="text-center">
                                                         @if (!item.IsDeleted)
                                                         {
-                                                            <button class="btn btn-primary" @onclick="() => EditMenuItem(item.MenuItemId)">Edit</button>
-                                                            <button class="btn btn-danger" @onclick="() => HideMenuItem(item.MenuItemId)">Hide</button>
+                                                            <button class="btn btn-primary" @onclick="() => EditMenuItem(item.MenuItemId)">Sửa</button>
+                                                            <button class="btn btn-danger" @onclick="() => HideMenuItem(item.MenuItemId)">Ẩn</button>
                                                         }
                                                         else
                                                         {
-                                                            <button class="btn btn-warning" @onclick="() => RestoreMenuItem(item.MenuItemId)">Restore</button>
+                                                            <button class="btn btn-warning" @onclick="() => RestoreMenuItem(item.MenuItemId)">Khôi Phục</button>
                                                         }
                                                     </td>
                                                 </tr>
