@@ -26,9 +26,9 @@
         {
             <button class="btn btn-success" @onclick="() => CreateAccount()">Add Account</button>
             <hr />
-            <h4>Account</h4>
+            <h4>Tài Khoản</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search Account..." @oninput="FilterAccount" />
+                <input type="text" class="form-control" placeholder="Tìm kiếm tài khoản..." @oninput="FilterAccount" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -55,10 +55,10 @@
                                 <td>
                                     @if (account.IsActive)
                                     {
-                                        <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Edit</button>
-                                        <button class="btn btn-danger" @onclick="() => HideAccount(account.AccountId)">Hide</button>
-                                        <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Employee</button>
-                                        <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Customer</button>
+                                        <button class="btn btn-primary" @onclick="() => EditAccount(account.AccountId)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="() => HideAccount(account.AccountId)">Ẩn</button>
+                                        <button class="btn btn-warning" @onclick="() => UpdateAccount(account.AccountId)">Nhân Viên</button>
+                                        <button class="btn btn-secondary" @onclick="() => DefaultAccount(account.AccountId)">Khách Hàng</button>
                                     }
                                     else
                                     {

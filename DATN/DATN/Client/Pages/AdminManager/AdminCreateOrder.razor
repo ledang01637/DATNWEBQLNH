@@ -10,7 +10,7 @@
     <div class="col-md-12 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Order</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Thêm Hóa Đơn</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
@@ -117,33 +117,11 @@
                                 <input id="CustomerVoucherId" @bind="order.CustomerVoucherId" class="form-control" placeholder="CustomerVoucherId" />
                                 <ValidationMessage For="@(() => order.CustomerVoucherId)" />
                             </div>
-@*                             <div class="form-group col-md-6 mb-3">
-                                <label for="CustomerVoucherId" class="control-label"><strong>CustomerVoucherId</strong></label>
-                                <select id="CustomerVoucherId" @bind="order.CustomerVoucherId" class="form-control">
-                                    <option value="">Chọn CustomerVoucherId</option>
-                                    @if (customervouchers != null && customervouchers.Any())
-                                    {
-                                        @foreach (var customervoucher in customervouchers)
-                                        {
-                                            if (customervoucher != null)
-                                            {
-                                                var connect = customers.FirstOrDefault(e => e.CustomerId == customervoucher.CustomerId);
-                                                if (connect != null)
-                                                {
-                                                    <option value="@customervoucher.CustomerVoucherId">@connect.CustomerName</option>
-                                                }
-
-                                            }
-                                        }
-                                    }
-                                </select>
-                                <ValidationMessage For="@(() => order.CustomerVoucherId)" />
-                            </div> *@
                         </div>
 
                         <div class="form-group text-center mt-3">
-                            <button type="submit" class="btn btn-danger mx-2">Add</button>
-                            <a href="/adminorder" class="btn btn-secondary mx-2">Back</a>
+                            <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                            <a href="/adminorder" class="btn btn-secondary mx-2">Trở Về</a>
                         </div>
                     </EditForm>
 

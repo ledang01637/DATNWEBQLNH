@@ -24,11 +24,11 @@
 {
     <div class="col-md-12 row">
         <div class="col-md-8">
-            <button class="btn btn-success" @onclick="() => CreateOrder()">Add Order</button>
+            <button class="btn btn-success" @onclick="() => CreateOrder()">Thêm Hóa Đơn</button>
             <hr />
-            <h4>Order</h4>
+            <h4>Hóa Đơn</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search Order..." @oninput="Filter" />
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Hóa Đơn..." @oninput="Filter" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -74,12 +74,12 @@
                                                 <td class="text-center">
                                                     @if (!item.IsDeleted)
                                                     {
-                                                        <button class="btn btn-primary" @onclick="() => EditOrder(item.OrderId)">Edit</button>
-                                                        <button class="btn btn-danger" @onclick="() => HideOrder(item.OrderId)">Hide</button>
+                                                        <button class="btn btn-primary" @onclick="() => EditOrder(item.OrderId)">Sửa</button>
+                                                        <button class="btn btn-danger" @onclick="() => HideOrder(item.OrderId)">Ẩn</button>
                                                     }
                                                     else
                                                     {
-                                                        <button class="btn btn-warning" @onclick="() => RestoreOrder(item.OrderId)">Restore</button>
+                                                        <button class="btn btn-warning" @onclick="() => RestoreOrder(item.OrderId)">Khôi Phục</button>
                                                     }
                                                 </td>
                                             </tr>
@@ -93,11 +93,11 @@
             </div>
         </div>
         <div class="col-md-4">
-            <button class="btn btn-success" @onclick="() => CreateOrderItem()">Add OrderItem</button>
+            <button class="btn btn-success" @onclick="() => CreateOrderItem()">Thêm OrderItem</button>
             <hr />
             <h4>OrderItem</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search OrderItem..." @oninput="FilterOrderItem" />
+                <input type="text" class="form-control" placeholder="Tìm Kiếm OrderItem..." @oninput="FilterOrderItem" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -131,12 +131,12 @@
                                             <td class="text-center">
                                                 @if (!item.IsDeleted)
                                                 {
-                                                    <button class="btn btn-primary" @onclick="() => EditOrderItem(item.OrderItemId)">Edit</button>
-                                                    <button class="btn btn-danger" @onclick="() => HideOrderItem(item.OrderItemId)">Hide</button>
+                                                    <button class="btn btn-primary" @onclick="() => EditOrderItem(item.OrderItemId)">Sửa</button>
+                                                    <button class="btn btn-danger" @onclick="() => HideOrderItem(item.OrderItemId)">Ẩn</button>
                                                 }
                                                 else
                                                 {
-                                                    <button class="btn btn-warning" @onclick="() => RestoreOrderItem(item.OrderItemId)">Restore</button>
+                                                    <button class="btn btn-warning" @onclick="() => RestoreOrderItem(item.OrderItemId)">Khôi Phục</button>
                                                 }
                                             </td>
                                         </tr>

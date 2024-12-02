@@ -21,47 +21,103 @@
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateShifte()">Add Shifte</button>
-    <hr />
-    <h4>Shifte</h4>
-    <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Search Shifte..." @oninput="Filter" />
-    </div>
-    <div class="product-table-container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ShifteName</th>
-                    <th>StartTime</th>
-                    <th>EndTime</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in filter)
-                {
-                    if (item != null)
-                    {
+    <div class="col-md-12 row">
+        <div class="col-md-6">
+            <button class="btn btn-success" @onclick="() => CreateShifte()">Thêm Ca Làm</button>
+            <hr />
+            <h4>Ca Làm</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Ca Làm..." @oninput="Filter" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
                         <tr>
-                            <td>@item.ShifteName</td>
-                            <td>@item.StartTime.ToString("HH:mm")</td>
-                            <td>@item.EndTime.ToString("HH:mm")</td>
-                            <td class="text-center">
-                                @if (!item.IsDeleted)
-                                {
-                                    <button class="btn btn-primary" @onclick="() => EditShifte(item.ShifteId)">Edit</button>
-                                    <button class="btn btn-danger" @onclick="() => HideShifte(item.ShifteId)">Hide</button>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-warning" @onclick="() => RestoreShifte(item.ShifteId)">Restore</button>
-                                }
-                            </td>
+                            <th>ShifteName</th>
+                            <th>StartTime</th>
+                            <th>EndTime</th>
+                            <th></th>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filter)
+                        {
+                            if (item != null)
+                            {
+                                <tr>
+                                    <td>@item.ShifteName</td>
+                                    <td>@item.StartTime.ToString("HH:mm")</td>
+                                    <td>@item.EndTime.ToString("HH:mm")</td>
+                                    <td class="text-center">
+                                        @if (!item.IsDeleted)
+                                        {
+                                            <button class="btn btn-primary" @onclick="() => EditShifte(item.ShifteId)">Sửa</button>
+                                            <button class="btn btn-danger" @onclick="() => HideShifte(item.ShifteId)">Ẩn</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-warning" @onclick="() => RestoreShifte(item.ShifteId)">Khôi Phục</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-success" @onclick="() => CreateEmployeeShifte()">Thêm Phân Công Ca Làm</button>
+            <hr />
+            <h4>Phân Công Ca Làm</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Phân Công Ca Làm..." @oninput="FilterEmployee" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ShifteDay</th>
+                            <th>Employee</th>
+                            <th>Shifte</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var itememployee in filteremployee)
+                        {
+                            if (itememployee != null)
+                            {
+                                var connectemployee = listEmployee.FirstOrDefault(e => e.EmployeeId == itememployee.EmployeeId);
+                                if (connectemployee != null)
+                                {
+                                    var connectshifte = listShifte.FirstOrDefault(s => s.ShifteId == itememployee.ShifteId);
+                                    if (connectshifte != null)
+                                    {
+                                        <tr>
+                                            <td>@itememployee.ShifteDay.ToString("MM/dd/yyyy")</td>
+                                            <td>@connectemployee.EmployeeName</td>
+                                            <td>@connectshifte.ShifteName</td>
+                                            <td class="text-center">
+                                                @if (!itememployee.IsDeleted)
+                                                {
+                                                    <button class="btn btn-primary" @onclick="() => EditEmployeeShifte(itememployee.EmployeeShifteId)">Sửa</button>
+                                                    <button class="btn btn-danger" @onclick="() => HideEmployeeShifte(itememployee.EmployeeShifteId)">Ẩn</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-warning" @onclick="() => RestoreEmployeeShifte(itememployee.EmployeeShifteId)">Khôi Phục</button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))

@@ -24,11 +24,11 @@
     <Authorized>
         @if (isLoaded)
         {
-            <button class="btn btn-success" @onclick="() => CreateCategory()">Add Category</button>
+            <button class="btn btn-success" @onclick="() => CreateCategory()">Thêm Danh Mục</button>
             <hr />
-            <h4>Category</h4>
+            <h4>Danh Mục</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search Category..." @oninput="FilterCategories" />
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Danh Mục..." @oninput="FilterCategories" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -45,9 +45,16 @@
                             <tr>
                                 <td>@cate.CategoryName</td>
                                 <td>@cate.CategoryDescription</td>
-                                <td>
-                                    <button class="btn btn-primary" @onclick="() => EditCategory(cate.CategoryId)">Edit</button>
-                                    <button class="btn btn-danger" @onclick="() => DeleteCategory(cate.CategoryId)">Hide</button>
+                                <td class="text-center">
+                                    @if (!cate.IsDeleted)
+                                    {
+                                        <button class="btn btn-primary" @onclick="() => EditCategory(cate.CategoryId)">Sửa</button>
+                                        <button class="btn btn-danger" @onclick="() => HideCategory(cate.CategoryId)">Ẩn</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-warning" @onclick="() => RestoreCategory(cate.CategoryId)">Khôi Phục</button>
+                                    }
                                 </td>
                             </tr>
                         }
