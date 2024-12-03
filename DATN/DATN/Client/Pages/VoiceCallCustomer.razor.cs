@@ -82,6 +82,12 @@ namespace DATN.Client.Pages
                         await JS.InvokeVoidAsync("layout");
                     }
                 }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại");
+                    Navigation.NavigateTo("/login");
+                    return;
+                }
 
                 
             }

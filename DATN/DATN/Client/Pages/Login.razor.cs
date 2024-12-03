@@ -20,12 +20,8 @@ namespace DATN.Client.Pages
     public partial class Login
     {
         private LoginRequest loginUser = new LoginRequest();
-        private bool loginFailed = false;
-        private string currentPassword = string.Empty;
-        private string confirmNewPassword = string.Empty;
         private string Token = "";
         private readonly string url = "/register";
-        private Type CurrentLayout { get; set; }
 
         private async Task HandleLogin()
         {
@@ -63,7 +59,7 @@ namespace DATN.Client.Pages
                         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
                         var user = authState.User;
 
-                        if (user.Identity.IsAuthenticated && (user.IsInRole("1") || user.IsInRole("2") || user.IsInRole("3")))
+                        if (user.Identity.IsAuthenticated && (user.IsInRole("admin") || user.IsInRole("employee")))
                         {
                             var res = await httpClient.PostAsJsonAsync("api/AuthJWT/ManagerToken/", loginUser);
                             if (res.IsSuccessStatusCode)
@@ -77,12 +73,10 @@ namespace DATN.Client.Pages
                                     await _localStorageService.SetItemAsync("AccountId", accountId);
                                 }
                             }
-                            CurrentLayout = typeof(LayoutAdmin);
                             Navigation.NavigateTo("/admin", true);
                         }
                         else
                         {
-                            CurrentLayout = typeof(MainLayout);
                             await _localStorageService.SetItemAsync("userName", Username);
                             await _localStorageService.SetItemAsync("expiryTime", expiryTime);
                             await _localStorageService.SetItemAsync("AccountId", accountId);

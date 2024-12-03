@@ -241,20 +241,22 @@ namespace DATN.Client.Pages
 
             order = await GetProcessingOrderForTable(table.TableId);
 
-            order ??= new Order
+            if(order.OrderId == 0)
             {
-                TableId = table.TableId,
-                EmployeeId = 1,
-                CreateDate = DateTime.Now,
-                TotalAmount = Total, 
-                Status = "Tạo hóa đơn",
-                CustomerId = customer.CustomerId,
-                PaymentMethod = "",
-                Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
-                CustomerVoucherId = null,
-                IsDeleted = false
-            };
-
+                order = new Order
+                {
+                    TableId = table.TableId,
+                    EmployeeId = 1,
+                    CreateDate = DateTime.Now,
+                    TotalAmount = Total,
+                    Status = "Tạo hóa đơn",
+                    CustomerId = customer.CustomerId,
+                    PaymentMethod = "",
+                    Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
+                    CustomerVoucherId = null,
+                    IsDeleted = false
+                };
+            }
 
             await ProcessOrder(order);
         }
@@ -273,45 +275,32 @@ namespace DATN.Client.Pages
             }
           
             order = await GetProcessingOrderForTable(table.TableId);
-
-            order ??= new Order
+            
+            if(order.OrderId == 0)
             {
-                TableId = table.TableId,
-                EmployeeId = 1,
-                CreateDate = DateTime.Now,
-                TotalAmount = Total,
-                Status = "Tạo hóa đơn",
-                CustomerId = customer.CustomerId,
-                PaymentMethod = "",
-                Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
-                CustomerVoucherId = isUseVoucher ? vcId : null,
-                IsDeleted = false
-            };
+                order = new Order
+                {
+                    TableId = table.TableId,
+                    EmployeeId = 1,
+                    CreateDate = DateTime.Now,
+                    TotalAmount = Total,
+                    Status = "Tạo hóa đơn",
+                    CustomerId = customer.CustomerId,
+                    PaymentMethod = "",
+                    Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
+                    CustomerVoucherId = isUseVoucher ? vcId : null,
+                    IsDeleted = false
+                };
+            }
 
             await ProcessOrder(order);
         }
 
         private async Task<Order> GetProcessingOrderForTable(int tableId)
         {
-            var response = await httpClient.PostAsJsonAsync("api/Order/GetOrderStatus", tableId);
+            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}");
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadFromJsonAsync<Order>();
-
-                if(responseContent != null && responseContent.Status.Equals("Đang xử lý"))
-                {
-                    return responseContent;
-                }
-                return null;
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("showAlert","error","Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
-            }
-
-            return null;
+            return order;
         }
 
         private async Task ProcessOrder(Order order)

@@ -26,12 +26,20 @@ namespace DATN.Server.Controllers
             
         }
 
-        [HttpPost("GetOrderStatus")]
-        public ActionResult<Order> GetOrderStatus([FromBody] int tableId)
+        [HttpGet("GetOrderStatus")]
+        public ActionResult<Order> GetOrderStatus([FromQuery] int tableId)
         {
             if (tableId <= 0) {return BadRequest("Value must be...");}
 
             return Ok(_OrderService.GetOrderStatus(tableId));
+        }
+
+        [HttpGet("GetOrderStatusTrans")]
+        public ActionResult<Order> GetOrderStatusTrans([FromQuery] int tableId)
+        {
+            if (tableId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_OrderService.GetOrderStatusTrans(tableId));
         }
 
         [HttpPost("GetOrderInvoice")]

@@ -69,7 +69,7 @@ namespace DATN.Client.Pages.AdminManager
                             await JS.InvokeVoidAsync("showAlert", "success", "Thành công");
                             if (user.Identity.IsAuthenticated && (user.IsInRole("admin")))
                             {
-                                Navigation.NavigateTo("/adminaccount", true);
+                                Navigation.NavigateTo("/Statistic", true);
                             }
                             else
                             {

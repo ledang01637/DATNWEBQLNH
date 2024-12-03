@@ -40,7 +40,7 @@ namespace DATN.Server.Service
         {
             var customer = _context.Customers.Include(a => a.Accounts).FirstOrDefault(a => a.AccountId == accountId);
 
-            return customer;
+            return customer ?? new Customer();
         }
 
         public List<Customer> GetCustomerInclude()

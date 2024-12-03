@@ -39,6 +39,7 @@ namespace DATN.Client.Pages.AdminManager
         private CartNote _cartNote = new();
 
         private decimal TotalAmount = 0;
+        private decimal Amount = 0;
         private bool IsUsing = false;
         private int selectedTableNumber;
         private static int nextRequestId = 1;
@@ -445,15 +446,8 @@ namespace DATN.Client.Pages.AdminManager
                 var resReser = await httpClient.PutAsJsonAsync($"api/Reservation/{getReservation.ReservationId}", getReservation);
 
                 if (!resReser.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật đơn đặt bàn"); return; }
-
-                order.TotalAmount = TotalAmount;
-
             }
-            else
-            {
-                order.TotalAmount = TotalAmount;
-            }
-
+            TotalAmount = order.TotalAmount;
             order.TableId = getTable.TableId;
         }
 
@@ -495,7 +489,7 @@ namespace DATN.Client.Pages.AdminManager
                 order.Note = _cartNote.Note;
 
 
-                if(customer != null && customer.CustomerId > 0)
+                if(customer != null && customer.CustomerId > 0 && customer.Email != "no account")
                 {
                     order.CustomerId = customer.CustomerId;
                     await SaveRewarPointes(order);
@@ -527,10 +521,11 @@ namespace DATN.Client.Pages.AdminManager
                 await GetTableColorAsync(selectedTableNumber);
                 tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
                 StateHasChanged();
+                return;
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không tìn thấy hóa đơn");
             }
 
         }

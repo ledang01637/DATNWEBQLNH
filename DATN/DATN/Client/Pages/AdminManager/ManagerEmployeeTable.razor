@@ -400,7 +400,7 @@ else
                         <li><hr class="dropdown-divider"></li>
                         @if (reservations != null && reservations.Count > 0)
                         {
-                            foreach (var rv in reservations)
+                            foreach (var rv in reservations.OrderByDescending(a => a.CreatedDate))
                             {
                                 <li class="notification-item" @onclick="() => ProcessBookTable(rv.ReservationId,false)">
                                     <div style="text-decoration: none; color: black;">
@@ -637,7 +637,7 @@ else
                                     </div>
                                     <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
                                 </li>
-                                TotalAmount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
+                                Amount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
                             }
                         }
                         @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
@@ -675,7 +675,7 @@ else
                             <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>
                         </li>
                         <li class="list-group-item">
-                            <div class="fw-bold text-end text-danger">Tổng tiền: @TotalAmount.ToString("N0") VND</div>
+                            <div class="fw-bold text-end text-danger">Tổng tiền: @Amount.ToString("N0") VND</div>
                         </li>
                     }
                     else
@@ -882,13 +882,13 @@ else
                         </table>
                         <div class="total-section-bill text-end">
                             @{
-                                TotalAmount = order.TotalAmount;
-                                var totalTax = TotalAmount * 0.1m;
-                                var serviceFee = TotalAmount * 0.05m;
+                                var totalAmount = order.TotalAmount;
+                                var totalTax = totalAmount * 0.1m;
+                                var serviceFee = totalAmount * 0.05m;
                                 var totalPayable = 0m;
 
 
-                                <span>Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @TotalAmount.ToString("N0") VND</span>
+                                <span>Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND</span>
 
                                 <br />
                                 <span> Thuế VAT (10%): @totalTax.ToString("N0") VND</span>                        <br />
@@ -897,16 +897,17 @@ else
                                 {
                                     @if (getReservation != null && getReservation.ReservationId > 0)
                                     {
-                                        TotalAmount = totalPayable = (TotalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
+                                        totalAmount = totalPayable = (totalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
                                         <span>Tiền đặt cọc: @getReservation.DepositPayment.ToString("N0") VND</span>                        <br />
                                         <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
                                     }
                                 }
                                 else
                                 {
-                                    TotalAmount = totalPayable = TotalAmount + totalTax + serviceFee;
-                                    <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
+                                    totalAmount = totalAmount + totalTax + serviceFee;
+                                    <strong>Tổng tiền thanh toán: @totalAmount.ToString("N0") VND</strong>                        <br />
                                 }
+                                TotalAmount = totalAmount;
                             }
 
                         </div>
