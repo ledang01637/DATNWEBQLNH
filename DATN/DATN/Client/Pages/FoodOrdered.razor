@@ -210,7 +210,8 @@
 
                 @if (customerVouchers != null && customerVouchers.Count > 0)
                 {
-                    @foreach (var cv in customerVouchers.Where(a => a.IsUsed == false).ToList())
+                    var now = DateTime.Now;
+                    @foreach (var cv in customerVouchers.Where(a => a.IsUsed == false && a.ExpirationDate > now).ToList())
                     {
                         bool isDisabled = cv.Vouchers.VoucherCode.Equals(Code);
 

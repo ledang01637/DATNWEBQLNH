@@ -4,12 +4,14 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Menu</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Thêm Menu</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
@@ -20,25 +22,25 @@
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="MenuName" class="control-label"><strong>MenuName</strong></label>
-                            <input id="MenuName" @bind="menu.MenuName" class="form-control" placeholder="MenuName" />
+                            <input id="MenuName" @bind="menu.MenuName" class="form-control" placeholder="MenuName" required />
                             <ValidationMessage For="@(() => menu.MenuName)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="PriceCombo" class="control-label"><strong>PriceCombo</strong></label>
-                            <input type="number" id="PriceCombo" @bind="menu.PriceCombo" class="form-control" placeholder="PriceCombo" />
+                            <input type="number" id="PriceCombo" @bind="menu.PriceCombo" class="form-control" placeholder="PriceCombo" required />
                             <ValidationMessage For="@(() => menu.PriceCombo)" />
                         </div>
 
                         <div class="form-group col-md-12 mb-3">
                             <label for="MenuDescription" class="control-label"><strong>MenuDescription</strong></label>
-                            <input id="MenuDescription" @bind="menu.MenuDescription" class="form-control" placeholder="MenuDescription" />
+                            <input id="MenuDescription" @bind="menu.MenuDescription" class="form-control" placeholder="MenuDescription" required />
                             <ValidationMessage For="@(() => menu.MenuDescription)" />
                         </div>
 
                         <div class="form-group text-center mt-3">
-                            <button type="submit" class="btn btn-danger mx-2">Add</button>
-                            <a href="/adminmenu" class="btn btn-secondary mx-2">Back</a>
+                            <button type="submit" class="btn btn-danger mx-2">Sửa</button>
+                            <a href="/adminmenu" class="btn btn-secondary mx-2">Trở Về</a>
                         </div>
                     </EditForm>
 
@@ -108,18 +110,21 @@
             {
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminmenu");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

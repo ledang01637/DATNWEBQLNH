@@ -88,12 +88,31 @@
             <p class="mb-0 text-danger"><strong>@Total.ToString("###,0##") VND</strong></p>
         </div>
         <div class="d-flex justify-content-between mt-2">
-            <button @onclick="Order" type="button" class="btn btn-warning w-100 me-1">
+            <button type="button" class="btn btn-warning w-100 me-1" data-bs-toggle="modal" data-bs-target="#ConfirmOrderModal">
                 Gọi món ăn
             </button>
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="ConfirmOrderModal" tabindex="-1" aria-labelledby="confirmOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmOrderModalLabel">Xác nhận đặt món</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Xác nhận đặt món ? Lưu ý đặt xong sẽ không thay đổi được!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="Order">Đặt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <nav class="navbar fixed-bottom navbar-light bg-light">
     <div class="container-fluid justify-content-around">
         <a href="/" class="nav-link"><i class="bi bi-house"></i></a>

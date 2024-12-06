@@ -1,0 +1,244 @@
+﻿@page "/employee-book-table"
+@using DATN.Client.Service
+@layout EmployeeLayout
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject CartService _cartService
+
+<style>
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .btn-red {
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+    }
+
+        .btn-red:hover {
+            background-color: #ff7875;
+        }
+
+    .btn-outline-danger {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #ff4d4f;
+            color: white;
+        }
+
+    .book-header {
+        border-bottom: 1px solid #bababa;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    h5 {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .btn-group-custom {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    .payment-button {
+        border-radius: 0px !important;
+    }
+
+        .payment-button.active {
+            border-color: #ef4c2b !important;
+            color: #ef4c2b !important;
+        }
+
+    .form-check-custom:checked {
+        background-color: #f0800af5 !important;
+        border-color: orange;
+    }
+
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .order-booking-item {
+        border-bottom: 1px solid rgba(120, 120, 128, .2);
+    }
+
+</style>
+
+<div class="d-flex d-inline-block">
+    <div class="align-items-start">
+        <a href="/" class="link-dark fw-semibold">
+            <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
+        </a>
+    </div>
+    <h5 class="text-center mx-auto mb-4 fw-semibold">Đặt bàn</h5>
+</div>
+
+<div class="container my-3">
+    <div class="row g-4">
+        <!-- Thông tin người đặt -->
+        <div class="col-lg-12">
+            <div class="card">
+                <h5 class="mb-4">Thông tin người đặt</h5>
+                <EditForm Model="@reservationModel" OnValidSubmit="OnSubmitForm">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Tên liên hệ <span class="text-danger">*</span></label>
+                        <InputText id="name" class="form-control" @bind-Value="reservationModel.CustomerName" placeholder=" Nhập tên liên hệ" />
+                        <ValidationMessage For="@(() => reservationModel.CustomerName)" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            <InputText type="tel" id="phone" class="form-control" @bind-Value="reservationModel.CustomerPhone" placeholder="Nhập số điện thoại" />
+                            <ValidationMessage For="@(() => reservationModel.CustomerPhone)" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <InputText class="form-control" placeholder="Nhập email" @bind-Value="reservationModel.CustomerEmail" />
+                            <ValidationMessage For="@(() => reservationModel.CustomerEmail)" class="validation-message" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3 col-md-6 col-6">
+                            <label for="adults" class="form-label icon-label">
+                                <i class="fas fa-user"></i> Người lớn:
+                            </label>
+                            <InputNumber class="form-control" placeholder="Người lớn" @bind-Value="reservationModel.Adults" min="1" max="200" required />
+                            <ValidationMessage For="@(() => reservationModel.Adults)" class="validation-message" />
+                        </div>
+                        <div class="mb-3 col-md-6 col-6">
+                            <label for="children" class="form-label icon-label">
+                                <i class="fas fa-child"></i> Trẻ em:
+                            </label>
+                            <InputNumber class="form-control" placeholder="Trẻ em" @bind-Value="reservationModel.Children" min="0" max="200" />
+                            <ValidationMessage For="@(() => reservationModel.Children)" class="validation-message" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Thời gian đến:</label>
+                        <div class="row">
+                            <div class="col-7">
+                                <input type="date" id="date" @bind="selectedDate" class="form-control mb-2">
+                            </div>
+                            <div class="col-5">
+                                <input type="time" id="time" min="07:00" max="22:00" @bind="selectedTime" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Ghi chú</label>
+                        <InputTextArea id="note" rows="3" @bind-Value="reservationModel.CustomerNote" class="form-control" placeholder="Nhập ghi chú"></InputTextArea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Tiền cọc:</label>
+                        <div class="fs-5 text-danger">Khách hàng vui lòng thanh toán trước khoản tiền cọc để giữ bàn với (số tiền = tổng số người lớn x 50,000). Số tiền sẽ được trừ vào hóa đơn khi khách hàng dùng món tại nhà hàng.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Chọn phương thức thanh toán</label>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn border w-50 me-2 text-muted payment-button active" id="transferBtnId" @onclick="() => ChoosePayMenthodAsync('t')">Chuyển khoản</button>
+                            <button type="button" class="btn border w-50 text-muted payment-button" id="cashBtnId" @onclick="() => ChoosePayMenthodAsync('c')">Tiền mặt</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        Tiếp tục
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ConformInfo" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-fullscreen">
+            <div class="modal-header">
+                <h5 class="card-title">Xác nhận thông tin người đặt</h5>
+                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3 order-booking-item">
+                            <label class="form-label fw-bold">Tên người đặt:</label>
+                            <p>@reservationModel.CustomerName</p>
+                        </div>
+                        <div class="row mb-3 order-booking-item">
+                            <div class="col-md-6 col-6">
+                                <label class="form-label fw-bold">SĐT:</label>
+                                <p>@reservationModel.CustomerPhone</p>
+                            </div>
+                            <div class="col-md-6 col-6">
+                                <label class="form-label fw-bold">Email:</label>
+                                <p>@reservationModel.CustomerEmail</p>
+                            </div>
+                        </div>
+                        <div class="row order-booking-item mb-3">
+                            <div class="col-md-6 col-6">
+                                <label class="form-label fw-bold">Số người lớn:</label>
+                                <p>@reservationModel.Adults</p>
+                            </div>
+                            <div class="col-md-6 col-6 ">
+                                <label class="form-label fw-bold">Số trẻ em:</label>
+                                <p>@reservationModel.Children</p>
+                            </div>
+                        </div>
+                        <div class="mb-3 order-booking-item" style="display: @(string.IsNullOrEmpty(reservationModel.CustomerNote) ? "none" : "")">
+                            <label class="form-label fw-bold">Ghi chú:</label>
+                            <p>@reservationModel.CustomerNote</p>
+                        </div>
+                        <div class="mb-3 order-booking-item">
+                            <label class="form-label fw-bold">Thời gian đến:</label>
+                            <p>@reservationModel.ReservationTime</p>
+                        </div>
+                        <div class="mb-3 order-booking-item">
+                            <label class="form-label fw-bold">Tiền cọc = (Người lớn x 50000):</label>
+                            <p>@reservationModel.DepositPayment.ToString("N0") VNĐ</p>
+                        </div>
+                        <div class="mb-3 order-booking-item">
+                            <label class="form-label fw-bold">Phương thức thanh toán:</label>
+                            <p>@(reservationModel.PaymentMethod == "Cash" ? "Tiền mặt" : "Chuyển khoản")</p>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary w-48" @onclick="HandleBookTableAsync">Xác nhận</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+

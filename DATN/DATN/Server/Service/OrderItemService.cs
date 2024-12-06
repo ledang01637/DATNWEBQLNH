@@ -23,7 +23,7 @@ namespace DATN.Server.Service
         public List<OrderItem> GetOrderItemInclude(int orderId)
         {
             var orderItems = _context.OrderItems
-                .Where(oi => oi.OrderId == orderId)
+                .Where(oi => oi.OrderId == orderId && !oi.IsDeleted)
                 .Include(oi => oi.Products)
                     .ThenInclude(p => p.Units)
                 .ToList();
@@ -80,6 +80,8 @@ namespace DATN.Server.Service
             existing.Quantity = update.Quantity;
             existing.Price = update.Price;
             existing.TotalPrice = update.TotalPrice;
+            existing.IsDeleted = update.IsDeleted;
+
 
             _context.Update(existing);
             _context.SaveChanges();

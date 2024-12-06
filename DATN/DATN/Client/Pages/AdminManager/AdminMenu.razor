@@ -20,52 +20,108 @@
     }
 </style>
 
-<AuthorizeView Roles="1,2">
+<AuthorizeView Roles="admin">
     <Authorized>
         @if (isLoaded)
         {
-            <button class="btn btn-success" @onclick="() => CreateMenu()">Add Menu</button>
-            <hr />
-            <h4>Menu</h4>
-            <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search Menu..." @oninput="Filter" />
-            </div>
-            <div class="product-table-container">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>MenuName</th>
-                            <th>PriceCombo</th>
-                            <th>MenuDescription</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var item in filter)
-                        {
-                            if (item != null)
-                            {
+            <div class="col-md-12 row">
+                <div class="col-md-6">
+                    <button class="btn btn-success" @onclick="() => CreateMenu()">Thêm Menu</button>
+                    <hr />
+                    <h4>Menu</h4>
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Tìm Kiếm Menu..." @oninput="Filter" />
+                    </div>
+                    <div class="product-table-container">
+                        <table class="table table-striped">
+                            <thead>
                                 <tr>
-                                    <td>@item.MenuName</td>
-                                    <td>@item.PriceCombo</td>
-                                    <td>@item.MenuDescription</td>
-                                    <td class="text-center">
-                                        @if (!item.IsDeleted)
-                                        {
-                                            <button class="btn btn-primary" @onclick="() => EditMenu(item.MenuId)">Edit</button>
-                                            <button class="btn btn-danger" @onclick="() => Hide(item.MenuId)">Hide</button>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-warning" @onclick="() => Restore(item.MenuId)">Restore</button>
-                                        }
-                                    </td>
+                                    <th>MenuName</th>
+                                    <th>PriceCombo</th>
+                                    <th>MenuDescription</th>
+                                    <th></th>
                                 </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in filter)
+                                {
+                                    if (item != null)
+                                    {
+                                        <tr>
+                                            <td>@item.MenuName</td>
+                                            <td>@item.PriceCombo</td>
+                                            <td>@item.MenuDescription</td>
+                                            <td class="text-center">
+                                                @if (!item.IsDeleted)
+                                                {
+                                                    <button class="btn btn-primary" @onclick="() => EditMenu(item.MenuId)">Sửa</button>
+                                                    <button class="btn btn-danger" @onclick="() => HideMenu(item.MenuId)">Ẩn</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-warning" @onclick="() => RestoreMenu(item.MenuId)">Khôi Phục</button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-success" @onclick="() => CreateMenuItem()">Thêm MenuItem</button>
+                    <hr />
+                    <h4>MenuItem</h4>
+                    <div class="search-bar">
+                        <input type="text" class="form-control" placeholder="Tìm Kiếm MenuItem..."  @oninput="FilterMenuItem" />
+                    </div>
+                    <div class="product-table-container">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Menu</th>
+                                    <th>Product</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in filtermenuitem)
+                                {
+                                    if (item != null)
+                                    {
+                                        var connectMenu = listMenu.FirstOrDefault(p => p.MenuId == item.MenuId);
+
+                                        if (connectMenu != null)
+                                        {
+                                            var connectProduct = listProduct.FirstOrDefault(p => p.ProductId == item.ProductId);
+
+                                            if (connectProduct != null)
+                                            {
+                                                <tr>
+                                                    <td>@connectMenu.MenuName</td>
+                                                    <td>@connectProduct.ProductName</td>
+                                                    <td class="text-center">
+                                                        @if (!item.IsDeleted)
+                                                        {
+                                                            <button class="btn btn-primary" @onclick="() => EditMenuItem(item.MenuItemId)">Sửa</button>
+                                                            <button class="btn btn-danger" @onclick="() => HideMenuItem(item.MenuItemId)">Ẩn</button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button class="btn btn-warning" @onclick="() => RestoreMenuItem(item.MenuItemId)">Khôi Phục</button>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         }
         else if (!string.IsNullOrEmpty(errorMessage))

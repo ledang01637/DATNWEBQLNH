@@ -1,0 +1,146 @@
+
+@page "/editmenuitem/{MenuItemId:int}"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Chỉnh Sửa MenuItem</h5>
+            </div>
+            <div class="card-body col-md-12 m-auto">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@menuitem" OnValidSubmit="EditMenuItem">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ProductId" class="control-label"><strong>ProductId</strong></label>
+                            <select id="ProductId" @bind="menuitem.ProductId" class="form-control">
+                                <option value="">Chọn Account</option>
+                                @if (products != null && products.Any())
+                                {
+                                    @foreach (var product in products)
+                                    {
+                                        <option value="@product.ProductId">@product.ProductName</option>
+                                    }
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => menuitem.ProductId)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="MenuId" class="control-label"><strong>MenuId</strong></label>
+                            <select id="MenuId" @bind="menuitem.MenuId" class="form-control">
+                                <option value="">Chọn Account</option>
+                                @if (menus != null && menus.Any())
+                                {
+                                    @foreach (var menu in menus)
+                                    {
+                                        <option value="@menu.MenuId">@menu.MenuName</option>
+                                    }
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => menuitem.MenuId)" />
+                        </div>
+
+
+                        <div class="form-group col-md-12 mb-3" hidden>
+                            <label for="IsDeleted" class="control-label"><strong>IsDeleted</strong></label>
+                            <input id="IsDeleted" @bind="menuitem.IsDeleted" class="form-control" placeholder="IsDeleted" />
+                            <ValidationMessage For="@(() => menuitem.IsDeleted)" />
+                        </div>
+
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Sửa</button>
+                            <a href="/adminmenu" class="btn btn-secondary mx-2">Trở Về</a>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int MenuItemId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.MenuItem menuitem = new DATN.Shared.MenuItem();
+    private List<Product> products = new List<Product>();
+    private List<Menu> menus = new List<Menu>();
+    private IBrowserFile selectedFile;
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+        isLoaded = true;
+    }
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            products = await httpClient.GetFromJsonAsync<List<DATN.Shared.Product>>("api/Product/GetProduct");
+            menus = await httpClient.GetFromJsonAsync<List<DATN.Shared.Menu>>("api/Menu/GetMenu");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách tài khoản: {ex.Message}";
+        }
+    }
+
+    private async Task EditMenuItem()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/MenuItem/{MenuItemId}", menuitem);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
+                Navigation.NavigateTo("/adminmenu");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+        }
+
+        StateHasChanged();
+    }
+}

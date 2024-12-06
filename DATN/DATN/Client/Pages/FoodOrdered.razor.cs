@@ -200,12 +200,8 @@ namespace DATN.Client.Pages
 
             order = await GetOrderForTable(tableId);
 
-            if(order == null) {
+            if(order == null || order.OrderId <= 0) {
 
-                order = new Order()
-                {
-                    TotalAmount = 0,
-                };
                 await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo" ,"Vui lòng đặt món ăn"); 
 
                 return; 
@@ -271,25 +267,28 @@ namespace DATN.Client.Pages
 
         private async Task<Order> GetOrderForTable(int tableId)
         {
-            var response = await httpClient.PostAsJsonAsync("api/Order/GetOrderStatus", tableId);
+            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}");
 
-            if (response.IsSuccessStatusCode)
+            return order;
+        }
+
+        private bool IsCompleteAllProd(int tableNumber)
+        {
+            var notePR = NoteProdReq.noteProdReqs[tableNumber];
+
+            if (notePR == null || notePR.ProdReqs.Count == 0)
             {
-                var responseContent = await response.Content.ReadFromJsonAsync<Order>();
+                return true;
+            }
 
-                if (responseContent != null && responseContent.Status.Equals("Đang xử lý"))
+            foreach (var i in notePR.ProdReqs)
+            {
+                if (!i.IsComplete)
                 {
-                    return responseContent;
+                    return false;
                 }
-                return null;
             }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
-                return null;
-
-            }
+            return true;
         }
 
         private async Task Payment()
@@ -319,9 +318,10 @@ namespace DATN.Client.Pages
 
                         if (voucher != null && voucher.VoucherId > 0)
                         {
-                            if(order.Status.Equals("Đang chờ xác nhận")){ await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hóa đơn đang chờ nhân viên xác nhận bạn vui lòng đợi tý nhé"); return; }
+                            if(order.Status.Equals("Đang xác nhận")){ await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hóa đơn đang chờ nhân viên xác nhận bạn vui lòng đợi tý nhé"); return; }
+
                             order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
-                            order.Status = "Đang chờ xác nhận";
+                            order.Status = "Đang xác nhận";
                             var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 
                             if (response.IsSuccessStatusCode)
@@ -351,11 +351,16 @@ namespace DATN.Client.Pages
                                 return;
                             }
                         }
+                        if (payMenthod == 't')
+                        {
+                            await Transfer(order);
+                            return;
+                        }
                     }
+
                     carts.Clear();
                     await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
-                    await JS.InvokeVoidAsync("showAlert", "success", "Gọi nhân viên thành công", "Bạn vui lòng đợi giây lát nhé");
-
+                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Bạn vui lòng đợi giây lát");
                     Navigation.NavigateTo("/");
                 }
                 else
@@ -363,9 +368,10 @@ namespace DATN.Client.Pages
                     await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán", ex.Message);
+                Console.WriteLine("Lỗi: " + ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán","Vui lòng liên hệ Admin");
             }
         }
 
@@ -374,10 +380,10 @@ namespace DATN.Client.Pages
             var vnpRequest = new VNPayRequest
             {
                 OrderId = new Random().Next(10000, 99999),
-                Amount = order.TotalAmount,
-                Description = "Thanh toán đặt bàn",
+                Amount = (long)order.TotalAmount,
+                Description = "Thanh toán hóa đơn",
                 CreatedDate = DateTime.Now,
-                FullName = "",
+                FullName = "no name",
             };
 
             var response = await httpClient.PostAsJsonAsync("api/VNPay/CreateUrlVNPay", vnpRequest);

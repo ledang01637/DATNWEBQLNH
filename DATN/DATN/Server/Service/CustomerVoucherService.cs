@@ -31,7 +31,8 @@ namespace DATN.Server.Service
 
         public CustomerVoucher GetCustomerVoucherExist(int customerId, int voucherId)
         {
-            var customerVoucher = _context.CustomerVouchers.FirstOrDefault(a => a.CustomerId == customerId &&  a.VoucherId == voucherId && !a.IsUsed);
+            var now = DateTime.Now;
+            var customerVoucher = _context.CustomerVouchers.FirstOrDefault(a => a.CustomerId == customerId &&  a.VoucherId == voucherId && !a.IsUsed && a.ExpirationDate > now);
             return customerVoucher ?? new CustomerVoucher();
         }
 

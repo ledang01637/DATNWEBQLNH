@@ -1,0 +1,140 @@
+
+@page "/editvoucher/{VoucherId:int}"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Chỉnh Sửa Voucher</h5>
+            </div>
+            <div class="card-body col-md-12 m-auto">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@voucher" OnValidSubmit="EditVoucher" Context="editFormContext">
+                        <DataAnnotationsValidator />
+                        <div class="text-danger mb-3">
+                            <ValidationSummary />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="VoucherCode" class="control-label"><strong>Voucher Code</strong></label>
+                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" required />
+                            <ValidationMessage For="@(() => voucher.VoucherCode)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="PointRequired" class="control-label"><strong>PointRequired</strong></label>
+                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" required />
+                            <ValidationMessage For="@(() => voucher.PointRequired)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="DiscountValue" class="control-label"><strong>DiscountValue</strong></label>
+                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" required />
+                            <ValidationMessage For="@(() => voucher.DiscountValue)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ExpriationDate" class="control-label"><strong>PointRequired</strong></label>
+                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" required />
+                            <ValidationMessage For="@(() => voucher.ExpriationDate)" />
+                        </div>
+
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Sửa</button>
+                            <a href="/adminunit" class="btn btn-secondary mx-2">Trở Về</a>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int VoucherId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.Voucher voucher = new DATN.Shared.Voucher();
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEditVoucher();
+        isLoaded = true;
+    }
+
+    private async Task LoadEditVoucher()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<Voucher>($"api/Voucher/{VoucherId}");
+            if (response != null)
+            {
+                voucher = response;
+            }
+            else
+            {
+                errorMessage = "Không tìm thấy món ăn.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task EditVoucher()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Voucher/{VoucherId}", voucher);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
+                Navigation.NavigateTo("/adminvoucher");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật món ăn: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+        }
+
+        StateHasChanged();
+    }
+}

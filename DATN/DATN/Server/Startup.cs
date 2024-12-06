@@ -80,10 +80,6 @@ namespace DATN.Server
                 facebookOptions.CallbackPath = "/signin-facebook";
             });
 
-            //ConnectDB
-            services.AddDbContext<AppDBContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             services.AddScoped<AccountService>();
             services.AddScoped<CategoryService>();
             services.AddScoped<CustomerService>();
@@ -109,6 +105,13 @@ namespace DATN.Server
             services.AddScoped<MessageService>();
             services.AddScoped<VNPayService>();
             services.AddScoped<TransactionService>();
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnect"))
@@ -157,6 +160,7 @@ namespace DATN.Server
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("AllowAllOrigins");

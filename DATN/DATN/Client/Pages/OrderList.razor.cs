@@ -24,10 +24,7 @@ namespace DATN.Client.Pages
         private List<Customer> customers = new();
         private Customer customer = new();
         private List<Table> tables = new();
-        private Order order = new Order();
-        private OrderItem orderItem = new();
-        private List<RewardPointe> rewardPointes = new();
-        private RewardPointe rewardPointe = new();
+        private Order order = new();
 
         private bool isSaveOrder = false;
         private bool isUseVoucher = false;
@@ -120,6 +117,7 @@ namespace DATN.Client.Pages
         #region Order
         private async Task Order()
         {
+            await JS.InvokeVoidAsync("closeModal", "ConfirmOrderModal");
             if (Carts != null && Carts.Count > 0)
             {
                 try
@@ -206,16 +204,21 @@ namespace DATN.Client.Pages
                             };
                             carts.Add(cartDto);
                         }
-
-                        table.Status = "Đang dùng";
+                        if(table.Status != "inusebooktable")
+                        {
+                            table.Status = "occupied";
+                        }
 
                         var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
 
                         if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
 
-                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note);
+                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note,order.OrderId);
 
-                        await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm nha :3");
+                        await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm");
+                        Carts.Clear();
+                        await _cartService.SaveCartAsync(Carts);
+                        Navigation.NavigateTo("/");
                     }
                 }
                 else
@@ -238,20 +241,22 @@ namespace DATN.Client.Pages
 
             order = await GetProcessingOrderForTable(table.TableId);
 
-            order ??= new Order
+            if(order.OrderId == 0)
             {
-                TableId = table.TableId,
-                EmployeeId = 1,
-                CreateDate = DateTime.Now,
-                TotalAmount = Total, 
-                Status = "Tạo hóa đơn",
-                CustomerId = customer.CustomerId,
-                PaymentMethod = "",
-                Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
-                CustomerVoucherId = null,
-                IsDeleted = false
-            };
-
+                order = new Order
+                {
+                    TableId = table.TableId,
+                    EmployeeId = 1,
+                    CreateDate = DateTime.Now,
+                    TotalAmount = Total,
+                    Status = "Tạo hóa đơn",
+                    CustomerId = customer.CustomerId,
+                    PaymentMethod = "",
+                    Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
+                    CustomerVoucherId = null,
+                    IsDeleted = false
+                };
+            }
 
             await ProcessOrder(order);
         }
@@ -270,45 +275,32 @@ namespace DATN.Client.Pages
             }
           
             order = await GetProcessingOrderForTable(table.TableId);
-
-            order ??= new Order
+            
+            if(order.OrderId == 0)
             {
-                TableId = table.TableId,
-                EmployeeId = 1,
-                CreateDate = DateTime.Now,
-                TotalAmount = Total,
-                Status = "Tạo hóa đơn",
-                CustomerId = customer.CustomerId,
-                PaymentMethod = "",
-                Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
-                CustomerVoucherId = isUseVoucher ? vcId : null,
-                IsDeleted = false
-            };
+                order = new Order
+                {
+                    TableId = table.TableId,
+                    EmployeeId = 1,
+                    CreateDate = DateTime.Now,
+                    TotalAmount = Total,
+                    Status = "Tạo hóa đơn",
+                    CustomerId = customer.CustomerId,
+                    PaymentMethod = "",
+                    Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
+                    CustomerVoucherId = isUseVoucher ? vcId : null,
+                    IsDeleted = false
+                };
+            }
 
             await ProcessOrder(order);
         }
 
         private async Task<Order> GetProcessingOrderForTable(int tableId)
         {
-            var response = await httpClient.PostAsJsonAsync("api/Order/GetOrderStatus", tableId);
+            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}");
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadFromJsonAsync<Order>();
-
-                if(responseContent != null && responseContent.Status.Equals("Đang xử lý"))
-                {
-                    return responseContent;
-                }
-                return null;
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                await JS.InvokeVoidAsync("showAlert","error","Lỗi", $"Lỗi khi gọi API: {response.StatusCode} - Nội dung: {errorContent}");
-            }
-
-            return null;
+            return order;
         }
 
         private async Task ProcessOrder(Order order)

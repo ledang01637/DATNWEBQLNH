@@ -21,6 +21,12 @@ namespace DATN.Server.Service
             return _context.Tables.ToList();
         }
 
+        public List<Table> GetTableEmplty()
+        {
+            var tables = _context.Tables.Where(a => !a.IsDeleted && a.Status == "empty").ToList();
+            return tables ?? new List<Table>();
+        }
+
         public Table GetTableByNumber(int numberTable)
         {
             var table = _context.Tables.FirstOrDefault(a => a.TableNumber == numberTable);

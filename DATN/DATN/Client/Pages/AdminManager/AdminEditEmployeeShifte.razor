@@ -1,0 +1,186 @@
+
+@page "/editemployeeshifte/{EmployeeShifteId:int}"
+@using DATN.Shared
+@layout LayoutAdmin
+@inject HttpClient httpClient
+@inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Chỉnh Sửa Phân Công Ca Làm</h5>
+            </div>
+            <div class="card-body col-md-12 m-auto">
+                @if (isLoaded)
+                {
+                    <EditForm Model="@employeeshifte" OnValidSubmit="EditEmployeeShifte">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ShifteDay" class="control-label"><strong>ShifteDay</strong></label>
+                            <input type="date" id="ShifteDay" @bind="employeeshifte.ShifteDay" class="form-control" placeholder="ShifteDay" required />
+                            <ValidationMessage For="@(() => employeeshifte.ShifteDay)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="EmployeeId" class="control-label"><strong>EmployeeId</strong></label>
+                            <select id="EmployeeId" @bind="employeeshifte.EmployeeId" class="form-control">
+                                <option value="">Chọn employee</option>
+                                @if (employees != null && employees.Any())
+                                {
+                                    @foreach (var employee in employees)
+                                    {
+                                        <option value="@employee.EmployeeId" selected="@(employee.EmployeeId == employeeshifte.EmployeeId ? true : false)">
+                                            @employee.EmployeeName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => employeeshifte.EmployeeId)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="ShifteId" class="control-label"><strong>ShifteId</strong></label>
+                            <select id="ShifteId" @bind="employeeshifte.ShifteId" class="form-control">
+                                <option value="">Chọn shifte</option>
+                                @if (shiftes != null && shiftes.Any())
+                                {
+                                    @foreach (var shifte in shiftes)
+                                    {
+                                        <option value="@shifte.ShifteId" selected="@(shifte.ShifteId == employeeshifte.ShifteId ? true : false)">
+                                            @shifte.ShifteName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => employeeshifte.ShifteId)" />
+                        </div>
+
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Sửa</button>
+                            <a href="/adminshifte" class="btn btn-secondary mx-2">Trở Về</a>
+                        </div>
+                    </EditForm>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 text-center">
+                            @successMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 text-center">
+                            @errorMessage
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Loading...</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int EmployeeShifteId { get; set; }
+
+    private string errorMessage;
+    private string successMessage;
+    private DATN.Shared.EmployeeShifte employeeshifte = new DATN.Shared.EmployeeShifte();
+    private List<DATN.Shared.Employee> employees = new List<DATN.Shared.Employee>();
+    private List<DATN.Shared.Shifte> shiftes = new List<DATN.Shared.Shifte>();
+    private bool isLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEmployees();
+        await LoadShiftes();
+        await LoadEmployeeShifte(); // Tải thông tin của EmployeeShifte theo EmployeeShifteId
+        isLoaded = true;
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Employee>>("api/Employee/GetEmployee");
+            if (response != null)
+            {
+                employees = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách nhân viên: {ex.Message}";
+        }
+    }
+
+    private async Task LoadShiftes()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<List<Shifte>>("api/Shifte/GetShifte");
+            if (response != null)
+            {
+                shiftes = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy danh sách ca làm việc: {ex.Message}";
+        }
+    }
+
+    // Hàm này sẽ tải thông tin của EmployeeShifte theo EmployeeShifteId
+    private async Task LoadEmployeeShifte()
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<EmployeeShifte>($"api/EmployeeShifte/{EmployeeShifteId}");
+            if (response != null)
+            {
+                employeeshifte = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi khi lấy thông tin EmployeeShifte: {ex.Message}";
+        }
+    }
+
+    private async Task EditEmployeeShifte()
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/EmployeeShifte/{EmployeeShifteId}", employeeshifte);
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Cập nhật thành công!";
+                errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
+                Navigation.NavigateTo("/adminshifte");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Lỗi khi cập nhật: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+            successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
+        }
+
+        StateHasChanged();
+    }
+}

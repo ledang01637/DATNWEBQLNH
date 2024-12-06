@@ -22,68 +22,132 @@
 
 @if (isLoaded)
 {
-    <button class="btn btn-success" @onclick="() => CreateOrder()">Add Order</button>
-    <hr />
-    <h4>Order</h4>
-    <div class="search-bar">
-        <input type="text" class="form-control" placeholder="Search Order..." @* @oninput="Filter" *@ />
-    </div>
-    <div class="product-table-container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>CustomerName</th>
-                    <th>TableId</th>
-                    <th>OrderDate</th>
-                    <th>ProductName</th>
-                    <th>Quantity</th>
-                    <th>TotalPrice</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in filter)
-                {
-                    if (item != null)
-                    {
-                        var connectOrderItem = listOrderItem.FirstOrDefault(p => p.OrderId == item.OrderId);
-
-                        if (connectOrderItem != null)
+    <div class="col-md-12 row">
+        <div class="col-md-8">
+            <button class="btn btn-success" @onclick="() => CreateOrder()">Thêm Hóa Đơn</button>
+            <hr />
+            <h4>Hóa Đơn</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Hóa Đơn..." @oninput="Filter" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>CustomerName</th>
+                            <th>TableId</th>
+                            <th>OrderDate</th>
+                            <th>TotalAmount</th>
+                            <th>Status</th>
+                            <th>CustomerId</th>
+                            <th>Note</th>
+                            <th>CustomerVoucherId</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filter)
                         {
-                            var connectProduct = listProduct.FirstOrDefault(p => p.ProductId == connectOrderItem.ProductId);
-
-                            if (connectProduct != null)
+                            if (item != null)
                             {
-                                var connectCustomer = listCustomer.FirstOrDefault(p => p.CustomerId == item.CustomerId);
+                                var connectOrderItem = listOrderItem.FirstOrDefault(p => p.OrderId == item.OrderId);
 
-                                if (connectCustomer != null)
+                                if (connectOrderItem != null)
                                 {
-                                    <tr>
-                                        <td>@connectCustomer.CustomerName</td>
-                                        <td>@item.TableId</td>
-                                        <td>@item.CreateDate</td>
-                                        <td>@connectProduct.ProductName</td>
-                                        <td>@connectOrderItem.Quantity</td>
-                                        <td>@connectOrderItem.TotalPrice</td>
-@*                                         <td class="text-center">
-                                            @if (!item.IsDelete)
-                                            {
-                                                <button class="btn btn-primary" @onclick="() => EditMenuItem(item.MenuItemId)">Sửa</button>
-                                                <button class="btn btn-danger" @onclick="() => Hide(item.MenuItemId)">Ẩn</button>
-                                            }
-                                            else
-                                            {
-                                                <button class="btn btn-warning" @onclick="() => Restore(item.MenuItemId)">Khôi phục</button>
-                                            }
-                                        </td> *@
-                                    </tr>
+                                    var connectProduct = listProduct.FirstOrDefault(p => p.ProductId == connectOrderItem.ProductId);
+
+                                    if (connectProduct != null)
+                                    {
+                                        var connectCustomer = listCustomer.FirstOrDefault(p => p.CustomerId == item.CustomerId);
+
+                                        if (connectCustomer != null)
+                                        {
+                                            <tr>
+                                                <td>@connectCustomer.CustomerName</td>
+                                                <td>@item.TableId</td>
+                                                <td>@item.CreateDate.ToString("MM/dd/yyyy")</td>
+                                                <td>@item.TotalAmount</td>
+                                                <td>@item.Status</td>
+                                                <td>@item.CustomerId</td>
+                                                <td>@item.Note</td>
+                                                <td>@item.CustomerVoucherId</td>
+                                                <td class="text-center">
+                                                    @if (!item.IsDeleted)
+                                                    {
+                                                        <button class="btn btn-primary" @onclick="() => EditOrder(item.OrderId)">Sửa</button>
+                                                        <button class="btn btn-danger" @onclick="() => HideOrder(item.OrderId)">Ẩn</button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-warning" @onclick="() => RestoreOrder(item.OrderId)">Khôi Phục</button>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                }
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success" @onclick="() => CreateOrderItem()">Thêm OrderItem</button>
+            <hr />
+            <h4>OrderItem</h4>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Tìm Kiếm OrderItem..." @oninput="FilterOrderItem" />
+            </div>
+            <div class="product-table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ProductName</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>TotalPrice</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filterorderitem)
+                        {
+                            if (item != null)
+                            {
+                                var connectOrderItem = listOrderItem.FirstOrDefault(p => p.OrderId == item.OrderId);
+
+                                if (connectOrderItem != null)
+                                {
+                                    var connectProduct = listProduct.FirstOrDefault(p => p.ProductId == connectOrderItem.ProductId);
+
+                                    if (connectProduct != null)
+                                    {
+                                        <tr>
+                                            <td>@connectProduct.ProductName</td>
+                                            <td>@connectOrderItem.Quantity</td>
+                                            <td>@connectOrderItem.Price</td>
+                                            <td>@connectOrderItem.TotalPrice</td>
+                                            <td class="text-center">
+                                                @if (!item.IsDeleted)
+                                                {
+                                                    <button class="btn btn-primary" @onclick="() => EditOrderItem(item.OrderItemId)">Sửa</button>
+                                                    <button class="btn btn-danger" @onclick="() => HideOrderItem(item.OrderItemId)">Ẩn</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-warning" @onclick="() => RestoreOrderItem(item.OrderItemId)">Khôi Phục</button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 }
 else if (!string.IsNullOrEmpty(errorMessage))

@@ -90,7 +90,7 @@ namespace DATN.Client.Pages.AdminManager
         private void SetDefaultTableProperties()
         {
             tableModel.IsDeleted = false;
-            tableModel.Status = "Bàn trống";
+            tableModel.Status = "empty";
             tableModel.Position = $"{row} - {column}";
         }
 

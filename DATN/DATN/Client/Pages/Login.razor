@@ -7,9 +7,10 @@
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject LocalStorageService _localStorageService
 
-
 <style>
-
+    body{
+        background: #F2F2F2;
+    }
     .btn-primary-custom, .btn-secondary-custom {
         border: none;
         border-radius: 20px;
@@ -34,12 +35,18 @@
         background-color: #e67e22;
     }
 
-    .mobile-footer {
-        display: none !important;
-    }
-
     .custom-link:hover{
         cursor: pointer;
+    }
+
+    .login-container {
+        position: relative;
+        max-width: 400px;
+        width: 100%;
+        background: #fff; /* Card background */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
 
@@ -49,7 +56,7 @@
     </a>
 </div>
 
-<div class="position-absolute top-50 start-50 translate-middle p-4 shadow rounded ms-2" style="width: 100%; max-width: 400px; background: #fff">
+<div class="position-absolute start-50 translate-middle p-4 shadow rounded ms-2" style="width: 100%; max-width: 400px; background: #fff; top: 35%;">
     <h3 class="text-center mb-4">Đăng nhập</h3>
     <EditForm Model="@loginUser" OnValidSubmit="HandleLogin">
         <DataAnnotationsValidator />
@@ -85,12 +92,3 @@
         </div>
     </EditForm>
 </div>
-
-
-
-
-
-
-
-
-

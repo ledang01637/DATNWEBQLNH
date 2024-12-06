@@ -142,21 +142,25 @@
                                 <input type="date" id="date" @bind="selectedDate" class="form-control mb-2">
                             </div>
                             <div class="col-5">
-                                <input type="time" id="time" @bind="selectedTime" class="form-control">
+                                <input type="time" id="time" min="07:00" max="22:00" @bind="selectedTime" class="form-control">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="note" class="form-label">Ghi chú</label>
+                        <label for="note" class="form-label">Ghi chú:</label>
                         <InputTextArea id="note" rows="3" @bind-Value="reservationModel.CustomerNote" class="form-control" placeholder="Nhập ghi chú"></InputTextArea>
                     </div>
 
                     <div class="mb-3">
-                        <label for="note" class="form-label">Phương thức thanh toán</label>
+                        <label for="note" class="form-label">Tiền cọc:</label>
+                        <div class="fs-5 text-danger">Khách hàng vui lòng thanh toán trước khoản tiền cọc để giữ bàn với (số tiền = tổng số người lớn x 50,000). Số tiền sẽ được trừ vào hóa đơn khi khách hàng dùng món tại nhà hàng.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Phương thức thanh toán:</label>
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn border w-50 me-2 text-muted payment-button active" id="transferBtnId" @onclick="() => ChoosePayMenthodAsync('t')">Chuyển khoản</button>
-                            <button type="button" class="btn border w-50 text-muted payment-button" id="cashBtnId" @onclick="() => ChoosePayMenthodAsync('c')">Tiền mặt</button>
+                            <button type="button" class="btn border w-50 me-2 text-muted payment-button active" id="transferBtnId" @onclick="() => ChoosePayMenthodAsync('t')">Chuyển khoản VNPay</button>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100" >
@@ -170,7 +174,7 @@
 
 <div class="modal fade" id="ConformInfo" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-fullscreen">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="card-title">Xác nhận thông tin người đặt</h5>
                 <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

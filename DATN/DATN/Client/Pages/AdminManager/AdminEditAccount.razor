@@ -3,14 +3,16 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">Edit Account</h5>
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Chỉnh Sửa Tài Khoản</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
                     <EditForm Model="@account" OnValidSubmit="EditAccount" Context="editFormContext">
@@ -19,40 +21,54 @@
                             <ValidationSummary />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="AccountType" class="control-label"><strong>AccountType</strong></label>
-                            <input id="AccountType" @bind="account.AccountType" class="form-control" placeholder="AccountType" />
+                            <input id="AccountType" @bind="account.AccountType" class="form-control bg-dark" placeholder="AccountType" readonly/>
                             <ValidationMessage For="@(() => account.AccountType)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="CreateDate" class="control-label"><strong>CreateDate</strong></label>
-                            <input type="date" id="CreateDate" @bind="account.CreateDate" class="form-control" placeholder="CreateDate" required />
+                            <input type="date" id="CreateDate" @bind="account.CreateDate" class="form-control bg-dark" placeholder="CreateDate" required />
                             <ValidationMessage For="@(() => account.CreateDate)" />
                         </div>
 
-                        <div class="form-group">
-                            <label for="Email" class="control-label"><strong>Email</strong></label>
-                            <input type="email" id="Email" @bind="account.Email" class="form-control" placeholder="Email" />
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="UpdateDate" class="control-label"><strong>UpdateDate</strong></label>
+                            <input type="date" id="UpdateDate" @bind="account.UpdateDate" class="form-control bg-dark" placeholder="UpdateDate" required />
+                            <ValidationMessage For="@(() => account.UpdateDate)" />
+                        </div>
+
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="CustomerId" class="control-label"><strong>UserName</strong></label>
+                            <input id="CustomerId" @bind="account.Email" class="form-control bg-dark" placeholder="UserName" required />
                             <ValidationMessage For="@(() => account.Email)" />
                         </div>
 
+                        <div class="form-group col-md-12 mb-3">
+                            <label for="Password" class="control-label"><strong>Password</strong></label>
+                            <input type="password" id="Password" @bind="account.Password" class="form-control bg-dark" placeholder="Password" required />
+                            <ValidationMessage For="@(() => account.Password)" />
+                        </div>
+
+
                         <div class="form-group text-center">
                             <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Update</button>
-                                <a href="/adminaccount" class="btn btn-secondary mx-2">Back</a>
+                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                                <a href="/adminaccount" class="btn btn-secondary mx-2">Trở Lại</a>
                             </div>
                         </div>
                     </EditForm>
+
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -102,6 +118,34 @@
 
     private async Task EditAccount()
     {
+
+        var checkResponse = await httpClient.GetAsync($"api/Account/{account.AccountId}");
+        if (checkResponse.IsSuccessStatusCode)
+        {
+            var isNameExists = await checkResponse.Content.ReadAsStringAsync();
+            if (bool.TryParse(isNameExists, out bool exists) && exists)
+            {
+                errorMessage = "Tên tài khoản đã tồn tại";
+                successMessage = string.Empty;
+                return;
+            }
+        }
+
+        if (account.UpdateDate < account.CreateDate)
+        {
+            errorMessage = "Thời gian cập nhật phải lớn hơn hoặc bằng thời gian tạo";
+            successMessage = string.Empty;
+            return;
+        }
+
+
+        if (account.Password.Length < 6)
+        {
+            errorMessage = "Mật khẩu không ít hơn 6 kí tự";
+            successMessage = string.Empty;
+            return;
+        }
+
         try
         {
             var response = await httpClient.PutAsJsonAsync($"api/Account/{AccountId}", account);
@@ -110,18 +154,21 @@
             {
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminaccount");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi cập nhật account: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

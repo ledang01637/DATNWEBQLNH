@@ -16,9 +16,11 @@ namespace DATN.Client.Pages
 {
     public partial class LoadQR
     {
-        private Table table = new Table();
-        private List<Table> tables = new List<Table>();
-        private QR qR = new QR();
+        private Table table = new();
+        private List<Table> tables = new();
+        private QR qR = new();
+        private bool isBookTable = false;
+        private bool isLoad = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -31,6 +33,7 @@ namespace DATN.Client.Pages
         }
         private async Task ProcessMd5Value(string md5)
         {
+            isLoad = true;
             try
             {
                 tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
@@ -52,6 +55,15 @@ namespace DATN.Client.Pages
 
                     if (qRResponse != null && qRResponse.IsSuccessFull)
                     {
+                        int numberTable = GetTableNumberFromToken(qRResponse.Token);
+
+                        var table = await CheckBookTableAsync(numberTable);
+
+                        if(table != null && table.Status.Equals("availableuntil")) 
+                        {
+                            isBookTable = true;
+                            return;
+                        }
                         await _localStorageService.SetItemAsync("n", qRResponse.Token);
                         Navigation.NavigateTo("/");
                     }
@@ -69,12 +81,39 @@ namespace DATN.Client.Pages
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi",ex);
             }
+            finally
+            {
+                isLoad = false;
+            }
             
         }
 
         private async Task<string> GenerateMD5Hash(string text)
         {
             return await JS.InvokeAsync<string>("generateMD5Hash", text);
+        }
+
+        private static int GetTableNumberFromToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+            var userId = jwtToken?.Claims.FirstOrDefault(c => c.Type == "userId");
+            return int.Parse(userId?.Value);
+        }
+        private async Task<Table> CheckBookTableAsync(int numberTable)
+        {
+            try
+            {
+                var table = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={numberTable}");
+
+                return table;
+            }
+            catch(Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ admin: " + ex.Message);
+                return null;
+            }
+
         }
     }
 }

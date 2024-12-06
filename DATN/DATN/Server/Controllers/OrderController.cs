@@ -26,12 +26,20 @@ namespace DATN.Server.Controllers
             
         }
 
-        [HttpPost("GetOrderStatus")]
-        public ActionResult<Order> GetOrderStatus([FromBody] int tableId)
+        [HttpGet("GetOrderStatus")]
+        public ActionResult<Order> GetOrderStatus([FromQuery] int tableId)
         {
             if (tableId <= 0) {return BadRequest("Value must be...");}
 
             return Ok(_OrderService.GetOrderStatus(tableId));
+        }
+
+        [HttpGet("GetOrderStatusTrans")]
+        public ActionResult<Order> GetOrderStatusTrans([FromQuery] int tableId)
+        {
+            if (tableId <= 0) { return BadRequest("Value must be..."); }
+
+            return Ok(_OrderService.GetOrderStatusTrans(tableId));
         }
 
         [HttpPost("GetOrderInvoice")]
@@ -62,15 +70,16 @@ namespace DATN.Server.Controllers
         {
             return _OrderService.AddOrder(new Order
             {
+                OrderId = Order.OrderId,
                 TableId = Order.TableId,
+                EmployeeId = Order.EmployeeId,
                 CreateDate = Order.CreateDate,
                 TotalAmount = Order.TotalAmount,
                 Status = Order.Status,
-                PaymentMethod = Order.PaymentMethod,
                 CustomerId = Order.CustomerId,
-                CustomerVoucherId = Order.CustomerVoucherId,
-                EmployeeId = Order.EmployeeId,
+                PaymentMethod = Order.PaymentMethod,
                 Note = Order.Note,
+                CustomerVoucherId = Order.CustomerVoucherId,
                 IsDeleted = Order.IsDeleted
             });
         }

@@ -3,14 +3,17 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
-<div class="row justify-content-center mt-3 p-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="text-center mb-0">Add Voucher</h5>
+
+<div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
+    <div class="col-md-6 m-auto">
+        <div class="card shadow-sm bg-white">
+            <div class="text-black">
+                <h5 class="m-3 p-4 fs-2 text-black">Thêm Voucher</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
                 {
                     <EditForm Model="@voucher" OnValidSubmit="CreateVoucher" Context="editFormContext">
@@ -19,46 +22,45 @@
                             <ValidationSummary />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="VoucherCode" class="control-label"><strong>Voucher Code</strong></label>
-                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" />
+                            <input id="VoucherCode" @bind="voucher.VoucherCode" class="form-control" placeholder="VoucherCode" required />
                             <ValidationMessage For="@(() => voucher.VoucherCode)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="PointRequired" class="control-label"><strong>PointRequired</strong></label>
-                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" />
+                            <input type="number" id="PointRequired" @bind="voucher.PointRequired" class="form-control" placeholder="PointRequired" required />
                             <ValidationMessage For="@(() => voucher.PointRequired)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="DiscountValue" class="control-label"><strong>DiscountValue</strong></label>
-                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" />
+                            <input type="number" id="DiscountValue" @bind="voucher.DiscountValue" class="form-control" placeholder="DiscountValue" required />
                             <ValidationMessage For="@(() => voucher.DiscountValue)" />
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-md-12 mb-3">
                             <label for="ExpriationDate" class="control-label"><strong>PointRequired</strong></label>
-                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" />
+                            <input type="date" id="ExpriationDate" @bind="voucher.ExpriationDate" class="form-control" placeholder="ExpriationDate" required />
                             <ValidationMessage For="@(() => voucher.ExpriationDate)" />
                         </div>
 
-                        <div class="form-group text-center">
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-danger mx-2">Thêm</button>
-                                <a href="/adminvoucher" class="btn btn-secondary mx-2">Quay Về</a>
-                            </div>
+                        <div class="form-group text-center mt-3">
+                            <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                            <a href="/adminunit" class="btn btn-secondary mx-2">Trở Về</a>
                         </div>
                     </EditForm>
+
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3 text-center">
                             @successMessage
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        <div class="alert alert-danger mt-3">
+                        <div class="alert alert-danger mt-3 text-center">
                             @errorMessage
                         </div>
                     }
@@ -94,18 +96,21 @@
             {
                 successMessage = "Success";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminvoucher");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Lỗi khi thêm danh mục: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

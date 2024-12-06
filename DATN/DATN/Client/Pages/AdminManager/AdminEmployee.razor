@@ -19,15 +19,15 @@
     }
 </style>
 
-<AuthorizeView Roles="1">
+<AuthorizeView Roles="admin">
     <Authorized>
         @if (isLoaded)
         {
-            <button class="btn btn-success" @onclick="() => CreateEmployee()">Add Employee</button>
+            <button class="btn btn-success" @onclick="() => CreateEmployee()">Thêm Nhân Viên</button>
             <hr />
-            <h4>Account</h4>
+            <h4>Nhân Viên</h4>
             <div class="search-bar">
-                <input type="text" class="form-control" placeholder="Search Employee..." @oninput="FilterEmployee" />
+                <input type="text" class="form-control" placeholder="Tìm Kiếm Nhân Viên..." @oninput="FilterEmployee" />
             </div>
             <div class="product-table-container">
                 <table class="table table-striped">
@@ -40,7 +40,6 @@
                             <th>Position</th>
                             <th>Hiredate</th>
                             <th>Salary</th>
-                            <th>IsDelete</th>
                             <th>AccountId</th>
                             <th></th>
                         </tr>
@@ -49,21 +48,34 @@
                     <tbody>
                         @foreach (var employee in listEmployee)
                         {
-                            <tr>
-                                <td>@employee.EmployeeName</td>
-                                <td>@employee.Address</td>
-                                <td>@employee.PhoneNumber</td>
-                                <td>@employee.Email</td>
-                                <td>@employee.Position</td>
-                                <td>@employee.HireDate</td>
-                                <td>@employee.Salary</td>
-                                <td>@employee.IsDeleted</td>
-                                <td>@employee.AccountId</td>
-                                <td>
-                                    <button class="btn btn-primary" @onclick="() => EditEmployee(employee.EmployeeId)">Sửa</button>
-                                    <button class="btn btn-danger" @onclick="() => DeleteEmployee(employee.EmployeeId)">Ẩn</button>
-                                </td>
-                            </tr>
+                            if (employee != null)
+                            {
+                                var connectaccount = listAccount.FirstOrDefault(a => a.AccountId == employee.AccountId);
+                                if (connectaccount != null)
+                                {
+                                    <tr>
+                                        <td>@employee.EmployeeName</td>
+                                        <td>@employee.Address</td>
+                                        <td>@employee.PhoneNumber</td>
+                                        <td>@employee.Email</td>
+                                        <td>@employee.Position</td>
+                                        <td>@employee.HireDate</td>
+                                        <td>@employee.Salary</td>
+                                        <td>@connectaccount.Email</td>
+                                        <td class="text-center">
+                                            @if (!employee.IsDeleted)
+                                            {
+                                                <button class="btn btn-primary" @onclick="() => EditEmployee(employee.EmployeeId)">Sửa</button>
+                                                <button class="btn btn-danger" @onclick="() => HideEmployee(employee.EmployeeId)">Ẩn</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-warning" @onclick="() => RestoreEmployee(employee.EmployeeId)">Khôi Phục</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
                         }
                     </tbody>
                 </table>

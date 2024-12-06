@@ -203,9 +203,9 @@
         justify-content: center;
         font-size: 10px;
     }
-   
+
     .selected-table {
-        background-color: #FF9900; 
+        background-color: #FF9900;
     }
 
     .table-custom-lst {
@@ -223,11 +223,13 @@
         border-radius: 3px;
         color: white;
     }
-    .gird-custom{
+
+    .gird-custom {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
         gap: 10px;
     }
+
     .custom-color-unpaid {
         color: #dc3545 !important;
     }
@@ -239,6 +241,23 @@
     .custom-color-paid {
         color: #28a745 !important;
     }
+
+    .marker-reserved {
+        width: 15px;
+        height: 15px;
+        background-color: #FFD700;
+        border-radius: 50%;
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .marker-reserved i {
+            font-size: 10px;
+            color: #FFFFFF;
+        }
+
 
 </style>
 
@@ -328,7 +347,7 @@ else
 
                             <div id="sortable-floor1">
                                 <div class="mt-2">
-                                    <div class="card table-card" style="background-color: @(tableColor)"
+                                    <div class="card table-card" style="background-color: @(table.Status == "availableuntil" ? "#FF5B5B" : tableColor)"
                                          @onclick="() => ShowModalForTable(table.TableNumber)" data-bs-toggle="modal" data-bs-target="#tableModal">
                                         <div class="card-body text-center position-relative">
                                             <img src="/Image/dinner-table.png" style="height: 50px" alt="Table Image">
@@ -339,6 +358,12 @@ else
                                             {
                                                 <div class="position-absolute bottom-0 start-0 m-1 text-white small countdown-timer">
                                                     @timeLeftText[table.TableNumber]
+                                                </div>
+                                            }
+                                            @if (table.Status == "inusebooktable")
+                                            {
+                                                <div class="position-absolute bottom-0 end-0 marker-reserved">
+                                                    <i class="fas fa-bookmark text-danger"></i>
                                                 </div>
                                             }
                                         </div>
@@ -375,7 +400,7 @@ else
                         <li><hr class="dropdown-divider"></li>
                         @if (reservations != null && reservations.Count > 0)
                         {
-                            foreach (var rv in reservations)
+                            foreach (var rv in reservations.OrderByDescending(a => a.CreatedDate))
                             {
                                 <li class="notification-item" @onclick="() => ProcessBookTable(rv.ReservationId,false)">
                                     <div style="text-decoration: none; color: black;">
@@ -454,6 +479,8 @@ else
                     </tbody>
                 </table>
             }
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#CheckColorModal">Chú thích</button>
+            <button class="btn btn-primary" @onclick="() => Navigation.NavigateTo(urlBookTable)">Đặt bàn</button>
         </div>
 
 
@@ -463,7 +490,6 @@ else
     </div> *@
     </div>
 }
-
 
 
 <div class="modal fade" id="bookTableModal" tabindex="-1" aria-labelledby="bookTableModal" aria-hidden="true">
@@ -557,9 +583,10 @@ else
                                 }
                             </div>
                             <div class="d-flex justify-content-end pt-3" style="border-top: 1px solid">
-                                @if(isEdit){
+                                @if (isEdit)
+                                {
                                     <button type="button" class="btn btn-primary w-25 me-3" @onclick="ConfirmInforCustomer">
-                                       Cập nhật
+                                        Cập nhật
                                     </button>
                                 }
                                 else
@@ -610,7 +637,7 @@ else
                                     </div>
                                     <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
                                 </li>
-                                TotalAmount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
+                                Amount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
                             }
                         }
                         @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
@@ -631,6 +658,14 @@ else
                                         </div>
                                     </div>
                                     <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
+                                            <span class="fw-bold">-</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCartAsync(c)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </li>
                             }
                         }
@@ -639,9 +674,8 @@ else
                             <div class="fw-bold">Ghi chú</div>
                             <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>
                         </li>
-
                         <li class="list-group-item">
-                            <div class="fw-bold text-end text-danger">Tổng tiền: @TotalAmount.ToString("N0") VND</div>
+                            <div class="fw-bold text-end text-danger">Tổng tiền: @Amount.ToString("N0") VND</div>
                         </li>
                     }
                     else
@@ -662,7 +696,7 @@ else
                     }
                     @if (visibility.IsCheckoutVisible)
                     {
-                        <button class="checkout-btn-model" style="background: #007bff !important" data-bs-toggle="modal" data-bs-target="#invoiceModal">Thanh toán</button>
+                        <button class="checkout-btn-model" style="background: #007bff !important" data-bs-toggle="modal" data-bs-target="#invoiceModal" @onclick="CalculatorAmount">Thanh toán</button>
                     }
                 }
             </div>
@@ -687,10 +721,71 @@ else
     </div>
 </div>
 
+<div class="modal fade" id="CheckColorModal" tabindex="-1" aria-labelledby="CheckColorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kiểm tra màu của bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>Màu sắc</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #32CD32; margin: 0 auto;"></div>
+                            </td>
+                            <td>Bàn trống</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #ADD8E6; margin: 0 auto;"></div>
+                            </td>
+                            <td>Yêu cầu đặt món</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FFD700; margin: 0 auto;"></div>
+                            </td>
+                            <td>Yêu cầu thanh toán</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FFA500; margin: 0 auto;"></div>
+                            </td>
+                            <td>Đang sử dụng</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FF5B5B; margin: 0 auto;"></div>
+                            </td>
+                            <td>Bàn đang chờ khách đến</td>
+                        </tr>
+                        <tr>
+                            <td class="position-relative">
+                                <div class="marker-reserved position-absolute top-50 start-50 translate-middle" style="width: 30px; height: 30px">
+                                    <i class="fas fa-bookmark text-danger fs-6"></i>
+                                </div>
+                            </td>
+                            <td>Đánh dấu bàn đang sử dụng có đặt trước</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
-            @if (order == null || order.OrderId <= 0)
+            @if (messagePay != "payReq")
             {
                 <div class="modal-header">
                     <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
@@ -768,7 +863,7 @@ else
                                 }
                                 else
                                 {
-                                    foreach (var c in order.OrderItems)
+                                    foreach (var c in order.OrderItems.Where(a => !a.IsDeleted && a.Quantity > 0).ToList())
                                     {
                                         <tr>
                                             <td><img src="data:image/png;base64,@Convert.ToBase64String(c.Products.ProductImage)" alt="Product"></td>
@@ -785,18 +880,36 @@ else
                                 }
                             </tbody>
                         </table>
-
                         <div class="total-section-bill text-end">
                             @{
                                 var totalAmount = order.TotalAmount;
                                 var totalTax = totalAmount * 0.1m;
                                 var serviceFee = totalAmount * 0.05m;
-                                var totalPayable = totalAmount + totalTax + serviceFee;
+                                var totalPayable = 0m;
+
+
+                                <span>Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND</span>
+
+                                <br />
+                                <span> Thuế VAT (10%): @totalTax.ToString("N0") VND</span>                        <br />
+                                <span>Phí dịch vụ (5%): @serviceFee.ToString("N0") VND</span>                        <br />
+                                @if (getTable != null && getTable.Status == "inusebooktable")
+                                {
+                                    @if (getReservation != null && getReservation.ReservationId > 0)
+                                    {
+                                        totalAmount = totalPayable = (totalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
+                                        <span>Tiền đặt cọc: @getReservation.DepositPayment.ToString("N0") VND</span>                        <br />
+                                        <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
+                                    }
+                                }
+                                else
+                                {
+                                    totalAmount = totalAmount + totalTax + serviceFee;
+                                    <strong>Tổng tiền thanh toán: @totalAmount.ToString("N0") VND</strong>                        <br />
+                                }
+                                TotalAmount = totalAmount;
                             }
-                            Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND<br>
-                            Thuế VAT (10%): @totalTax.ToString("N0") VND<br>
-                            Phí dịch vụ (5%): @serviceFee.ToString("N0") VND<br>
-                            <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>
+
                         </div>
 
                         <div class="footer-section">

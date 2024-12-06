@@ -12,13 +12,23 @@ namespace DATN.Client.Pages
     public partial class BookTable
     {
         private readonly Reservation reservationModel = new();
+        private List<Table> tables = new();
         private DateTime selectedDate = DateTime.Now;
         private DateTime selectedTime = DateTime.Now;
+        private int countSeat;
 
-        protected override void OnInitialized()
+        protected override async void OnInitialized()
         {
             reservationModel.Adults = 1;
             reservationModel.PaymentMethod = "Transfer";
+            tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTableEmplty");
+            if(tables.Count > 0)
+            {
+                foreach(Table table in tables)
+                {
+                    countSeat += table.SeatingCapacity;
+                }
+            }
         }
 
         public async Task HandleBookTableAsync()
@@ -35,6 +45,7 @@ namespace DATN.Client.Pages
                 reservationModel.IsPayment = false;
                 reservationModel.ReservationStatus = "Đang xử lý";
 
+
                 await _localStorageService.SetAsync("reservation", reservationModel);
 
                 if(reservationModel.PaymentMethod != "Cash")
@@ -42,7 +53,7 @@ namespace DATN.Client.Pages
                     var vnpRequest = new VNPayRequest
                     {
                         OrderId = new Random().Next(10000, 99999),
-                        Amount = reservationModel.DepositPayment,
+                        Amount = (long)reservationModel.DepositPayment,
                         Description = "Thanh toán đặt bàn",
                         CreatedDate = DateTime.Now,
                         FullName = reservationModel.CustomerName,
@@ -96,6 +107,7 @@ namespace DATN.Client.Pages
         private async void OnSubmitForm()
         {
             await JS.InvokeVoidAsync("closeModal", "ConformInfo");
+
             reservationModel.ReservationTime = new DateTime(
                     selectedDate.Year,
                     selectedDate.Month,
@@ -105,11 +117,32 @@ namespace DATN.Client.Pages
                     0
                 );
 
-            if (reservationModel.ReservationTime < DateTime.Now.AddHours(2))
+            if (reservationModel.ReservationTime < DateTime.Now)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải ít nhất sau 2 giờ kể từ hiện tại.");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải lớn hơn thời gian hiện tại.");
                 return;
             }
+
+            if (reservationModel.ReservationTime < DateTime.Now.AddHours(2).AddMinutes(30))
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải ít nhất sau 2 giờ 30 phút kể từ hiện tại.");
+                return;
+            }
+
+            var totalCustomer = reservationModel.Adults + reservationModel.Children;
+
+            if (totalCustomer > countSeat)
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hiện tại nhà hàng chỉ còn: " + countSeat + " chỗ");
+                return;
+            }
+
+            if(countSeat <= 0) 
+            {
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hiện đã hết bàn trống vui lòng quay lại sau");
+                return;
+            }
+            
 
             await JS.InvokeVoidAsync("showModal", "ConformInfo");
             await CatulatorDepositPaymentAsync();

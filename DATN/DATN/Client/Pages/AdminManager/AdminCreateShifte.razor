@@ -3,13 +3,15 @@
 @layout LayoutAdmin
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
+@inject LocalStorageService _localStorageService
+@inject IJSRuntime JS
 
 
 <div class="container-fluid p-5 bg-secondary mt-3" style="height: 900px;">
     <div class="col-md-6 m-auto">
         <div class="card shadow-sm bg-white">
             <div class="text-black">
-                <h5 class="m-3 p-4 fs-2 text-black">Add Shifte</h5>
+                <h5 class="m-3 p-4 fs-2 text-black">Thêm Ca Làm</h5>
             </div>
             <div class="card-body col-md-12 m-auto">
                 @if (isLoaded)
@@ -19,7 +21,7 @@
                         <ValidationSummary />
 
                         <div class="form-group col-md-12 mb-3">
-                            <label for="Shifte_Name" class="control-label"><strong>ShifteName</strong></label>
+                            <label for="Shifte_Name" class="control-label"><strong>Shifte_Name</strong></label>
                             <input id="Shifte_Name" @bind="shifte.ShifteName" class="form-control" placeholder="Shifte_Name" />
                             <ValidationMessage For="@(() => shifte.ShifteName)" />
                         </div>
@@ -37,8 +39,8 @@
                         </div>
 
                         <div class="form-group text-center mt-3">
-                            <button type="submit" class="btn btn-danger mx-2">Add</button>
-                            <a href="/adminshifte" class="btn btn-secondary mx-2">Back</a>
+                            <button type="submit" class="btn btn-danger mx-2">Thêm</button>
+                            <a href="/adminshifte" class="btn btn-secondary mx-2">Trở Về</a>
                         </div>
                     </EditForm>
 
@@ -77,15 +79,32 @@
 
     private async Task CreateShifte()
     {
-        // Ensure dates are selected
-        if (shifte.StartTime == default || shifte.EndTime == default)
+        if (shifte.ShifteName == null || shifte.StartTime == null || shifte.EndTime == null)
         {
-            errorMessage = "Please select both start and end dates.";
+            errorMessage = "Vui lòng nhập đầy đủ thông tin";
             successMessage = string.Empty;
             return;
         }
 
-        // Check that StartTime does not exceed EndTime at the day, month, and year level
+        var checkResponse = await httpClient.GetAsync($"api/Shifte/{shifte.ShifteName}");
+        if (checkResponse.IsSuccessStatusCode)
+        {
+            var isNameExists = await checkResponse.Content.ReadAsStringAsync();
+            if (bool.TryParse(isNameExists, out bool exists) && exists)
+            {
+                errorMessage = "Tên ca làm đã tồn tại";
+                successMessage = string.Empty;
+                return;
+            }
+        }
+
+        if (shifte.StartTime == default || shifte.EndTime == default)
+        {
+            errorMessage = "thời gian bắt đầu phải nhỏ hơn thời gian kết thúc";
+            successMessage = string.Empty;
+            return;
+        }
+
         if (shifte.StartTime.Date > shifte.EndTime.Date)
         {
             errorMessage = "The start date must not be later than the end date.";
@@ -101,18 +120,21 @@
             {
                 successMessage = "Successfully added!";
                 errorMessage = string.Empty;
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
                 Navigation.NavigateTo("/adminshifte");
             }
             else
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"Error: {errorContent}";
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"An error occurred: {ex.Message}";
             successMessage = string.Empty;
+            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
 
         StateHasChanged();

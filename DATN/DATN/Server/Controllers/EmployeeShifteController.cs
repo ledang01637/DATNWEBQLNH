@@ -1,74 +1,125 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
 using DATN.Shared;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System;
 using DATN.Server.Service;
 
 namespace DATN.Server.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class EmployeeServiceController : ControllerBase
+    [Route("api/[controller]")]
+    public class EmployeeShifteController : ControllerBase
     {
-        private readonly EmployeeShifteService _EmployeeShifteService;
+        private readonly EmployeeShifteService _employeeShifteService;
 
-        public EmployeeServiceController(EmployeeShifteService _EmployeeShifte)
+        public EmployeeShifteController(EmployeeShifteService employeeShifteService)
         {
-            _EmployeeShifteService = _EmployeeShifte;
+            _employeeShifteService = employeeShifteService;
         }
 
-        [HttpGet("GetEmployeeService")]
-        public List<EmployeeShifte> GetEmployeeShifte()
+        [HttpGet("GetEmployeeShifte")]
+        public IActionResult GetEmployeeShifte()
         {
-            return _EmployeeShifteService.GetEmployeeShifte();
-        }
-
-        [HttpPost("AddEmployeeService")]
-        public EmployeeShifte AddEmployeeShifte(EmployeeShifte EmployeeShifte)
-        {
-            return _EmployeeShifteService.AddEmployeeShifte(new EmployeeShifte
+            try
             {
-                ShifteDay = EmployeeShifte.ShifteDay,
-                EmployeeId = EmployeeShifte.EmployeeId,
-                ShifteId = EmployeeShifte.ShifteId,
+                var result = _employeeShifteService.GetEmployeeShifte();
+                if (result == null || result.Count == 0)
+                {
+                    return NotFound("Không có EmployeeShifte nào.");
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi server: {ex.Message}");
+            }
+        }
 
-            });
+        [HttpPost("AddEmployeeShifte")]
+        public IActionResult AddEmployeeShifte([FromBody] EmployeeShifte employeeShifte)
+        {
+            if (employeeShifte == null)
+            {
+                return BadRequest("Dữ liệu không hợp lệ.");
+            }
+
+            try
+            {
+                var result = _employeeShifteService.AddEmployeeShifte(employeeShifte);
+                return CreatedAtAction(nameof(GetIdEmployeeShifte), new { id = result.EmployeeShifteId }, result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi server: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
-        public ActionResult<EmployeeShifte> GetIdEmployeeShifte(int id)
+        public IActionResult GetIdEmployeeShifte(int id)
         {
-            if (id == 0)
+            if (id <= 0)
             {
-                return BadRequest("Value must be...");
-
+                return BadRequest("ID không hợp lệ.");
             }
-            return Ok(_EmployeeShifteService.GetIdEmployeeShifte(id));
-        }
 
+            try
+            {
+                var result = _employeeShifteService.GetIdEmployeeShifte(id);
+                if (result == null)
+                {
+                    return NotFound($"Không tìm thấy EmployeeShifte với ID {id}.");
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi server: {ex.Message}");
+            }
+        }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteEmployeeShifte(int id)
         {
-            var deleted = _EmployeeShifteService.DeleteEmployeeShifte(id);
-            if (deleted == null)
+            try
             {
-                return NotFound("EmployeeShifte not found");
-            }
+                var deleted = _employeeShifteService.DeleteEmployeeShifte(id);
+                if (deleted == null)
+                {
+                    return NotFound($"Không tìm thấy EmployeeShifte với ID {id}.");
+                }
 
-            return Ok(deleted);
+                return Ok(deleted);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi server: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateEmployeeShifte(int id, [FromBody] EmployeeShifte updatedEmployeeShifte)
         {
-            var updated = _EmployeeShifteService.UpdateEmployeeShifte(id, updatedEmployeeShifte);
-            if (updated == null)
+            if (updatedEmployeeShifte == null || id <= 0)
             {
-                return NotFound("EmployeeShifte not found");
+                return BadRequest("Dữ liệu không hợp lệ.");
             }
 
-            return Ok(updated);
+            try
+            {
+                var updated = _employeeShifteService.UpdateEmployeeShifte(id, updatedEmployeeShifte);
+                if (updated == null)
+                {
+                    return NotFound($"Không tìm thấy EmployeeShifte với ID {id}.");
+                }
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Lỗi server: {ex.Message}");
+            }
         }
     }
 }
