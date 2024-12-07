@@ -29,7 +29,7 @@ namespace DATN.Server.Service
 
         public Table GetTableByNumber(int numberTable)
         {
-            var table = _context.Tables.FirstOrDefault(a => a.TableNumber == numberTable);
+            var table = _context.Tables.FirstOrDefault(a => a.TableNumber == numberTable && !a.IsDeleted);
             return table ?? new Table();
         }
         public Table GetTableInclude(int tableId)

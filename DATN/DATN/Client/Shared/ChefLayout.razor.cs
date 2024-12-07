@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace DATN.Client.Shared
 {
-    public partial class EmployeeLayout
+    public partial class ChefLayout
     {
         private string wifiIpAddress;
         private bool isAcceptWifi;
@@ -46,8 +46,8 @@ namespace DATN.Client.Shared
         private void GoToManager(bool isCheck)
         {
             isShow = isCheck;
-            string query = "?isCheckBookTable="+ isCheck;
-            Navigation.NavigateTo("/manager" + query,true);
+            string query = "?isCheckBookTable=" + isCheck;
+            Navigation.NavigateTo("/manager" + query, true);
         }
 
         private void Logout()

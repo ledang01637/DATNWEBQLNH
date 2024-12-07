@@ -159,11 +159,22 @@ namespace DATN.Server.Controllers
         public IActionResult GenerateQrToken(QR qr)
         {
             var token = AccessTokenStringee(qr.NumberTable.ToString());
-            return Ok(new QRResponse
+            if (token != null)
             {
-                IsSuccessFull = true,
-                Token = token
-            });
+                return Ok(new QRResponse
+                {
+                    IsSuccessFull = true,
+                    Token = token
+                });
+            }
+            else
+            {
+                return BadRequest(new QRResponse
+                {
+                    IsSuccessFull = false
+                });
+            }
+
         }
 
         [HttpPost]

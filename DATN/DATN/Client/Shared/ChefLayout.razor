@@ -95,7 +95,7 @@
 </style>
 
 <CascadingAuthenticationState>
-    <AuthorizeView Roles="admin,employee">
+    <AuthorizeView Roles="admin,chef">
         <Authorized>
             @if (isLoading)
             {
@@ -109,23 +109,10 @@
             {
                 <div class="custom-body">
                     <div class="container mt-1 foodcustom content p-3">
-                        <!-- Sidebar -->
-                        <div id="mySidebar" class="sidebar">
-                            <a href="javascript:void(0)" class="closebtn" @onclick="() => Navbar(true)">&times;</a>
-                            <a class="nav-link custom-link text-white mt-3 @(isShow ? "": "acctive")" @onclick="() => GoToManager(false)" id="manageLink">Quản lý bàn ăn</a>
-                            <a class="nav-link custom-link text-white @(isShow ? "acctive": "")" @onclick="() => GoToManager(true)" id="lstLink">Danh sách đặt bàn</a>
-                        </div>
-
-
-                        <!-- Overlay -->
-                        <div id="overlay" class="overlay" @onclick="() => Navbar(false)"></div>
-
                         <div class="d-flex justify-content-between align-items-center py-3">
+                            <div></div>
                             <div>
-                                <i class="fas fa-bars fa-2x me-3" style="cursor: pointer;" @onclick="() => Navbar(false)"></i>
-                            </div>
-                            <div>
-                                <h2 class="fs-3 d-inline text-center">Nhân viên</h2>
+                                <h2 class="fs-3 d-inline text-center">Nhà bếp</h2>
                             </div>
                             <div>
                                 <span>Xin chào, <strong id="user-name">@Username</strong></span>

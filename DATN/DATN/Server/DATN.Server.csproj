@@ -41,6 +41,14 @@
   <ItemGroup>
     <Folder Include="Payment\Momo\" />
   </ItemGroup>
-
+  
+<ItemGroup>
+  <None Update="Data\valid_wifi.txt">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+    <None Update="Data\message-res.txt">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
 
 </Project>

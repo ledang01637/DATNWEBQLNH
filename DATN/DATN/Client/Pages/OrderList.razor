@@ -33,67 +33,91 @@
 
     </div>
 </section>
-<div class="container mt-3 mb-4">
-    <h4 style="text-align: center;">Danh sách gọi món</h4>
-    @if (Carts == null)
-    {
-        <p>Loading...</p>
-    }
-    else
-    {
-        <ul class="list-group" id="cart-items">
-            @if (Carts != null && Carts.Count > 0)
-            {
-                foreach (var c in Carts)
-                {
-                    <li class="list-group-item d-flex align-items-center">
-                        <img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="@c.ProductName" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;" />
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">@c.ProductName</div>
-                            <div class="text-danger">@c.Price.ToString("N0")đ</div>
-                        </div>
-                        <div class="quantity-control">
-                            <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
-                                <span>-</span>
-                            </button>
-                            <span class="badge bg-primary">@c.Quantity</span>
-                            <button type="button" class="btn btn-sm m-2" @onclick="() => IncreaseQuantity(c.ProductId)">
-                                <span>+</span>
-                            </button>
-                        </div>
-                        <div class="text-end">
-                            <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCart(c)">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </li>
 
-                }
-                <li class="list-group-item">
-                    <div class="fw-bold">Ghi chú</div>
-                    <textarea rows="2" @bind="ListCartDTO.Note" class="form-control" placeholder="Thêm ghi chú nếu có..."></textarea>
-                </li>
-            }
-            else
-            {
-                <li class="list-group-item text-center">Không có món ăn</li>
-            }
-        </ul>
-        
-    }
-
-    <div class="total-section mt-3" >
-        <div class="d-flex justify-content-between">
-            <p class="mb-0 fw-bold">Tổng tiền</p>
-            <p class="mb-0 text-danger"><strong>@Total.ToString("###,0##") VND</strong></p>
-        </div>
-        <div class="d-flex justify-content-between mt-2">
-            <button type="button" class="btn btn-warning w-100 me-1" data-bs-toggle="modal" data-bs-target="#ConfirmOrderModal">
-                Gọi món ăn
-            </button>
+@if (IsProcess)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="container mt-3 mb-4">
+        <h4 style="text-align: center;">Danh sách gọi món</h4>
+        @if (Carts == null)
+        {
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (!Carts.Any())
+        {
+            <ul class="list-group" id="cart-items">
+                <li class="list-group-item d-flex align-items-center">Không tìm thấy món ăn</li>
+            </ul>
+        }
+        else
+        {
+            <ul class="list-group" id="cart-items">
+                @if (Carts != null && Carts.Count > 0)
+                {
+                    foreach (var c in Carts)
+                    {
+                        <li class="list-group-item d-flex align-items-center">
+                            <img src="data:image/png;base64,@Convert.ToBase64String(c.ProductImage)" alt="@c.ProductName" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;" />
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">@c.ProductName</div>
+                                <div class="text-danger">@c.Price.ToString("N0")đ</div>
+                            </div>
+                            <div class="quantity-control">
+                                <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
+                                    <span>-</span>
+                                </button>
+                                <span class="badge bg-primary">@c.Quantity</span>
+                                <button type="button" class="btn btn-sm m-2" @onclick="() => IncreaseQuantity(c.ProductId)">
+                                    <span>+</span>
+                                </button>
+                            </div>
+                            <div class="text-end">
+                                <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCart(c)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </li>
+
+                    }
+                    <li class="list-group-item">
+                        <div class="fw-bold">Ghi chú</div>
+                        <textarea rows="2" @bind="ListCartDTO.Note" class="form-control" placeholder="Thêm ghi chú nếu có..."></textarea>
+                    </li>
+                }
+                else
+                {
+                    <li class="list-group-item text-center">Không có món ăn</li>
+                }
+            </ul>
+        }
+        @if (Carts != null && Carts.Count > 0)
+        {
+            <div class="total-section mt-3">
+                <div class="d-flex justify-content-between">
+                    <p class="mb-0 fw-bold">Tổng tiền</p>
+                    <p class="mb-0 text-danger"><strong>@Total.ToString("###,0##") VND</strong></p>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <button type="button" class="btn btn-warning w-100 me-1" data-bs-toggle="modal" data-bs-target="#ConfirmOrderModal">
+                        Gọi món ăn
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+}
 
 
 <div class="modal fade" id="ConfirmOrderModal" tabindex="-1" aria-labelledby="confirmOrderModalLabel" aria-hidden="true">

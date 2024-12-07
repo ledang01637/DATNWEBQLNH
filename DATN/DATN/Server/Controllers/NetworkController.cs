@@ -6,6 +6,8 @@ using System.Linq;
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace DATN.Server.Controllers
 {
@@ -15,7 +17,7 @@ namespace DATN.Server.Controllers
     {
         private readonly NetworkService _networkService;
         private readonly FileEncryptionService _fileEncryptionService;
-
+        private string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "valid_wifi.txt");
         public NetworkController(NetworkService networkService, FileEncryptionService fileEncryptionService)
         {
             _networkService = networkService;
@@ -31,7 +33,7 @@ namespace DATN.Server.Controllers
 
             try
             {
-                encryptedContent = await System.IO.File.ReadAllTextAsync("Data/valid_wifi.txt");
+                encryptedContent = await System.IO.File.ReadAllTextAsync(filePath);
             }
             catch (Exception ex)
             {
@@ -54,7 +56,7 @@ namespace DATN.Server.Controllers
             return BadRequest("Địa chỉ IP không hợp lệ.");
         }
 
-        [HttpGet("get-ip")]
+        [HttpGet("get-ip-local")]
         public IActionResult GetIPWifi()
         {
             var ip = _networkService.GetWifiIPAddress();
@@ -63,34 +65,79 @@ namespace DATN.Server.Controllers
                 return Ok(ip);
             }
             return NotFound("Không tìm thấy IP");
-        } 
+        }
 
+        [HttpGet("get-ip-host")]
+        public IActionResult GetIPWifiHost()
+        {
+            var ip = GetClientIP(HttpContext);
+
+            if (!string.IsNullOrEmpty(ip))
+            {
+                return Ok(ip);
+            }
+            return NotFound("Không tìm thấy IP");
+        }
+
+        private static string GetClientIP(HttpContext context)
+        {
+            string ip = context.Request.Headers["CF-Connecting-IP"].FirstOrDefault();
+
+            if (string.IsNullOrEmpty(ip))
+            {
+                ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            }
+
+            if (string.IsNullOrEmpty(ip))
+            {
+                ip = context.Connection.RemoteIpAddress?.ToString();
+            }
+
+            return ip;
+        }
 
         [HttpPost("post-wifi-ip")]
         public async Task<IActionResult> PostWifiIpAddressAsync([FromBody] string IP)
         {
-            if (string.IsNullOrWhiteSpace(IP))
+            try
             {
-                return BadRequest("IP không hợp lệ.");
+                if (string.IsNullOrWhiteSpace(IP))
+                {
+                    return BadRequest("IP không hợp lệ.");
+                }
+
+                string encryptedIp = ComputeSHA256Hash(IP);
+
+                string existingContent = await System.IO.File.ReadAllTextAsync(filePath);
+
+                var ipList = existingContent.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (ipList.Contains(encryptedIp))
+                {
+                    return BadRequest("IP đã tồn tại.");
+                }
+                existingContent += ";" + encryptedIp;
+
+                await System.IO.File.WriteAllTextAsync(filePath, existingContent);
+
+                return Ok("IP đã được thêm thành công.");
             }
-
-            string encryptedIp = ComputeMD5Hash(IP);
-
-            string existingContent = await System.IO.File.ReadAllTextAsync("Data/valid_wifi.txt");
-
-            var ipList = existingContent.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (ipList.Contains(encryptedIp))
+            catch
             {
-                return BadRequest("IP đã tồn tại.");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            existingContent += ";" + encryptedIp;
-
-            await System.IO.File.WriteAllTextAsync("Data/valid_wifi.txt", existingContent);
-
-            return Ok("IP đã được thêm thành công.");
         }
+
+        // Hàm mã hóa SHA256
+        private string ComputeSHA256Hash(string rawData)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
+                return Convert.ToBase64String(bytes);
+            }
+        }
+
 
         [HttpPost("remove-wifi-ip")]
         public async Task<IActionResult> RemoveWifiIpAddressAsync([FromBody] string IP)
@@ -105,7 +152,7 @@ namespace DATN.Server.Controllers
 
             try
             {
-                existingContent = await System.IO.File.ReadAllTextAsync("Data/valid_wifi.txt");
+                existingContent = await System.IO.File.ReadAllTextAsync(filePath);
             }
             catch (Exception ex)
             {
@@ -120,7 +167,7 @@ namespace DATN.Server.Controllers
             }
             ipList.Remove(encryptedIp);
             string updatedContent = string.Join(";", ipList);
-            await System.IO.File.WriteAllTextAsync("Data/valid_wifi.txt", updatedContent);
+            await System.IO.File.WriteAllTextAsync(filePath, updatedContent);
 
             return Ok("IP đã được xóa thành công.");
         }

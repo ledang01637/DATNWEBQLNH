@@ -40,7 +40,6 @@ namespace DATN.Server
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
-
             //Authentication
             var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
 
@@ -138,12 +137,17 @@ namespace DATN.Server
                     "application/octet-stream"
                 });
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseResponseCompression();
+            if (!env.IsDevelopment())
+            {
+                app.UseResponseCompression();
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -152,19 +156,18 @@ namespace DATN.Server
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
+
             app.UseRouting();
             app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseCors("AllowAllOrigins");
-
 
             app.UseEndpoints(endpoints =>
             {
@@ -174,5 +177,6 @@ namespace DATN.Server
                 endpoints.MapFallbackToFile("index.html");
             });
         }
+
     }
 }

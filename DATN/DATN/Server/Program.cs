@@ -21,7 +21,6 @@ namespace DATN.Server
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("https://*:44328", "http://*:5000");
                 });
     }
 }

@@ -94,7 +94,7 @@ namespace DATN.Client.Pages
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Tài khoản mật khẩu không chính xác");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Tài khoản mật khẩu không chính xác");
                         return;
                     }
                 }
@@ -141,7 +141,7 @@ namespace DATN.Client.Pages
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Sản phẩm đã hết");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Sản phẩm đã hết");
             }
 
             StateHasChanged();
@@ -273,11 +273,11 @@ namespace DATN.Client.Pages
 
         private async Task SendMessage()
         {
-            if(string.IsNullOrEmpty(messageText)) { await JS.InvokeVoidAsync("showAlert", "warning", "Lỗi", "Vui lòng nhập yêu cầu"); return; }
+            if(string.IsNullOrEmpty(messageText)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng nhập yêu cầu"); return; }
             string token = await _localStorageService.GetItemAsync("n");
             if (string.IsNullOrEmpty(token))
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét QR");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng quét QR");
                 return;
             }
 
@@ -291,7 +291,7 @@ namespace DATN.Client.Pages
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Không thể kết nối tới server!");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể kết nối tới server!");
                 return;
             }
         }
@@ -322,7 +322,7 @@ namespace DATN.Client.Pages
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể kiểm tra tài khoản");
                 }
             }
             return null;

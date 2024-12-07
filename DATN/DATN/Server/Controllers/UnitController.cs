@@ -24,13 +24,12 @@ namespace DATN.Server.Controllers
         }
 
         [HttpPost("AddUnit")]
-        public Unit AddUnit(Unit Unit)
+        public Unit AddUnit([FromBody] Unit Unit)
         {
             return _UnitService.AddUnit(new Unit
             {
                 UnitName = Unit.UnitName,
                 UnitDescription = Unit.UnitDescription,
-
             });
         }
 

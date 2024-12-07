@@ -23,7 +23,6 @@ namespace DATN.Client.Pages
         private List<Cart> Carts = new();
         private List<Customer> customers = new();
         private Customer customer = new();
-        private List<Table> tables = new();
         private Order order = new();
 
         private bool isSaveOrder = false;
@@ -31,18 +30,32 @@ namespace DATN.Client.Pages
         private int vcId;
         private int TotalQuantity;
         private decimal Total;
+        private bool IsProcess = false;
 
 
 
         protected override async Task OnInitializedAsync()
         {
-            hubConnection = new HubConnectionBuilder()
+            IsProcess = true;
+            try
+            {
+                hubConnection = new HubConnectionBuilder()
                 .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
                 .Build();
 
-            await hubConnection.StartAsync();
-            Carts = await _cartService.GetCartAsync();
-            await UpdateCartTotals();
+                await hubConnection.StartAsync();
+                Carts = await _cartService.GetCartAsync();
+                await UpdateCartTotals();
+            }
+            catch 
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Đã xảy ra lỗi không xác định");
+            }
+            finally
+            {
+                IsProcess = false;
+            }
+
         }
 
         #region Cart
@@ -117,6 +130,7 @@ namespace DATN.Client.Pages
         #region Order
         private async Task Order()
         {
+            IsProcess = true;
             await JS.InvokeVoidAsync("closeModal", "ConfirmOrderModal");
             if (Carts != null && Carts.Count > 0)
             {
@@ -124,13 +138,16 @@ namespace DATN.Client.Pages
                 {
                     string token = await _localStorageService.GetItemAsync("n");
 
-                    if (string.IsNullOrEmpty(token)) { await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR"); return; }
+                    if (string.IsNullOrEmpty(token)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng quét mã QR"); return; }
 
                     int numberTable = GetTableNumberFromToken(token);
 
-                    await LoadTables();
+                    var table = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={numberTable}");
 
-                    Table table = tables.FirstOrDefault(a => a.TableNumber == numberTable) ?? throw new Exception("Không tìm thấy bàn!");
+                    if(table.TableId <=0)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy bàn"); return;
+                    }
 
                     var accountType = await CheckTypeAccount();
                     string noaccount = accountType != null
@@ -146,12 +163,16 @@ namespace DATN.Client.Pages
                         await HandleAccountPayment(table);
                     }
                     
-                    await SenMessageAsync();
+                    await SenMessageAsync(table);
 
                 }
-                catch (Exception ex)
+                catch
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin: " + ex.Message);
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật");
+                }
+                finally
+                {
+                    IsProcess = false;
                 }
             }
             else
@@ -159,79 +180,83 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng thêm món ăn");
             }
         }
-        private async Task SenMessageAsync()
+        private async Task SenMessageAsync(Table table)
         {
-            
-            string token = await _localStorageService.GetItemAsync("n");
-            if (string.IsNullOrEmpty(token))
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR");
-                return;
-            }
-
-            if(customer == null)
-            {
-                await JS.InvokeVoidAsync("showAlert", "error", "Không tìm thấy khách hàng");
-                return;
-            }
-
-
-            int number = GetTableNumberFromToken(token);
-            List<Table> tables = new();
-            tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
-
-            if(tables != null)
-            {
-                var table = tables.FirstOrDefault(t => t.TableNumber == number);
-                await _localStorageService.SetItemAsync("tbid",table.TableId.ToString());
-                if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
+                string token = await _localStorageService.GetItemAsync("n");
+                if (string.IsNullOrEmpty(token))
                 {
-                    if (table is not null && Carts.Count > 0)
+                    await JS.InvokeVoidAsync("showAlert", "error", "Vui lòng quét mã QR");
+                    return;
+                }
+
+                if (customer == null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Không tìm thấy khách hàng");
+                    return;
+                }
+
+
+                if (table != null)
+                {
+                    await _localStorageService.SetItemAsync("tbid", table.TableId.ToString());
+                    if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
                     {
-                        List<CartDTO> carts = new();
-
-                        for (int i = 0; i < Carts.Count; i++)
+                        if (table is not null && Carts.Count > 0)
                         {
-                            var cartDto = new CartDTO
+                            List<CartDTO> carts = new();
+
+                            for (int i = 0; i < Carts.Count; i++)
                             {
-                                TableNumber = table.TableNumber,
-                                TableId = table.TableId,
-                                ProductId = Carts[i].ProductId,
-                                UnitName = Carts[i].UnitName,
-                                ProductName = Carts[i].ProductName,
-                                Price = Carts[i].Price,
-                                Quantity = Carts[i].Quantity
-                            };
-                            carts.Add(cartDto);
+                                var cartDto = new CartDTO
+                                {
+                                    TableNumber = table.TableNumber,
+                                    TableId = table.TableId,
+                                    ProductId = Carts[i].ProductId,
+                                    UnitName = Carts[i].UnitName,
+                                    ProductName = Carts[i].ProductName,
+                                    Price = Carts[i].Price,
+                                    Quantity = Carts[i].Quantity
+                                };
+                                carts.Add(cartDto);
+                            }
+                            if (table.Status != "inusebooktable")
+                            {
+                                table.Status = "occupied";
+                            }
+
+                            var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
+
+                            if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Không thể cập nhật bàn"); return; }
+
+                            await hubConnection.SendAsync("SendTable", table.TableNumber.ToString(), carts, ListCartDTO.Note, order.OrderId);
+
+                            await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm");
+                            Carts.Clear();
+                            await _cartService.SaveCartAsync(Carts);
+                            Navigation.NavigateTo("/");
                         }
-                        if(table.Status != "inusebooktable")
-                        {
-                            table.Status = "occupied";
-                        }
-
-                        var response = await httpClient.PutAsJsonAsync($"api/Table/{table.TableId}", table);
-
-                        if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
-
-                        await hubConnection.SendAsync("SendTable", table.TableNumber.ToString() , carts, ListCartDTO.Note,order.OrderId);
-
-                        await JS.InvokeVoidAsync("showAlert", "success", "Đặt món thành công", "Bạn vui lòng đợi đầu bếp làm");
-                        Carts.Clear();
-                        await _cartService.SaveCartAsync(Carts);
-                        Navigation.NavigateTo("/");
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể kết nối tới server!");
+                        return;
                     }
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error","Lỗi" ,"Không thể kết nối tới server!");
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng quét mã QR");
                     return;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning","Thông báo" ,"Vui lòng quét mã QR");
-                return;
+                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi không xác định");
             }
+            
         }
 
         private async Task HandleNoAccountPayment(Table table)
@@ -344,7 +369,7 @@ namespace DATN.Client.Pages
                 isSaveOrder = true;
                 if (!updateOrder.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật hóa đơn");
                 }
                 return;
             }
@@ -358,7 +383,7 @@ namespace DATN.Client.Pages
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng liên hệ Admin");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không thể tạo hóa đơn");
             }
         }
         private async Task SaveOrderItem(OrderItem _orderItem)
@@ -367,9 +392,9 @@ namespace DATN.Client.Pages
             {
                 await httpClient.PostAsJsonAsync("api/OrderItem/AddOrderItem", _orderItem);
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception("Lỗi khi thêm sản phẩm vào đơn hàng: " + ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể thêm món vào hóa đơn");
             }
         }
         private async Task<OrderItem> GetOrderItemByProductAndOrderId(int orderId, int productId)
@@ -384,14 +409,10 @@ namespace DATN.Client.Pages
             {
                 await httpClient.PutAsJsonAsync($"api/OrderItem/{idOrderItem}", orderItem);
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception("Lỗi khi cập nhật sản phẩm trong đơn hàng: " + ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật món trong hóa đơn");
             }
-        }
-        private async Task LoadTables()
-        {
-            tables = await httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
         }
 
         private async Task<Customer> GetCustomer(string email)
@@ -415,7 +436,7 @@ namespace DATN.Client.Pages
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert","error","Lỗi","Vui lòng liên hệ Admin");
+                    await JS.InvokeVoidAsync("showAlert","error","Lỗi","Không thể kiểm tra tài khoản");
                 }
             }
             return null;
@@ -435,7 +456,7 @@ namespace DATN.Client.Pages
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể kiểm tra email");
                 }
             }
             return null;

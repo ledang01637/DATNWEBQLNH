@@ -69,17 +69,19 @@ namespace DATN.Client.Pages
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning", "Lỗi qRResponse is null");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không thể đọc QR");
                     }
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi Post QR");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không thể kiểm tra QR");
                 }
             }
             catch(Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi",ex);
+                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Lỗi không xác định");
             }
             finally
             {
@@ -110,7 +112,9 @@ namespace DATN.Client.Pages
             }
             catch(Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ admin: " + ex.Message);
+                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi khi lấy dữ liệu bàn");
                 return null;
             }
 

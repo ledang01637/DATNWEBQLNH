@@ -22,19 +22,21 @@ namespace DATN.Client.Pages
         private LoginRequest loginUser = new LoginRequest();
         private string Token = "";
         private readonly string url = "/register";
+        private bool IsProcess = false;
 
         private async Task HandleLogin()
         {
-            if (string.IsNullOrEmpty(loginUser.Email) || string.IsNullOrEmpty(loginUser.Password))
+            IsProcess = true;
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Vui nhập tài khoản và mật khẩu");
-                return;
-            }
+                if (string.IsNullOrEmpty(loginUser.Email) || string.IsNullOrEmpty(loginUser.Password))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Vui nhập tài khoản và mật khẩu");
+                    return;
+                }
 
-            var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
-            if (response.IsSuccessStatusCode)
-            {
-                try
+                var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
+                if (response.IsSuccessStatusCode)
                 {
                     var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
                     if (loginResponse?.SuccsessFull == true)
@@ -87,17 +89,23 @@ namespace DATN.Client.Pages
                     {
                         await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Tài khoản hoặc mật khẩu không đúng!");
                     }
+
+
                 }
-                catch (JsonException ex)
+                else
                 {
-                    var query = $"[C#] fix error: {ex.Message}";
-                    await JS.InvokeVoidAsync("openChatGPT", query);
-                    Token = $"JSON parse error: {ex.Message}";
+                    Token = "Server error or invalid request.";
                 }
             }
-            else
+            catch (JsonException ex)
             {
-                Token = "Server error or invalid request.";
+                var query = $"[C#] fix error: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
+                Token = $"JSON parse error: {ex.Message}";
+            }
+            finally
+            {
+                IsProcess = false;
             }
         }
 

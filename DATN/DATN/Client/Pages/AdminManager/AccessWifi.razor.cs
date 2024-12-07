@@ -15,9 +15,9 @@ namespace DATN.Client.Pages.AdminManager
         private string IP;
         private async Task HandleSubmit()
         {
-            if (string.IsNullOrEmpty(IP))
+            if (string.IsNullOrEmpty(IP) && !IsValidIp(IP))
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng nhập IP");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "IP không hợp lệ");
                 return;
             }
 
@@ -25,28 +25,31 @@ namespace DATN.Client.Pages.AdminManager
 
             if (response.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("showAlert", "success", "Đã thêm IP.");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thông báo","Đã thêm IP.");
                 return;
             }
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", errorMessage);
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", errorMessage);
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Đã xảy ra lỗi không xác định.");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Đã xảy ra lỗi không xác định.");
                 }
             }
+        }
+        private static bool IsValidIp(string ip)
+        {
+            return System.Net.IPAddress.TryParse(ip, out _);
         }
         private async Task HandleRemove()
         {
             if (string.IsNullOrEmpty(IP))
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Vui lòng nhập IP");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Vui lòng nhập IP");
                 return;
             }
 
@@ -54,7 +57,7 @@ namespace DATN.Client.Pages.AdminManager
 
             if (response.IsSuccessStatusCode)
             {
-                await JS.InvokeVoidAsync("showAlert", "success", "Đã xóa IP.");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thông báo","Đã xóa IP.");
                 return;
             }
             else
@@ -63,11 +66,11 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", errorMessage);
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", errorMessage);
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Đã xảy ra lỗi không xác định.");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Đã xảy ra lỗi không xác định.");
                 }
             }
         }
@@ -76,13 +79,13 @@ namespace DATN.Client.Pages.AdminManager
         {
             try
             {
-                var ip = await httpClient.GetStringAsync("api/Network/get-ip");
-                if(string.IsNullOrEmpty(ip)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi Get IP"); return; }
+                var ip = await httpClient.GetStringAsync("api/Network/get-ip-host");
+                if(string.IsNullOrEmpty(ip)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi Get IP"); return; }
                 IP = ip;
             }
-            catch(Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể lấy IP wifi");
             }
         }
     }

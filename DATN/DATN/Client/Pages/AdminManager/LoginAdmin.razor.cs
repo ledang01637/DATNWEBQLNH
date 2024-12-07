@@ -15,19 +15,21 @@ namespace DATN.Client.Pages.AdminManager
         private LoginRequest loginUser = new LoginRequest();
         private bool loginFailed = false;
         private string Token = "";
+        private bool IsProcess = false;
 
         private async Task HandleLogin()
         {
-            if (string.IsNullOrEmpty(loginUser.Email) || string.IsNullOrEmpty(loginUser.Password))
+            IsProcess = true;
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Vui nhập tài khoản và mật khẩu");
-                return;
-            }
+                if (string.IsNullOrEmpty(loginUser.Email) || string.IsNullOrEmpty(loginUser.Password))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Vui nhập tài khoản và mật khẩu");
+                    return;
+                }
 
-            var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
-            if (response.IsSuccessStatusCode)
-            {
-                try
+                var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
+                if (response.IsSuccessStatusCode)
                 {
                     var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
                     if (loginResponse?.SuccsessFull == true)
@@ -52,7 +54,7 @@ namespace DATN.Client.Pages.AdminManager
                         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
                         var user = authState.User;
 
-                        if (user.Identity.IsAuthenticated && (user.IsInRole("admin")) || user.Identity.IsAuthenticated && (user.IsInRole("employee")))
+                        if (user.Identity.IsAuthenticated && (user.IsInRole("admin")) || user.Identity.IsAuthenticated && (user.IsInRole("employee")) || user.Identity.IsAuthenticated && (user.IsInRole("chef")))
                         {
                             var res = await httpClient.PostAsJsonAsync("api/AuthJWT/ManagerToken/", loginUser);
                             if (res.IsSuccessStatusCode)
@@ -71,6 +73,10 @@ namespace DATN.Client.Pages.AdminManager
                             {
                                 Navigation.NavigateTo("/Statistic", true);
                             }
+                            else if(user.Identity.IsAuthenticated && (user.IsInRole("chef")))
+                            {
+                                Navigation.NavigateTo("/manager-chef", true);
+                            }
                             else
                             {
                                 Navigation.NavigateTo("/manager", true);
@@ -78,25 +84,30 @@ namespace DATN.Client.Pages.AdminManager
                         }
                         else
                         {
-                            await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo","Tài khoản không có quyền truy cập");
+                            await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo", "Tài khoản không có quyền truy cập");
                         }
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo", "Tài khoản hoặc mật khẩu không đúng! hoặc không có quyền truy cập", "");
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Cảnh báo", "Tài khoản hoặc mật khẩu không đúng");
                     }
                 }
-                catch (JsonException ex)
+                else
                 {
-                    var query = $"[C#] fix error: {ex.Message}";
-                    await JS.InvokeVoidAsync("openChatGPT", query);
-                    Token = $"JSON parse error: {ex.Message}";
+                    Token = "Server error or invalid request.";
                 }
             }
-            else
+            catch (JsonException ex)
             {
-                Token = "Server error or invalid request.";
+                var query = $"[C#] fix error: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
+                Token = $"JSON parse error: {ex.Message}";
             }
+            finally
+            {
+                IsProcess = false;
+            }
+            
         }
     }
 }

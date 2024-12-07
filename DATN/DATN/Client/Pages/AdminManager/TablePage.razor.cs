@@ -31,7 +31,7 @@ namespace DATN.Client.Pages.AdminManager
         protected override async Task OnInitializedAsync()
         {
             dotNetObjectReference = DotNetObjectReference.Create(this);
-            qrModel.Url = "https://localhost:44328/";
+            qrModel.Url = "https://nhahangtechtitans.com/";
             await LoadAll();
         }
 

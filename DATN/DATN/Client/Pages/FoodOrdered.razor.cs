@@ -28,11 +28,12 @@ namespace DATN.Client.Pages
         private bool isCorrectVoucher = false;
         private decimal originalTotalAmount;
         private char payMenthod;
-
+        private bool IsProcess = false;
         private HubConnection hubConnection;
 
         protected override async Task OnInitializedAsync()
         {
+            IsProcess = true;
             try
             {
                 hubConnection = new HubConnectionBuilder()
@@ -62,9 +63,13 @@ namespace DATN.Client.Pages
                     }
                 }
             }
-            catch(Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Vui lòng thêm món: " + ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Lỗi không xác định");
+            }
+            finally
+            {
+                IsProcess = false;
             }
         }
 

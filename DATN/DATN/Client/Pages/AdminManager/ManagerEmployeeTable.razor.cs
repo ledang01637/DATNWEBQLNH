@@ -60,42 +60,55 @@ namespace DATN.Client.Pages.AdminManager
         private int updateCounter = 0;
         private int _orderId;
         private string availableUntil;
+        private bool IsProcess = false;
         private readonly string urlBookTable = "/employee-book-table";
 
 
         protected override async Task OnInitializedAsync()
         {
-
-            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-            if (query.ContainsKey("isCheckBookTable") && !string.IsNullOrEmpty(query["isCheckBookTable"]))
+            try
             {
-                isCheckBookTable = bool.Parse(query["isCheckBookTable"]);
+                IsProcess = true;
+                var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+                var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+                if (query.ContainsKey("isCheckBookTable") && !string.IsNullOrEmpty(query["isCheckBookTable"]))
+                {
+                    isCheckBookTable = bool.Parse(query["isCheckBookTable"]);
+                }
+                else
+                {
+                    isCheckBookTable = false;
+                }
+
+                hubConnection = new HubConnectionBuilder()
+                    .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
+                    .Build();
+
+                await SetupHubEvents();
+                await hubConnection.StartAsync();
+
+                string username = await _localStorageService.GetItemAsync("userName");
+                var response = await httpClient.PostAsJsonAsync("api/Voice/post-message", username);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!");
+                }
+
+                await GetLocalStorageAsync();
+                await LoadAll();
+                await SetupTimer();
             }
-            else
+            catch
             {
-                isCheckBookTable = false;
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi không xác định");
             }
-
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
-                .Build();
-
-            await SetupHubEvents();
-            await hubConnection.StartAsync();
-
-            string username = await _localStorageService.GetItemAsync("userName");
-            var response = await httpClient.PostAsJsonAsync("api/Voice/post-message", username);
-
-            if (!response.IsSuccessStatusCode)
+            finally
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!");
+                IsProcess = false;
             }
-
-            await GetLocalStorageAsync();
-            await LoadAll();
-            await SetupTimer();
+            
         }
 
         private async Task GetLocalStorageAsync()
@@ -159,6 +172,7 @@ namespace DATN.Client.Pages.AdminManager
         //InitLoad
         private async Task LoadAll()
         {
+            IsProcess = true;
             try
             {
                 var loadTablesTask = httpClient.GetFromJsonAsync<List<Table>>("api/Table/GetTable");
@@ -203,6 +217,9 @@ namespace DATN.Client.Pages.AdminManager
             catch (Exception ex)
             {
                 await HandleError(ex);
+            }finally
+            {
+                IsProcess = false;
             }
         }
 
@@ -272,6 +289,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task ConfirmOrder()
         {
+            IsProcess = true;
             try
             {
                 _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote") ?? new CartNote();
@@ -342,9 +360,13 @@ namespace DATN.Client.Pages.AdminManager
                 tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
                 StateHasChanged();
             }
-            catch(Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng gọi Admin: " + ex);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng gọi Admin");
+            }
+            finally
+            {
+                IsProcess = false;
             }
 
         }
@@ -532,6 +554,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task SaveRewarPointes(Order _order)
         {
+            IsProcess = true;
             try
             {
                 if (customer != null)
@@ -575,10 +598,14 @@ namespace DATN.Client.Pages.AdminManager
                     return;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không lưu điểm được");
                 return;
+            }
+            finally
+            {
+                IsProcess = true;
             }
         }
 
@@ -738,6 +765,7 @@ namespace DATN.Client.Pages.AdminManager
         }
         private async Task SetupCall(string token, string from, string to)
         {
+            IsProcess = true;
             try
             {
                 var response = await httpClient.PostAsJsonAsync("api/JwtTokenValidator/ValidateToken", token);
@@ -764,12 +792,16 @@ namespace DATN.Client.Pages.AdminManager
                         }
                     }
                 }
-
-
             }
             catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi",ex.Message);
+                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không thể setup cuộc gọi");
+
+            }finally
+            {
+                IsProcess = false;
             }
         }
         private async Task setupVideo()
@@ -900,6 +932,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task ProcessBookTable(int reservationId, bool isCancel)
         {
+            IsProcess = true;
             try
             {
                 reservationModel = await httpClient.GetFromJsonAsync<Reservation>($"api/Reservation/{reservationId}");
@@ -924,9 +957,13 @@ namespace DATN.Client.Pages.AdminManager
                     await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Không tìm thấy đơn đặt bàn");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ admin: " + ex.Message);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xử lý bàn");
+            }
+            finally
+            {
+                IsProcess = false;
             }
         }
 
@@ -1128,7 +1165,6 @@ namespace DATN.Client.Pages.AdminManager
             }
             return null;
         }
-
         public void Dispose()
         {
             dotNetObjectReference?.Dispose();
