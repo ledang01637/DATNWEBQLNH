@@ -7,6 +7,8 @@
   <ItemGroup>
     <PackageReference Include="Blazor.Bindable" Version="1.0.2" />
     <PackageReference Include="BlazorBarcodeScanner.ZXing.JS" Version="1.0.4" />
+    <PackageReference Include="EPPlus" Version="7.5.1" />
+    <PackageReference Include="EPPlus.System.Drawing" Version="7.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization.Policy" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.17" />

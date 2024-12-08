@@ -7,8 +7,8 @@ using System;
 using System.Net.Http.Json;
 using System.Globalization;
 using DATN.Shared;
-using Microsoft.VisualBasic;
-using System.Net.Http;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace DATN.Client.Pages.AdminManager
 {
@@ -54,7 +54,6 @@ namespace DATN.Client.Pages.AdminManager
 				    // Kiểm tra ListMonthlyRevenue
 				    if (ListMonthlyRevenue == null || !ListMonthlyRevenue.Any())
 				    {
-					    Console.WriteLine(ListMonthlyRevenue);
 					    availableYears = new List<int> { DateTime.Now.Year };
 					    selectedDailyYear = DateTime.Now.Year;
 					    selectedMonthlyYear = DateTime.Now.Year;
@@ -314,7 +313,7 @@ namespace DATN.Client.Pages.AdminManager
             Orders = await httpClient.GetFromJsonAsync<List<Order>>("api/Order/GetOrder");
             OrderItems = await httpClient.GetFromJsonAsync<List<OrderItem>>("api/OrderItem/GetOrderItem");
             Products = await httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProduct");
-            Categories = await httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
+            Categories = await httpClient.GetFromJsonAsync<List<DATN.Shared.Category>>("api/Category/GetCategories");
 
             Console.WriteLine("Orders"+ Orders);
             if (Orders != null && OrderItems != null && Products != null && Categories != null)
@@ -398,9 +397,8 @@ namespace DATN.Client.Pages.AdminManager
 					.Distinct()
 					.OrderByDescending(year => year)
 					.ToList();
-
-				// Nếu chưa chọn năm, đặt mặc định là năm hiện tại hoặc năm đầu tiên
-				if (!selectedCustomerYear.HasValue)
+                // Nếu chưa chọn năm, đặt mặc định là năm hiện tại hoặc năm đầu tiên
+                if (!selectedCustomerYear.HasValue)
 				{
 					var currentYear = DateTime.Now.Year;
 					selectedCustomerYear = availableCustomerYears.Contains(currentYear) ? currentYear : availableCustomerYears.FirstOrDefault();
@@ -430,14 +428,14 @@ namespace DATN.Client.Pages.AdminManager
 					labels,
 					datasets = new[]
 					{
-				new
-				{
-					label = "Số lượng khách hàng theo tháng",
-					data,
-					borderColor = "#ff9800",
-					fill = false
-				}
-			}
+				        new
+				        {
+					        label = "Số lượng khách hàng theo tháng",
+					        data,
+					        borderColor = "#ff9800",
+					        fill = false
+				        }
+			        }
 				};
 
 				var options = new
@@ -454,6 +452,308 @@ namespace DATN.Client.Pages.AdminManager
 				Console.WriteLine($"Lỗi khi tải dữ liệu khách hàng: {ex.Message}");
 			}
 		}
+
+        public async Task ExportCustomerAndRevenueData()
+        {
+            try
+            {
+                // Thiết lập LicenseContext để tránh lỗi System.Drawing
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                using var package = new ExcelPackage();
+                var sheet = package.Workbook.Worksheets.Add("Báo Cáo Thống Kê");
+
+                // Định dạng tiêu đề cho bảng đầu tiên
+                sheet.Cells["A1:H1"].Merge = true;
+                sheet.Cells["A1"].Value = "BÁO CÁO THỐNG KÊ DOANH THU THEO THÁNG NĂM " + DateTime.Now.Year;
+                sheet.Cells["A1"].Style.Font.Size = 14;
+                sheet.Cells["A1"].Style.Font.Bold = true;
+                sheet.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                // Headers cho bảng đầu tiên
+                var headers = new string[] {
+                    "Tháng",
+                    "Số lượng khách hàng",
+                    "Doanh thu (VND)",
+                    "VAT (10%)",
+                    "Doanh thu sau thuế",
+                    "Chi phí (Điền vào nếu có)",
+                    "Lợi nhuận",
+                    "Tỷ suất lợi nhuận (%)"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    sheet.Cells[3, i + 1].Value = headers[i];
+                    sheet.Cells[3, i + 1].Style.Font.Bold = true;
+                }
+
+                // Dữ liệu cho bảng đầu tiên
+                var customerData = ListGuest.GroupBy(x => x.CreateDate.Month)
+                    .ToDictionary(g => g.Key, g => g.Count());
+                var revenueData = listRevenue.GroupBy(x => x.CreateDate.Month)
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.TotalAmount));
+
+                for (int month = 1; month <= 12; month++)
+                {
+                    int row = month + 3;
+                    var revenue = revenueData.GetValueOrDefault(month, 0);
+                    var vat = revenue * 0.1m;
+                    var revenueAfterTax = revenue - vat;
+
+                    // Đặt công thức tính lợi nhuận trong ô Excel
+                    sheet.Cells[row, 7].Formula = $"IF(F{row}=0, E{row}, E{row}-F{row})"; // IF(Chi phí phát sinh = 0, Lợi nhuận = Doanh thu sau thuế, Lợi nhuận = Doanh thu sau thuế - Chi phí phát sinh)
+
+                    // Các ô khác
+                    sheet.Cells[row, 1].Value = $"Tháng {month}";
+                    sheet.Cells[row, 2].Value = customerData.GetValueOrDefault(month, 0);
+                    sheet.Cells[row, 3].Value = revenue;
+                    sheet.Cells[row, 4].Value = vat;
+                    sheet.Cells[row, 5].Value = revenueAfterTax;
+                    sheet.Cells[row, 6].Value = 0; // Chi phí phát sinh mặc định là 0
+                    sheet.Cells[row, 8].Formula = $"IF(C{row}=0, 0, G{row}/C{row}*100)"; // Tỷ suất lợi nhuận (%)
+                }
+
+
+                // Tổng cộng cho bảng đầu tiên
+                var totalRow = 16;
+                sheet.Cells[totalRow, 1].Value = "Tổng cộng";
+                sheet.Cells[totalRow, 2].Formula = $"SUM(B4:B15)";
+                sheet.Cells[totalRow, 3].Formula = $"SUM(C4:C15)";
+                sheet.Cells[totalRow, 4].Formula = $"SUM(D4:D15)";
+                sheet.Cells[totalRow, 5].Formula = $"SUM(E4:E15)";
+                sheet.Cells[totalRow, 6].Formula = $"SUM(F4:F15)";
+                sheet.Cells[totalRow, 7].Formula = $"SUM(G4:G15)";
+                sheet.Cells[totalRow, 8].Formula = $"AVERAGE(H4:H15)";
+
+                // Định dạng dòng tổng cộng
+                sheet.Cells[totalRow, 1, totalRow, headers.Length].Style.Font.Bold = true;
+
+                // Định dạng số liệu cho bảng đầu tiên
+                var dataRange = sheet.Cells[4, 2, totalRow, headers.Length];
+                dataRange.Style.Numberformat.Format = "#,##0";
+                sheet.Cells[4, 8, totalRow, 8].Style.Numberformat.Format = "#,##0.00";
+
+                // Tự động điều chỉnh độ rộng cột cho bảng đầu tiên
+                sheet.Cells.AutoFitColumns();
+
+                // Thêm viền xung quanh bảng đầu tiên
+                var border = sheet.Cells[3, 1, totalRow, headers.Length].Style.Border;
+                border.Top.Style = border.Bottom.Style = border.Left.Style = border.Right.Style = ExcelBorderStyle.Thin;
+
+                // -----------------
+                // Bảng thứ hai: Doanh thu món ăn phổ biến
+                // -----------------
+                int startRowForSecondTable = totalRow + 2; // Đặt bảng thứ hai bắt đầu từ dòng kế tiếp sau bảng đầu tiên
+
+                sheet.Cells[startRowForSecondTable, 1, startRowForSecondTable, 3].Merge = true;
+                sheet.Cells[startRowForSecondTable, 1].Value = "TOP 5 MÓN BÁN CHẠY NHẤT";
+                sheet.Cells[startRowForSecondTable, 1].Style.Font.Size = 14;
+                sheet.Cells[startRowForSecondTable, 1].Style.Font.Bold = true;
+                sheet.Cells[startRowForSecondTable, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                // Headers cho bảng thứ hai
+                var dishHeaders = new string[] {
+                    "Món ăn",
+                    "Số lượng bán",
+                    "Doanh thu (VND)"
+                };
+
+                for (int i = 0; i < dishHeaders.Length; i++)
+                {
+                    sheet.Cells[startRowForSecondTable + 1, i + 1].Value = dishHeaders[i];
+                    sheet.Cells[startRowForSecondTable + 1, i + 1].Style.Font.Bold = true;
+                }
+
+                // Dữ liệu cho bảng thứ hai (giả sử bạn đã có dữ liệu cho món ăn phổ biến)
+                var popularDishes = OrderItems
+                    .GroupBy(item => item.ProductId)
+                    .Select(group => new
+                    {
+                        ProductId = group.Key,
+                        Quantity = group.Sum(item => item.Quantity)
+                    })
+                    .Join(Products,
+                          orderItemGroup => orderItemGroup.ProductId,
+                          product => product.ProductId,
+                          (orderItemGroup, product) => new
+                          {
+                              ProductId = product.ProductId,
+                              ProductName = product.ProductName,
+                              Quantity = orderItemGroup.Quantity,
+                              TotalAmount = orderItemGroup.Quantity * product.Price
+                          })
+                    .OrderByDescending(dish => dish.Quantity)
+                    .Take(5)
+                    .ToList();
+
+                for (int i = 0; i < popularDishes.Count; i++)
+                {
+                    sheet.Cells[startRowForSecondTable + 2 + i, 1].Value = popularDishes[i].ProductName;
+                    sheet.Cells[startRowForSecondTable + 2 + i, 2].Value = popularDishes[i].Quantity;
+                    sheet.Cells[startRowForSecondTable + 2 + i, 3].Value = popularDishes[i].TotalAmount;
+                }
+
+                // Định dạng số liệu cho bảng thứ hai
+                var dishDataRange = sheet.Cells[startRowForSecondTable + 2, 2, startRowForSecondTable + 2 + popularDishes.Count - 1, 3];
+                dishDataRange.Style.Numberformat.Format = "#,##0";
+
+                // Tự động điều chỉnh độ rộng cột cho bảng thứ hai
+                sheet.Cells.AutoFitColumns();
+
+                // Thêm viền xung quanh bảng thứ hai
+                var border2 = sheet.Cells[startRowForSecondTable + 1, 1, startRowForSecondTable + 2 + popularDishes.Count - 1, 3].Style.Border;
+                border2.Top.Style = border2.Bottom.Style = border2.Left.Style = border2.Right.Style = ExcelBorderStyle.Thin;
+
+                // Lưu file
+                var fileBytes = package.GetAsByteArray();
+                await JSRuntime.InvokeVoidAsync("saveAsFile", "Bao_Cao_Thong_Ke_Theo_Thang_Nam" + DateTime.Now.Year + ".xlsx", Convert.ToBase64String(fileBytes));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi: {ex.Message}");
+            }
+        }
+
+        private async Task ExportRevenueByDayToExcel()
+        {
+            try
+            {
+                // Thiết lập LicenseContext để tránh lỗi System.Drawing
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                using var package = new ExcelPackage();
+                var sheet = package.Workbook.Worksheets.Add("Báo Cáo Thống Kê");
+
+                // Xác định ngày đầu và ngày cuối của tuần được chọn
+                var startOfWeek = FirstDateOfWeek(selectedDailyYear ?? 2024, selectedWeek ?? 1); // 2024 là giá trị mặc định
+                var endOfWeek = startOfWeek.AddDays(6);
+
+                // Định dạng tiêu đề cho báo cáo
+                sheet.Cells["A1:H1"].Merge = true;
+                string title = $"BÁO CÁO DOANH THU VÀ KHÁCH HÀNG THEO NGÀY TRONG TUẦN ({startOfWeek:dd/MM/yyyy} - {endOfWeek:dd/MM/yyyy})";
+                sheet.Cells["A1"].Value = title;
+                sheet.Cells["A1"].Style.Font.Size = 14;
+                sheet.Cells["A1"].Style.Font.Bold = true;
+                sheet.Cells["A1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                sheet.Cells["A1"].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+                // Headers cho bảng theo ngày
+                var headers = new string[] {
+                    "Ngày trong tuần",
+                    "Số lượng khách hàng",
+                    "Doanh thu (VND)",
+                    "VAT (10%)",
+                    "Doanh thu sau thuế",
+                    "Chi phí (Điền vào nếu có)",
+                    "Lợi nhuận",
+                    "Tỷ suất lợi nhuận (%)"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    sheet.Cells[3, i + 1].Value = headers[i];
+                    sheet.Cells[3, i + 1].Style.Font.Bold = true;
+                    sheet.Cells[3, i + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    sheet.Cells[3, i + 1].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    sheet.Cells[3, i + 1].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    sheet.Cells[3, i + 1].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    sheet.Cells[3, i + 1].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                }
+
+                
+
+
+                // Dữ liệu theo ngày trong tuần
+                var customerDataByDay = ListGuest
+                    .Where(x => x.CreateDate >= startOfWeek && x.CreateDate <= endOfWeek)
+                    .GroupBy(x => x.CreateDate.DayOfWeek)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                var revenueDataByDay = listRevenue
+                    .Where(x => x.CreateDate >= startOfWeek && x.CreateDate <= endOfWeek)
+                    .GroupBy(x => x.CreateDate.DayOfWeek)
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.TotalAmount));
+
+                var daysOfWeek = new[] {
+                    DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
+                };
+
+                var vietnameseDays = new[] {
+                    "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"
+                };
+
+                for (int i = 0; i < daysOfWeek.Length; i++)
+                {
+                    int row = i + 4; // Dữ liệu bắt đầu từ dòng 4
+                    var day = daysOfWeek[i];
+                    var revenue = revenueDataByDay.GetValueOrDefault(day, 0);
+                    var vat = revenue * 0.1m;
+                    var revenueAfterTax = revenue - vat;
+
+                    // Đặt công thức tính lợi nhuận trong ô Excel (tránh lỗi chia cho 0)
+                    sheet.Cells[row, 7].Formula = $"IF(F{row}=0, E{row}, E{row}-F{row})"; // Lợi nhuận
+
+                    // Các ô khác
+                    sheet.Cells[row, 1].Value = vietnameseDays[i]; // Sửa để lấy tên ngày trong tuần bằng tiếng Việt
+                    sheet.Cells[row, 2].Value = customerDataByDay.GetValueOrDefault(day, 0);
+                    sheet.Cells[row, 3].Value = revenue;
+                    sheet.Cells[row, 4].Value = vat;
+                    sheet.Cells[row, 5].Value = revenueAfterTax;
+                    sheet.Cells[row, 6].Value = 0; // Chi phí phát sinh mặc định là 0 (sửa nếu có dữ liệu thực tế)
+                    sheet.Cells[row, 8].Formula = $"IF(C{row}=0, 0, G{row}/C{row}*100)"; // Tỷ suất lợi nhuận (%)
+
+                }
+
+                // Tổng cộng cho bảng theo ngày
+                var totalRow = 11; // Dòng tổng cộng
+                sheet.Cells[totalRow, 1].Value = "Tổng cộng";
+                sheet.Cells[totalRow, 2].Formula = $"SUM(B4:B10)";
+                sheet.Cells[totalRow, 3].Formula = $"SUM(C4:C10)";
+                sheet.Cells[totalRow, 4].Formula = $"SUM(D4:D10)";
+                sheet.Cells[totalRow, 5].Formula = $"SUM(E4:E10)";
+                sheet.Cells[totalRow, 6].Formula = $"SUM(F4:F10)";
+                sheet.Cells[totalRow, 7].Formula = $"SUM(G4:G10)";
+                sheet.Cells[totalRow, 8].Formula = $"AVERAGE(H4:H10)";
+
+                // Định dạng số liệu
+                // Định dạng số liệu cho bảng đầu tiên
+                var dataRange = sheet.Cells[4, 2, totalRow, headers.Length];
+                dataRange.Style.Numberformat.Format = "#,##0";
+                sheet.Cells[4, 8, totalRow, 8].Style.Numberformat.Format = "#,##0.00";
+
+                // Định dạng dòng tổng cộng
+                sheet.Cells[totalRow, 1, totalRow, headers.Length].Style.Font.Bold = true;
+                sheet.Cells[totalRow, 1, totalRow, headers.Length].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                // Thêm viền xung quanh bảng 
+                var border = sheet.Cells[3, 1, totalRow, headers.Length].Style.Border;
+                border.Top.Style = border.Bottom.Style = border.Left.Style = border.Right.Style = ExcelBorderStyle.Thin;
+
+                // Tự động điều chỉnh độ rộng cột cho bảng
+                sheet.Cells.AutoFitColumns();
+
+                // Lưu file Excel vào bộ nhớ
+                var fileBytes = package.GetAsByteArray();
+
+                // Lưu file
+                await JSRuntime.InvokeVoidAsync("saveAsFile", "Doanh_Thu_Theo_Ngay_" + startOfWeek + "_" + endOfWeek +".xlsx", fileBytes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public DateTime FirstDateOfWeek(int year, int weekOfYear)
+        {
+            var jan1 = new DateTime(year, 1, 1);
+            var daysOffset = DayOfWeek.Monday - jan1.DayOfWeek;
+            var firstMonday = jan1.AddDays(daysOffset);
+
+            return firstMonday.AddDays((weekOfYear - 1) * 7);
+        }
 
         // Class để lưu thông tin tháng
         public class MonthModel
