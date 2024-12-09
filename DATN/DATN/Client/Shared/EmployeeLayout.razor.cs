@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.JSInterop;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -53,6 +54,11 @@ namespace DATN.Client.Shared
         private void Logout()
         {
             Navigation.NavigateTo("/logout");
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await JS.InvokeVoidAsync("stopSnowfall");
         }
     }
 }

@@ -92,9 +92,42 @@
         background: transparent;
         border: none;
     }
-
 </style>
+<HeadContent>
+    <script>
+        function createSnowflake() {
+            const snowContainer = document.querySelector('.snow-container');
+            const snowflakes = ['❄', '❅', '❆', '✶', '✻', '❄️', '☃️'];
 
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+            snowflake.style.opacity = Math.random() * 0.5 + 0.5;
+
+            snowContainer.appendChild(snowflake);
+
+            snowflake.addEventListener('animationend', () => {
+                snowflake.remove();
+            });
+        }
+
+        let snowfallInterval;
+
+        function startSnowfall() {
+            snowfallInterval = setInterval(createSnowflake, 50);
+        }
+
+        function stopSnowfall() {
+            clearInterval(snowfallInterval);
+        }
+
+        startSnowfall();
+    </script>
+</HeadContent>
 <CascadingAuthenticationState>
     <AuthorizeView Roles="admin,employee">
         <Authorized>
@@ -108,6 +141,7 @@
             }
             else if (isAcceptWifi)
             {
+                <div class="snow-container"></div>
                 <div class="custom-body">
                     <div class="container mt-1 foodcustom content p-3">
                         <!-- Sidebar -->
