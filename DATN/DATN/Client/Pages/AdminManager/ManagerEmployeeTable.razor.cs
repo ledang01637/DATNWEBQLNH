@@ -92,8 +92,11 @@ namespace DATN.Client.Pages.AdminManager
 
                 var response = await httpClient.PostAsJsonAsync("api/Voice/post-message", username);
 
+                var content = response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
+                    Console.WriteLine(content.Result);
                     await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể thêm người nhận cuộc gọi");
                 }
 
@@ -293,6 +296,7 @@ namespace DATN.Client.Pages.AdminManager
             IsProcess = true;
             try
             {
+                await JS.InvokeVoidAsync("closeModal", "tableModal");
                 _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote") ?? new CartNote();
 
                 if (_cartNote.CartDTOs is null || !_cartNote.CartDTOs.Any())
@@ -355,7 +359,6 @@ namespace DATN.Client.Pages.AdminManager
                 await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                 await GetTableColorAsync(selectedTableNumber);
 
-                await JS.InvokeVoidAsync("closeModal", "tableModal");
                 await JS.InvokeVoidAsync("showAlert", "success", "Đã gửi đầu bếp");
                 await InitializeButtonVisibilityAsync(selectedTableNumber);
                 tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
@@ -476,80 +479,95 @@ namespace DATN.Client.Pages.AdminManager
 
         private async void ProcessPayment()
         {
-            if (string.IsNullOrEmpty(messagePay))
+            IsProcess = true;
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Khách hàng chưa yêu cầu thanh toán");
-                return;
-            }
-
-            cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
-
-            if (cartsByTable is null) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!"); return; }
-
-            if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
-            {
-                cartsByTable.Remove(selectedTableNumber);
-                IsUsing = false;
-            }
-            else
-            {
-                cartsByTable[selectedTableNumber] = new CartNote
+                await JS.InvokeVoidAsync("closeModal", "invoiceModal");
+                if (string.IsNullOrEmpty(messagePay))
                 {
-                    PreviousCartDTOs = new List<CartDTO>(),
-                    CartDTOs = new List<CartDTO>(),
-                    Note = _cartNote.Note
-                };
-                existingCartNote.CartDTOs = new List<CartDTO>();
-                existingCartNote.PreviousCartDTOs = new List<CartDTO>();
-
-            }
-
-            if (order != null && order.OrderId > 0)
-            {
-                order.Status = "Đã thanh toán";
-                order.TotalAmount = TotalAmount;
-                order.EmployeeId = employee.EmployeeId;
-                order.Note = _cartNote.Note;
-
-
-                if(customer != null && customer.CustomerId > 0 && customer.Email != "no account")
-                {
-                    order.CustomerId = customer.CustomerId;
-                    await SaveRewarPointes(order);
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Khách hàng chưa yêu cầu thanh toán");
+                    return;
                 }
 
-                var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+                cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
 
-                if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
+                if (cartsByTable is null) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!"); return; }
 
-                getTable.Status = "empty";
+                if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
+                {
+                    cartsByTable.Remove(selectedTableNumber);
+                    IsUsing = false;
+                }
+                else
+                {
+                    cartsByTable[selectedTableNumber] = new CartNote
+                    {
+                        PreviousCartDTOs = new List<CartDTO>(),
+                        CartDTOs = new List<CartDTO>(),
+                        Note = _cartNote.Note
+                    };
+                    existingCartNote.CartDTOs = new List<CartDTO>();
+                    existingCartNote.PreviousCartDTOs = new List<CartDTO>();
 
-                var res = await httpClient.PutAsJsonAsync($"api/Table/{getTable.TableId}", getTable);
+                }
 
-                if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
+                if (order != null && order.OrderId > 0)
+                {
+                    order.Status = "Đã thanh toán";
+                    order.TotalAmount = TotalAmount;
+                    order.EmployeeId = employee.EmployeeId;
+                    order.Note = _cartNote.Note;
 
 
-                TotalAmount = 0;
-                IsUsing = false;
-                messagePay = null;
-                orderIdPay = 0;
-                numberTablePay = 0;
-                numberTable = null;
+                    if (customer != null && customer.CustomerId > 0 && customer.Email != "no account")
+                    {
+                        order.CustomerId = customer.CustomerId;
+                        await SaveRewarPointes(order);
+                    }
 
-                await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
-                await JS.InvokeVoidAsync("closeModal", "tableModal");
-                await JS.InvokeVoidAsync("closeModal", "invoiceModal");
-                await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
-                await InitializeButtonVisibilityAsync(selectedTableNumber);
-                await GetTableColorAsync(selectedTableNumber);
-                tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
-                StateHasChanged();
-                return;
+                    var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+
+                    if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
+
+                    getTable.Status = "empty";
+
+                    var res = await httpClient.PutAsJsonAsync($"api/Table/{getTable.TableId}", getTable);
+
+                    if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
+
+
+                    TotalAmount = 0;
+                    IsUsing = false;
+                    messagePay = null;
+                    orderIdPay = 0;
+                    numberTablePay = 0;
+                    numberTable = null;
+
+                    await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
+                    await JS.InvokeVoidAsync("closeModal", "tableModal");
+                    await JS.InvokeVoidAsync("closeModal", "invoiceModal");
+                    await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
+                    await InitializeButtonVisibilityAsync(selectedTableNumber);
+                    await GetTableColorAsync(selectedTableNumber);
+                    tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
+                    StateHasChanged();
+                    return;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìn thấy hóa đơn");
+                }
             }
-            else
+            catch(Exception ex)
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không tìn thấy hóa đơn");
+                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
             }
+            finally
+            {
+                IsProcess = false;
+            }
+            
 
         }
 
@@ -606,7 +624,7 @@ namespace DATN.Client.Pages.AdminManager
             }
             finally
             {
-                IsProcess = true;
+                IsProcess = false;
             }
         }
 

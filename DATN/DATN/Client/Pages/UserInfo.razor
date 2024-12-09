@@ -7,12 +7,85 @@
 @inject CartService _cartService
 
 
+<style>
+
+    /* Tăng tính đồng nhất */
+    .container-custom {
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-section {
+        text-align: center;
+    }
+
+    .profile-img img {
+        margin-bottom: 10px;
+        border: 3px solid #f0f0f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-info h2 {
+        font-size: 24px;
+        color: #FF5722;
+    }
+
+    .user-info p {
+        color: #888;
+        margin: 5px 0;
+    }
+
+    .menu-list li a {
+        border-radius: 8px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .menu-list li a:hover {
+            background-color: #FF5722;
+            color: #fff;
+        }
+
+    .logout-btn {
+        background-color: #FF5722;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(255, 87, 34, 0.3);
+        }
+
+    /* Thanh điều hướng */
+    .navbar {
+        border-top: 1px solid #ddd;
+    }
+
+        .navbar a {
+            color: #333;
+            font-size: 20px;
+            transition: color 0.2s ease;
+        }
+
+            .navbar a:hover, .navbar a:active {
+                color: #FF5722;
+            }
+
+
+</style>
+
 <div class="container container-custom">
-    <div class="profile-section">
-        <div class="profile-img">
+    <div class="row profile-section">
+        <div class="col-12 text-center profile-img">
             <img src="./css/UserCss/Image/user1.jpg" alt="User Image">
         </div>
-        <div class="user-info">
+        <div class="col-12 user-info">
             <h2>@customer.CustomerName</h2>
             <p>@customer.PhoneNumber</p>
         </div>
@@ -29,11 +102,11 @@
     <button class="logout-btn bg-dark border-dark shadow" @onclick="Logout">Đăng xuất</button>
 </div>
 
-<nav class="navbar fixed-bottom navbar-light bg-light">
+<nav class="navbar fixed-bottom navbar-light bg-white shadow">
     <div class="container-fluid justify-content-around">
-        <a href="/" class="nav-link"><i class="bi bi-house"></i></a>
-        <a href="/order-list" class="nav-link"><i class="bi bi-card-list"></i></a>
-        <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark"></i></a>
-        <a href="/userinfo" class="nav-link"><i class="bi bi-person" style="color: orange"></i></a>
+        <a href="/" class="nav-link"><i class="bi bi-house" style="font-size: 24px;"></i></a>
+        <a href="/order-list" class="nav-link"><i class="bi bi-card-list" style="font-size: 24px;"></i></a>
+        <a href="/food-ordered" class="nav-link"><i class="bi bi-bookmark" style="font-size: 24px;"></i></a>
+        <a href="/userinfo" class="nav-link"><i class="bi bi-person" style="font-size: 24px; color: orange;"></i></a>
     </div>
 </nav>
