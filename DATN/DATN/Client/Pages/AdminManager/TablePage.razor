@@ -2,7 +2,7 @@
 @inject IJSRuntime JS
 @inject HttpClient httpClient
 @inject NavigationManager Navigation
-@layout EmployeeLayout
+@layout LayoutAdmin
 @inject LocalStorageService _localStorageService
 
 
@@ -67,7 +67,7 @@
                              data-position="@table.Position"
                              style="@(isMoveTable ? "col-md-2" : $"grid-column: {GetColumnFromPosition(table.Position)}; grid-row: {GetRowFromPosition(table.Position)};")">
                             <div class="card table-card" 
-                                style="background-color:@(isDuplicatePosition ? "red" : "transparent");" 
+                                style="background-color:@(isDuplicatePosition ? "red" : "");" 
                                 data-bs-toggle="modal"
                                  data-bs-target="#GenQRModel"
                                  @onclick="() => LoadTableForEdit(table.TableId)">

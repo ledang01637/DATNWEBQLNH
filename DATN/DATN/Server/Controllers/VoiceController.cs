@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 [Route("api/[controller]")]
 public class VoiceController : ControllerBase
 {
-    private readonly string FilePath = "Data/message-res.txt";
+    private readonly string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "message-res.txt");
+
 
     [HttpPost("post-message")]
     public async Task<IActionResult> PostMessage([FromBody] string message)
@@ -19,7 +20,7 @@ public class VoiceController : ControllerBase
             return BadRequest("Message không hợp lệ.");
         }
 
-        await System.IO.File.WriteAllTextAsync(FilePath, message);
+        await System.IO.File.WriteAllTextAsync(filePath, message);
 
         return Ok("Message đã được thêm thành công.");
     }
@@ -29,11 +30,11 @@ public class VoiceController : ControllerBase
     {
         try
         {
-            if (!System.IO.File.Exists(FilePath))
+            if (!System.IO.File.Exists(filePath))
             {
                 return NotFound("Tệp tin không tồn tại.");
             }
-            var message = await System.IO.File.ReadAllTextAsync("Data/message-res.txt");
+            var message = await System.IO.File.ReadAllTextAsync(filePath);
             return Ok(message);
         }
         catch (Exception ex)

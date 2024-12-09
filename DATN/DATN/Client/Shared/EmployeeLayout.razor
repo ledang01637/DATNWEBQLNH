@@ -12,6 +12,7 @@
         flex-direction: column;
         min-height: 100vh;
         margin: 0;
+        background: linear-gradient(#123 30%, #667);
     }
 
     .container.foodcustom {
@@ -122,13 +123,13 @@
 
                         <div class="d-flex justify-content-between align-items-center py-3">
                             <div>
-                                <i class="fas fa-bars fa-2x me-3" style="cursor: pointer;" @onclick="() => Navbar(false)"></i>
+                                <i class="fas fa-bars fa-2x me-3 text-white" style="cursor: pointer;" @onclick="() => Navbar(false)"></i>
                             </div>
                             <div>
-                                <h2 class="fs-3 d-inline text-center">Nhân viên</h2>
+                                <h2 class="fs-3 d-inline text-center text-white">Nhân viên</h2>
                             </div>
                             <div>
-                                <span>Xin chào, <strong id="user-name">@Username</strong></span>
+                                <span>Xin chào, <strong class="text-white" id="user-name">@Username</strong></span>
                                 <button class="btn btn-sm btn-outline-danger ms-3" id="logout-btn" @onclick="Logout">Đăng xuất</button>
                             </div>
                         </div>
@@ -158,7 +159,7 @@
                             </div>
                         </div>
                     </footer>
-                </div>
+                </div>  
             }
             else
             {
@@ -170,7 +171,6 @@
                 </div>
             }
         </Authorized>
-
         <NotAuthorized>
             <div class="container-fluid access-denied-container">
                 <div class="access-denied-card">

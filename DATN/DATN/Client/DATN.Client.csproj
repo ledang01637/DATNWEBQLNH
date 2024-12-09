@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\img\**" />
+    <Content Remove="wwwroot\img\**" />
+    <EmbeddedResource Remove="wwwroot\img\**" />
+    <None Remove="wwwroot\img\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazor.Bindable" Version="1.0.2" />
     <PackageReference Include="BlazorBarcodeScanner.ZXing.JS" Version="1.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="5.0.17" />
@@ -27,7 +34,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\UserCss\Image\" />
-    <Folder Include="wwwroot\img\png\" />
     <Folder Include="wwwroot\images\products\" />
     <Folder Include="wwwroot\js\lib\" />
   </ItemGroup>

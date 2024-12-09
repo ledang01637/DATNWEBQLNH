@@ -89,11 +89,12 @@ namespace DATN.Client.Pages.AdminManager
                 await hubConnection.StartAsync();
 
                 string username = await _localStorageService.GetItemAsync("userName");
+
                 var response = await httpClient.PostAsJsonAsync("api/Voice/post-message", username);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể thêm người nhận cuộc gọi");
                 }
 
                 await GetLocalStorageAsync();

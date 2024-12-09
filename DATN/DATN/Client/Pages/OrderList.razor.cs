@@ -47,9 +47,11 @@ namespace DATN.Client.Pages
                 Carts = await _cartService.GetCartAsync();
                 await UpdateCartTotals();
             }
-            catch 
+            catch(Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Đã xảy ra lỗi không xác định");
+                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
+                await JS.InvokeVoidAsync("openChatGPT", query);
             }
             finally
             {

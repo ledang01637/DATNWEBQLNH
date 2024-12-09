@@ -263,7 +263,7 @@
 
 @if(IsProcess){
     <div class="d-flex justify-content-center">
-        <div class="spinner-border" role="status">
+        <div class="spinner-border text-white" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
@@ -275,7 +275,7 @@ else
         <div class="col-lg-6 text-end mb-3">
             <div class="input-group">
                 <span class="input-group-text bg-transparent border-end-0">
-                    <i class="bi bi-search"></i>
+                    <i class="bi bi-search text-white"></i>
                 </span>
                 <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm..." />
             </div>
@@ -318,9 +318,9 @@ else
                             <td>@r.ReservationTime</td>
                             <td>@r.Tables.TableNumber</td>
                             <td>@r.CustomerNote</td>
-                            <td class="@(r.ReservationStatus.Equals("Đặt bàn thành công") ? "custom-color-processpaid" : r.ReservationStatus.Equals("Đã nhận bàn") ? "custom-color-paid" : "custom-color-unpaid") fw-semibold">@r.ReservationStatus</td>
+                            <td class="@(r.ReservationStatus.Equals("Đặt bàn thành công") ? "custom-color-processpaid" : r.ReservationStatus.Equals("Hoàn thành") ? "custom-color-paid" : "custom-color-unpaid") fw-semibold">@r.ReservationStatus</td>
                             <td>
-                                <button class="btn btn-danger" @onclick="() => ProcessBookTable(r.ReservationId,true)">Hủy</button>
+                                <button disabled=@(r.ReservationStatus.Equals("Hoàn thành") || r.ReservationStatus.Equals("Đã hủy") ? true : false) class="btn btn-danger" @onclick="() => ProcessBookTable(r.ReservationId,true)">Hủy</button>
                             </td>
                         </tr>
                     }
@@ -344,7 +344,7 @@ else
                 {
                     @foreach (var f in floors)
                     {
-                        <h3>Tầng @f.NumberFloor</h3>
+                        <h3 class="text-white">Tầng @f.NumberFloor</h3>
                         <div class="floor floor-section gird-custom">
                             @foreach (var table in tables.Where(t => t.FloorId == f.FloorId).OrderBy(t => t.Position))
                             {
@@ -392,7 +392,7 @@ else
                     <h5 class="mb-2">Quản lý yêu cầu</h5>
                     <div class="dropdown dropend">
                         <button class="btn btn-default dropdown-toggle position-relative border border-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell-fill"></i>
+                            <i class="bi bi-bell-fill text-white"></i>
                             <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 @if (reservations != null && reservations.Count > 0)
                                 {
@@ -500,453 +500,453 @@ else
         </div>
     }
 
-
-    <div class="modal fade" id="bookTableModal" tabindex="-1" aria-labelledby="bookTableModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="bookTableModal">Mã đơn hàng: @reservationModel.ReservationId</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card p-3 pb-0">
-                        <h5 class="mb-2 text-center">Thông tin người đặt</h5>
-                        <div class="card-body">
-                            <EditForm Model="@reservationModel" OnValidSubmit="OnSubmitForm">
-                                <DataAnnotationsValidator />
-                                <div class="mb-3">
-                                    <label for="name" class="form-label fw-bold">Tên liên hệ <span class="text-danger">*</span></label>
-                                    <InputText id="name" class="form-control" @bind-Value="reservationModel.CustomerName" placeholder="Nhập tên liên hệ" readonly />
-                                    <ValidationMessage For="@(() => reservationModel.CustomerName)" />
+}
+<div class="modal fade" id="bookTableModal" tabindex="-1" aria-labelledby="bookTableModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookTableModal">Mã đơn hàng: @reservationModel.ReservationId</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card p-3 pb-0">
+                    <h5 class="mb-2 text-center">Thông tin người đặt</h5>
+                    <div class="card-body">
+                        <EditForm Model="@reservationModel" OnValidSubmit="OnSubmitForm">
+                            <DataAnnotationsValidator />
+                            <div class="mb-3">
+                                <label for="name" class="form-label fw-bold">Tên liên hệ <span class="text-danger">*</span></label>
+                                <InputText id="name" class="form-control" @bind-Value="reservationModel.CustomerName" placeholder="Nhập tên liên hệ" readonly />
+                                <ValidationMessage For="@(() => reservationModel.CustomerName)" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                                    <InputText type="tel" id="phone" class="form-control" @bind-Value="reservationModel.CustomerPhone" placeholder="Nhập số điện thoại" readonly />
+                                    <ValidationMessage For="@(() => reservationModel.CustomerPhone)" />
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="phone" class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
-                                        <InputText type="tel" id="phone" class="form-control" @bind-Value="reservationModel.CustomerPhone" placeholder="Nhập số điện thoại" readonly />
-                                        <ValidationMessage For="@(() => reservationModel.CustomerPhone)" />
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label fw-bold">Email <span class="text-danger">*</span></label>
-                                        <InputText class="form-control" placeholder="Nhập email" @bind-Value="reservationModel.CustomerEmail" readonly />
-                                        <ValidationMessage For="@(() => reservationModel.CustomerEmail)" class="validation-message" />
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                                    <InputText class="form-control" placeholder="Nhập email" @bind-Value="reservationModel.CustomerEmail" readonly />
+                                    <ValidationMessage For="@(() => reservationModel.CustomerEmail)" class="validation-message" />
                                 </div>
-                                <div class="row">
-                                    <div class="mb-3 col-md-6 col-6">
-                                        <label for="adults" class="form-label icon-label fw-bold">
-                                            <i class="fas fa-user"></i> Người lớn:
-                                        </label>
-                                        <InputNumber class="form-control" placeholder="Người lớn" @bind-Value="reservationModel.Adults" min="1" max="200" readonly="@(isEdit ? false : true)" />
-                                        <ValidationMessage For="@(() => reservationModel.Adults)" class="validation-message" />
-                                    </div>
-                                    <div class="mb-3 col-md-6 col-6">
-                                        <label for="children" class="form-label icon-label fw-bold">
-                                            <i class="fas fa-child"></i> Trẻ em:
-                                        </label>
-                                        <InputNumber class="form-control" placeholder="Trẻ em" @bind-Value="reservationModel.Children" min="0" max="200" readonly="@(isEdit ? false : true)" />
-                                        <ValidationMessage For="@(() => reservationModel.Children)" class="validation-message" />
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="time" class="form-label fw-bold">Thời gian đến:</label>
-                                    <div class="row">
-                                        <div class="col-7">
-                                            <InputDate class="form-control" placeholder="Ngày đến" @bind-Value="selectedDate" min="@reservationModel.ReservationTime" readonly="@(isEdit ? false : true)" />
-                                        </div>
-                                        <div class="col-5">
-                                            <input class="form-control" type="time" placeholder="Giờ đến" @bind-value="selectedTime" min="@reservationModel.ReservationTime" readonly="@(isEdit ? false : true)" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="children" class="form-label icon-label fw-bold">
-                                        Tiền cọc = (Người lớn x 50,000):
+                            </div>
+                            <div class="row">
+                                <div class="mb-3 col-md-6 col-6">
+                                    <label for="adults" class="form-label icon-label fw-bold">
+                                        <i class="fas fa-user"></i> Người lớn:
                                     </label>
-                                    <InputNumber class="form-control" placeholder="Tiền cọc" @bind-Value="reservationModel.DepositPayment" readonly />
+                                    <InputNumber class="form-control" placeholder="Người lớn" @bind-Value="reservationModel.Adults" min="1" max="200" readonly="@(isEdit ? false : true)" />
+                                    <ValidationMessage For="@(() => reservationModel.Adults)" class="validation-message" />
                                 </div>
-                                <div class="mb-3">
-                                    <label for="note" class="form-label fw-bold">Ghi chú</label>
-                                    <InputTextArea id="note" rows="3" @bind-Value="reservationModel.CustomerNote" class="form-control" placeholder="Nhập ghi chú" readonly="@(isEdit ? false : true)"></InputTextArea>
+                                <div class="mb-3 col-md-6 col-6">
+                                    <label for="children" class="form-label icon-label fw-bold">
+                                        <i class="fas fa-child"></i> Trẻ em:
+                                    </label>
+                                    <InputNumber class="form-control" placeholder="Trẻ em" @bind-Value="reservationModel.Children" min="0" max="200" readonly="@(isEdit ? false : true)" />
+                                    <ValidationMessage For="@(() => reservationModel.Children)" class="validation-message" />
                                 </div>
-                                <div class="mb-3 row">
-                                    <label for="chooseTable" class="form-label fw-bold">Chọn bàn</label>
-                                    @foreach (var f in floors)
-                                    {
-                                        <div class="text-center fw-semibold mb-2">Tầng @f.NumberFloor</div>
-                                        <div class="row mb-3">
-                                            @foreach (var table in tables.Where(t => t.FloorId == f.FloorId && t.Status != "Đã đặt").OrderBy(t => t.Position))
-                                            {
-                                                <div class="col-6 col-md-2 p-2">
-                                                    <div class="card table-card-booktable @(selectedTableId == table.TableId ? "selected-table" : "")" style="height: 100px; width: 100%; cursor: pointer;" @onclick="() => ProcessChooseTable(table.TableId)">
-                                                        <div class="card-body text-center position-relative">
-                                                            <img src="/Image/dinner-table.png" style="height: 40px" alt="Table Image" class="mb-2">
-                                                            <div class="position-absolute top-0 end-0 fw-bold m-1 text-white bg-primary rounded-circle custom-seat">
-                                                                @table.SeatingCapacity ghế
-                                                            </div>
-                                                            <span class="d-block fw-bold">Bàn @table.TableNumber</span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="time" class="form-label fw-bold">Thời gian đến:</label>
+                                <div class="row">
+                                    <div class="col-7">
+                                        <InputDate class="form-control" placeholder="Ngày đến" @bind-Value="selectedDate" min="@reservationModel.ReservationTime" readonly="@(isEdit ? false : true)" />
+                                    </div>
+                                    <div class="col-5">
+                                        <input class="form-control" type="time" placeholder="Giờ đến" @bind-value="selectedTime" min="@reservationModel.ReservationTime" readonly="@(isEdit ? false : true)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="children" class="form-label icon-label fw-bold">
+                                    Tiền cọc = (Người lớn x 50,000):
+                                </label>
+                                <InputNumber class="form-control" placeholder="Tiền cọc" @bind-Value="reservationModel.DepositPayment" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label for="note" class="form-label fw-bold">Ghi chú</label>
+                                <InputTextArea id="note" rows="3" @bind-Value="reservationModel.CustomerNote" class="form-control" placeholder="Nhập ghi chú" readonly="@(isEdit ? false : true)"></InputTextArea>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="chooseTable" class="form-label fw-bold">Chọn bàn</label>
+                                @foreach (var f in floors)
+                                {
+                                    <div class="text-center fw-semibold mb-2">Tầng @f.NumberFloor</div>
+                                    <div class="row mb-3">
+                                        @foreach (var table in tables.Where(t => t.FloorId == f.FloorId && t.Status != "Đã đặt").OrderBy(t => t.Position))
+                                        {
+                                            <div class="col-6 col-md-2 p-2">
+                                                <div class="card table-card-booktable @(selectedTableId == table.TableId ? "selected-table" : "")" style="height: 100px; width: 100%; cursor: pointer;" @onclick="() => ProcessChooseTable(table.TableId)">
+                                                    <div class="card-body text-center position-relative">
+                                                        <img src="/Image/dinner-table.png" style="height: 40px" alt="Table Image" class="mb-2">
+                                                        <div class="position-absolute top-0 end-0 fw-bold m-1 text-white bg-primary rounded-circle custom-seat">
+                                                            @table.SeatingCapacity ghế
                                                         </div>
+                                                        <span class="d-block fw-bold">Bàn @table.TableNumber</span>
                                                     </div>
                                                 </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                                <div class="d-flex justify-content-end pt-3" style="border-top: 1px solid">
-                                    @if (isEdit)
-                                    {
-                                        <button type="button" class="btn btn-primary w-25 me-3" @onclick="ConfirmInforCustomer">
-                                            Cập nhật
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-info w-25 me-3" @onclick="EditInforCustomer">Sửa thông tin</button>
-                                        <button type="submit" class="btn btn-primary w-25">
-                                            Xác nhận
-                                        </button>
-                                    }
-                                </div>
-                            </EditForm>
-                        </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="d-flex justify-content-end pt-3" style="border-top: 1px solid">
+                                @if (isEdit)
+                                {
+                                    <button type="button" class="btn btn-primary w-25 me-3" @onclick="ConfirmInforCustomer">
+                                        Cập nhật
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-info w-25 me-3" @onclick="EditInforCustomer">Sửa thông tin</button>
+                                    <button type="submit" class="btn btn-primary w-25">
+                                        Xác nhận
+                                    </button>
+                                }
+                            </div>
+                        </EditForm>
                     </div>
                 </div>
-
-
             </div>
+
+
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="tableModal">Bàn số: @selectedTableNumber</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-group" id="cart-items">
-                        @if ((_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0) || (_cartNote.CartDTOs is not null && _cartNote.CartDTOs.Count > 0))
-                        {
-                            <!-- Hiển thị danh sách món ăn trước đó -->
-                            @if (_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0)
-                            {
-                                <li class="list-group-item text-center bg-light">Danh sách món đã gọi</li>
-                                foreach (var item in _cartNote.PreviousCartDTOs)
-                                {
-                                    var prod = products.FirstOrDefault(a => a.ProductId == item.ProductId);
-                                    <li class="list-group-item d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
-                                                 alt="Image"
-                                                 style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">@item.ProductName</div>
-                                                <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @item.Quantity</div>
-                                            </div>
-                                        </div>
-                                        <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
-                                    </li>
-                                    Amount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
-                                }
-                            }
-                            @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
-                            {
-                                <!-- Hiển thị danh sách món ăn mới -->
-                                <li class="list-group-item text-center bg-light">Danh sách món mới gọi</li>
-                                foreach (var c in _cartNote.CartDTOs)
-                                {
-                                    var prod = products.FirstOrDefault(a => a.ProductId == c.ProductId);
-                                    <li class="list-group-item d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
-                                                 alt="Image"
-                                                 style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
-                                            <div class="flex-grow-1">
-                                                <div class="fw-bold">@c.ProductName</div>
-                                                <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @c.Quantity</div>
-                                            </div>
-                                        </div>
-                                        <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
-                                        <div class="text-end">
-                                            <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
-                                                <span class="fw-bold">-</span>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCartAsync(c)">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </li>
-                                }
-                            }
-
-                            <li class="list-group-item">
-                                <div class="fw-bold">Ghi chú</div>
-                                <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>
-                            </li>
-                            <li class="list-group-item">
-                                <div class="fw-bold text-end text-danger">Tổng tiền: @Amount.ToString("N0") VND</div>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="list-group-item text-center">Bàn không có khách</li>
-                        }
-                    </ul>
-                </div>
-
-                <div class="modal-footer">
-                    @if (tableButtonVisibility.ContainsKey(selectedTableNumber))
+<div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tableModal">Bàn số: @selectedTableNumber</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="cart-items">
+                    @if ((_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0) || (_cartNote.CartDTOs is not null && _cartNote.CartDTOs.Count > 0))
                     {
-                        var visibility = tableButtonVisibility[selectedTableNumber];
-                        @if (visibility.IsConfirmVisible)
+                        <!-- Hiển thị danh sách món ăn trước đó -->
+                        @if (_cartNote.PreviousCartDTOs is not null && _cartNote.PreviousCartDTOs.Count > 0)
                         {
-                            <button class="checkout-btn-model bg-danger" @onclick="CancelOrder">Hủy</button>
-                            <button class="checkout-btn-model" style="background: #28a745 !important" @onclick="ConfirmOrder">Xác nhận</button>
+                            <li class="list-group-item text-center bg-light">Danh sách món đã gọi</li>
+                            foreach (var item in _cartNote.PreviousCartDTOs)
+                            {
+                                var prod = products.FirstOrDefault(a => a.ProductId == item.ProductId);
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
+                                             alt="Image"
+                                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">@item.ProductName</div>
+                                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @item.Quantity</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger fw-bold">@item.Price.ToString("N0")đ</div>
+                                </li>
+                                Amount = _cartNote.PreviousCartDTOs.Sum(cartItem => cartItem.Price * cartItem.Quantity);
+                            }
                         }
-                        @if (visibility.IsCheckoutVisible)
+                        @if (_cartNote.CartDTOs != null && _cartNote.CartDTOs.Count > 0)
                         {
-                            <button class="checkout-btn-model" style="background: #007bff !important" data-bs-toggle="modal" data-bs-target="#invoiceModal" @onclick="CalculatorAmount">Thanh toán</button>
+                            <!-- Hiển thị danh sách món ăn mới -->
+                            <li class="list-group-item text-center bg-light">Danh sách món mới gọi</li>
+                            foreach (var c in _cartNote.CartDTOs)
+                            {
+                                var prod = products.FirstOrDefault(a => a.ProductId == c.ProductId);
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(prod.ProductImage)"
+                                             alt="Image"
+                                             style="width: 50px; height: 50px; margin-right: 10px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">@c.ProductName</div>
+                                            <div class="text-secondary" style="font-size: 0.9rem">Số lượng: @c.Quantity</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger fw-bold">@c.Price.ToString("N0")đ</div>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-sm m-2" @onclick="() => DecreaseQuantity(c.ProductId)">
+                                            <span class="fw-bold">-</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger m-2" @onclick="() => RemoveFromCartAsync(c)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            }
                         }
+
+                        <li class="list-group-item">
+                            <div class="fw-bold">Ghi chú</div>
+                            <textarea rows="2" @bind="_cartNote.Note" class="form-control"></textarea>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="fw-bold text-end text-danger">Tổng tiền: @Amount.ToString("N0") VND</div>
+                        </li>
                     }
-                </div>
+                    else
+                    {
+                        <li class="list-group-item text-center">Bàn không có khách</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="modal-footer">
+                @if (tableButtonVisibility.ContainsKey(selectedTableNumber))
+                {
+                    var visibility = tableButtonVisibility[selectedTableNumber];
+                    @if (visibility.IsConfirmVisible)
+                    {
+                        <button class="checkout-btn-model bg-danger" @onclick="CancelOrder">Hủy</button>
+                        <button class="checkout-btn-model" style="background: #28a745 !important" @onclick="ConfirmOrder">Xác nhận</button>
+                    }
+                    @if (visibility.IsCheckoutVisible)
+                    {
+                        <button class="checkout-btn-model" style="background: #007bff !important" data-bs-toggle="modal" data-bs-target="#invoiceModal" @onclick="CalculatorAmount">Thanh toán</button>
+                    }
+                }
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="ConfirmCancelModal" tabindex="-1" aria-labelledby="ConfirmCancelModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Xác nhận hủy</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Bạn có chắc chắn muốn hủy đặt bàn không?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @onclick="ConfirmCancelBookTable">Xác nhận</button>
-                </div>
+<div class="modal fade" id="ConfirmCancelModal" tabindex="-1" aria-labelledby="ConfirmCancelModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận hủy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn hủy đặt bàn không?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" @onclick="ConfirmCancelBookTable">Xác nhận</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="CheckColorModal" tabindex="-1" aria-labelledby="CheckColorLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+<div class="modal fade" id="CheckColorModal" tabindex="-1" aria-labelledby="CheckColorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kiểm tra màu của bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>Màu sắc</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #32CD32; margin: 0 auto;"></div>
+                            </td>
+                            <td>Bàn trống</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #ADD8E6; margin: 0 auto;"></div>
+                            </td>
+                            <td>Yêu cầu đặt món</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FFD700; margin: 0 auto;"></div>
+                            </td>
+                            <td>Yêu cầu thanh toán</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FFA500; margin: 0 auto;"></div>
+                            </td>
+                            <td>Đang sử dụng</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="width: 30px; height: 30px; background-color: #FF5B5B; margin: 0 auto;"></div>
+                            </td>
+                            <td>Bàn đang chờ khách đến</td>
+                        </tr>
+                        <tr>
+                            <td class="position-relative">
+                                <div class="marker-reserved position-absolute top-50 start-50 translate-middle" style="width: 30px; height: 30px">
+                                    <i class="fas fa-bookmark text-danger fs-6"></i>
+                                </div>
+                            </td>
+                            <td>Đánh dấu bàn đang sử dụng có đặt trước</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            @if (messagePay != "payReq")
+            {
                 <div class="modal-header">
-                    <h5 class="modal-title">Kiểm tra màu của bàn</h5>
+                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <table class="table table-bordered text-center">
+                <div class="modal-body" style="max-height: 500px !important">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Màu sắc</th>
-                                <th>Trạng thái</th>
+                                <th>Nội dung</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>
-                                    <div style="width: 30px; height: 30px; background-color: #32CD32; margin: 0 auto;"></div>
-                                </td>
-                                <td>Bàn trống</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="width: 30px; height: 30px; background-color: #ADD8E6; margin: 0 auto;"></div>
-                                </td>
-                                <td>Yêu cầu đặt món</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="width: 30px; height: 30px; background-color: #FFD700; margin: 0 auto;"></div>
-                                </td>
-                                <td>Yêu cầu thanh toán</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="width: 30px; height: 30px; background-color: #FFA500; margin: 0 auto;"></div>
-                                </td>
-                                <td>Đang sử dụng</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="width: 30px; height: 30px; background-color: #FF5B5B; margin: 0 auto;"></div>
-                                </td>
-                                <td>Bàn đang chờ khách đến</td>
-                            </tr>
-                            <tr>
-                                <td class="position-relative">
-                                    <div class="marker-reserved position-absolute top-50 start-50 translate-middle" style="width: 30px; height: 30px">
-                                        <i class="fas fa-bookmark text-danger fs-6"></i>
-                                    </div>
-                                </td>
-                                <td>Đánh dấu bàn đang sử dụng có đặt trước</td>
+                                <td>Khách hàng chưa yêu cầu thanh toán</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
+            }
+            else
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 500px !important">
+                    <div class="invoice-container" id="invoice-preview">
+                        <div class="invoice-header">
+                            <h1>LHDMHHNTTLQVHHMNVT</h1>
+                            <h2 class="mb-2">NHÀ HÀNG 5 SAO</h2>
+                            <h4>HÓA ĐƠN</h4>
+                        </div>
 
-    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-                @if (messagePay != "payReq")
-                {
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" style="max-height: 500px !important">
+                        <div class="invoice-details">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>TIỆN NGHI NHÀ HÀNG CỦA CHÚNG TÔI</strong> <br />
+                                    @{
+                                        if (employee != null && employee.EmployeeId > 0)
+                                        {
+                                            <strong>Nhân viên: @employee.EmployeeName</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong>Nhân viên: hihi</strong>
+                                        }
+                                    }
+
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    Số bàn: @selectedTableNumber<br>
+                                    Thời gian vào: @order.CreateDate <br>
+                                    Thời gian ra: @DateTime.Now
+                                </div>
+                            </div>
+                        </div>
+
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Nội dung</th>
+                                    <th>Ảnh</th>
+                                    <th>Tên</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Khách hàng chưa yêu cầu thanh toán</td>
-                                </tr>
+                                @if (order == null || order.OrderId <= 0)
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center">Không tìm thấy sản phẩm</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var c in order.OrderItems.Where(a => !a.IsDeleted && a.Quantity > 0).ToList())
+                                    {
+                                        <tr>
+                                            <td><img src="data:image/png;base64,@Convert.ToBase64String(c.Products.ProductImage)" alt="Product"></td>
+                                            <td>@c.Products.ProductName</td>
+                                            <td>@c.Quantity</td>
+                                            <td>@c.Products.Price.ToString("N0") VND</td>
+                                            <td>@c.TotalPrice.ToString("N0") VND</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td class="fw-samibold">Ghi chú: @order.Note</td>
+                                        <td class="fw-samibold">Phương thức thanh toán: @order.PaymentMethod</td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
-                    </div>
-                }
-                else
-                {
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" style="max-height: 500px !important">
-                        <div class="invoice-container" id="invoice-preview">
-                            <div class="invoice-header">
-                                <h1>LHDMHHNTTLQVHHMNVT</h1>
-                                <h2 class="mb-2">NHÀ HÀNG 5 SAO</h2>
-                                <h4>HÓA ĐƠN</h4>
-                            </div>
+                        <div class="total-section-bill text-end">
+                            @{
+                                var totalAmount = order.TotalAmount;
+                                var totalTax = totalAmount * 0.1m;
+                                var serviceFee = totalAmount * 0.05m;
+                                var totalPayable = 0m;
 
-                            <div class="invoice-details">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>TIỆN NGHI NHÀ HÀNG CỦA CHÚNG TÔI</strong> <br />
-                                        @{
-                                            if (employee != null && employee.EmployeeId > 0)
-                                            {
-                                                <strong>Nhân viên: @employee.EmployeeName</strong>
-                                            }
-                                            else
-                                            {
-                                                <strong>Nhân viên: hihi</strong>
-                                            }
-                                        }
 
-                                    </div>
-                                    <div class="col-md-6 text-end">
-                                        Số bàn: @selectedTableNumber<br>
-                                        Thời gian vào: @order.CreateDate <br>
-                                        Thời gian ra: @DateTime.Now
-                                    </div>
-                                </div>
-                            </div>
+                                <span>Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND</span>
 
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Ảnh</th>
-                                        <th>Tên</th>
-                                        <th>Số lượng</th>
-                                        <th>Đơn giá</th>
-                                        <th>Thành tiền</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (order == null || order.OrderId <= 0)
+                                <br />
+                                <span> Thuế VAT (10%): @totalTax.ToString("N0") VND</span>                        <br />
+                                <span>Phí dịch vụ (5%): @serviceFee.ToString("N0") VND</span>                        <br />
+                                @if (getTable != null && getTable.Status == "inusebooktable")
+                                {
+                                    @if (getReservation != null && getReservation.ReservationId > 0)
                                     {
-                                        <tr>
-                                            <td colspan="5" class="text-center">Không tìm thấy sản phẩm</td>
-                                        </tr>
+                                        totalAmount = totalPayable = (totalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
+                                        <span>Tiền đặt cọc: @getReservation.DepositPayment.ToString("N0") VND</span>                        <br />
+                                        <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
                                     }
-                                    else
-                                    {
-                                        foreach (var c in order.OrderItems.Where(a => !a.IsDeleted && a.Quantity > 0).ToList())
-                                        {
-                                            <tr>
-                                                <td><img src="data:image/png;base64,@Convert.ToBase64String(c.Products.ProductImage)" alt="Product"></td>
-                                                <td>@c.Products.ProductName</td>
-                                                <td>@c.Quantity</td>
-                                                <td>@c.Products.Price.ToString("N0") VND</td>
-                                                <td>@c.TotalPrice.ToString("N0") VND</td>
-                                            </tr>
-                                        }
-                                        <tr>
-                                            <td class="fw-samibold">Ghi chú: @order.Note</td>
-                                            <td class="fw-samibold">Phương thức thanh toán: @order.PaymentMethod</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            <div class="total-section-bill text-end">
-                                @{
-                                    var totalAmount = order.TotalAmount;
-                                    var totalTax = totalAmount * 0.1m;
-                                    var serviceFee = totalAmount * 0.05m;
-                                    var totalPayable = 0m;
-
-
-                                    <span>Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND</span>
-
-                                    <br />
-                                    <span> Thuế VAT (10%): @totalTax.ToString("N0") VND</span>                        <br />
-                                    <span>Phí dịch vụ (5%): @serviceFee.ToString("N0") VND</span>                        <br />
-                                    @if (getTable != null && getTable.Status == "inusebooktable")
-                                    {
-                                        @if (getReservation != null && getReservation.ReservationId > 0)
-                                        {
-                                            totalAmount = totalPayable = (totalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
-                                            <span>Tiền đặt cọc: @getReservation.DepositPayment.ToString("N0") VND</span>                        <br />
-                                            <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
-                                        }
-                                    }
-                                    else
-                                    {
-                                        totalAmount = totalAmount + totalTax + serviceFee;
-                                        <strong>Tổng tiền thanh toán: @totalAmount.ToString("N0") VND</strong>                        <br />
-                                    }
-                                    TotalAmount = totalAmount;
                                 }
+                                else
+                                {
+                                    totalAmount = totalAmount + totalTax + serviceFee;
+                                    <strong>Tổng tiền thanh toán: @totalAmount.ToString("N0") VND</strong>                        <br />
+                                }
+                                TotalAmount = totalAmount;
+                            }
 
-                            </div>
-
-                            <div class="footer-section">
-                                <div>
-                                    <strong>Thông tin ngân hàng</strong>
-                                    Ngân hàng: Tiên phong<br>
-                                    Tên tài khoản: FFOOD<br>
-                                    Số tài khoản: 123 456 7890
-                                </div>
-                                <div class="text-end">
-                                    <strong>Thông tin liên hệ</strong>
-                                    Email: ffood@teach.com<br>
-                                    Điện thoại: +84 912 345 678<br>
-                                    Địa chỉ: 3/2 Hưng Lợi, Ninh Kiều, Cần Thơ
-                                </div>
-                            </div>
-                            <footer class="mt-2" style="text-align: center;"><b>Xin cảm ơn và hẹn gặp lại.</b></footer>
                         </div>
+
+                        <div class="footer-section">
+                            <div>
+                                <strong>Thông tin ngân hàng</strong>
+                                Ngân hàng: Tiên phong<br>
+                                Tên tài khoản: FFOOD<br>
+                                Số tài khoản: 123 456 7890
+                            </div>
+                            <div class="text-end">
+                                <strong>Thông tin liên hệ</strong>
+                                Email: ffood@teach.com<br>
+                                Điện thoại: +84 912 345 678<br>
+                                Địa chỉ: 3/2 Hưng Lợi, Ninh Kiều, Cần Thơ
+                            </div>
+                        </div>
+                        <footer class="mt-2" style="text-align: center;"><b>Xin cảm ơn và hẹn gặp lại.</b></footer>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary mt-3" @onclick="ProcessPayment">Xác nhận</button>
-                    </div>
-                }
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary mt-3" @onclick="ProcessPayment">Xác nhận</button>
+                </div>
+            }
         </div>
     </div>
+</div>
 
-    <div class="box" id="call-box">
+<div class="box" id="call-box">
         <div id="particles-js"></div>
         <button @onclick="() => CallButton(true)" class="btn position-absolute top-0 start-0">
             <i class="far fa-window-close text-danger fs-4" style="margin: 4px 0px"></i>
@@ -980,7 +980,5 @@ else
             </button>
         </div>
     </div>
-}
-
 
 
