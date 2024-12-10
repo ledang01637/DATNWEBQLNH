@@ -54,7 +54,7 @@
     .register-container {
         position: relative;
         max-width: 400px;
-        width: 100%;
+        width: 90%;
         background: #fff;
         padding: 20px;
         border-radius: 10px;
@@ -69,6 +69,10 @@
     .iphone-13-mini-2-inner{
         display: none;
     }
+
+    .foodgo{
+        font-size: 40px !important;
+    }
 </style>
 
 @if (isLoading)
@@ -81,21 +85,19 @@
 }
 else
 {
-    <section class="iphone-13-mini-2-inner">
-        <div class="frame-parent">
-            <div class="frame-wrapper">
-                <div class="frame-group">
-                    <div class="frame-container d-flex align-items-center justify-content-between">
-                        <a class="nav-link" href="/login"><i class="fas fa-arrow-left fs-2"></i></a>
-                        <h1 class="foodgo m-0">Foodgo</h1>
-                        <div class="ellipse4-31-iphone13mini-1-wrapper">
-                            <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
-                        </div>
+    <div class="frame-parent">
+        <div class="frame-wrapper">
+            <div class="frame-group">
+                <div class="frame-container d-flex align-items-center justify-content-between">
+                    <a class="nav-link" href="/login"><i class="fas fa-arrow-left fs-2"></i></a>
+                    <h1 class="foodgo m-0">Tech Titans</h1>
+                    <div class="ellipse4-31-iphone13mini-1-wrapper">
+                        <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
     <div class="register-container position-absolute start-50 translate-middle shadow rounded" style="top: 35%;">
         <h3 class="text-center mb-4">Đăng ký</h3>
         <EditForm Model="@customer" OnValidSubmit="HandleValidSubmitAsync">

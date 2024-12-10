@@ -99,25 +99,24 @@
         <div class="row mb-2">
             @if (!String.IsNullOrEmpty(ComboName))
             {
-                <div class="col-6 text-start ">
+                <div class="col-6 col-lg-6 text-start fw-bold">
                     @ComboName
                 </div>
             }
             else
             {
-                <div class="col-lg-6 text-start fw-bold">
+                <div class="col-lg-6 col-6 text-start fw-bold">
                     Món ăn
                 </div>
-                <div class="col-lg-6 text-end ">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm..." />
-                    </div>
-                    @*                     <button @onclick="ToggleGridView" class="btn"><i class="fas fa-th"></i></button> *@
-                </div>
             }
+            <div class="col-lg-6 text-end ">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm..." />
+                </div>
+            </div>
         </div>
 
         <div class="filters-content">
@@ -288,7 +287,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <textarea @bind="messageText" class="form-control" rows="3" cols="3"></textarea>
+                <textarea @bind="MessageText" class="form-control" rows="3" cols="3"></textarea>
             </div>
 
             <div class="modal-footer">

@@ -24,17 +24,18 @@ namespace DATN.Server.Payment.VNPay
         [HttpPost("CreateUrlVNPay")]
         public ActionResult<string> CreateUrlVNPay(VNPayRequest vNPayRequest)
         {
-            if (vNPayRequest == null || !ModelState.IsValid)
-            {
-                return BadRequest(new
-                {
-                    Message = "Invalid request data",
-                    Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
-                });
-            }
 
             try
             {
+                if (vNPayRequest == null || !ModelState.IsValid)
+                {
+                    return BadRequest(new
+                    {
+                        Message = "Invalid request data",
+                        Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
+                    });
+                }
+
                 var paymentUrl = _VNPayService.CreatePaymentUrl(HttpContext, vNPayRequest);
 
                 return Ok(paymentUrl);

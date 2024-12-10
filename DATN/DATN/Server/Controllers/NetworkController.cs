@@ -17,7 +17,7 @@ namespace DATN.Server.Controllers
     {
         private readonly NetworkService _networkService;
         private readonly FileEncryptionService _fileEncryptionService;
-        private string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "valid_wifi.txt");
+        private readonly string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "valid_wifi.txt");
         public NetworkController(NetworkService networkService, FileEncryptionService fileEncryptionService)
         {
             _networkService = networkService;
@@ -27,7 +27,7 @@ namespace DATN.Server.Controllers
         [HttpGet("wifi-ip")]
         public async Task<IActionResult> GetWifiIpAddressAsync()
         {
-            var remoteIpAddress = _networkService.GetWifiIPAddress();
+            var remoteIpAddress = GetClientIP(HttpContext);
 
             string encryptedContent;
 
@@ -46,7 +46,7 @@ namespace DATN.Server.Controllers
             }
             var ipList = encryptedContent.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-            string hashedRemoteIp = ComputeMD5Hash(remoteIpAddress);
+            string hashedRemoteIp = ComputeSHA256Hash(remoteIpAddress);
 
             if (ipList.Contains(hashedRemoteIp))
             {
@@ -56,6 +56,7 @@ namespace DATN.Server.Controllers
             return BadRequest("Địa chỉ IP không hợp lệ.");
         }
 
+        //Local
         [HttpGet("get-ip-local")]
         public IActionResult GetIPWifi()
         {
@@ -67,6 +68,7 @@ namespace DATN.Server.Controllers
             return NotFound("Không tìm thấy IP");
         }
 
+        //Host
         [HttpGet("get-ip-host")]
         public IActionResult GetIPWifiHost()
         {
@@ -91,6 +93,11 @@ namespace DATN.Server.Controllers
             if (string.IsNullOrEmpty(ip))
             {
                 ip = context.Connection.RemoteIpAddress?.ToString();
+            }
+
+            if (ip == "::1")
+            {
+                ip = "127.0.0.1";
             }
 
             return ip;
@@ -120,73 +127,53 @@ namespace DATN.Server.Controllers
 
                 await System.IO.File.WriteAllTextAsync(filePath, existingContent);
 
-                return Ok("IP đã được thêm thành công.");
+                return Ok("Thêm IP thành công.");
             }
             catch
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(500, "Lỗi server.");
             }
         }
-
-        // Hàm mã hóa SHA256
-        private string ComputeSHA256Hash(string rawData)
-        {
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
-            {
-                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
-                return Convert.ToBase64String(bytes);
-            }
-        }
-
 
         [HttpPost("remove-wifi-ip")]
         public async Task<IActionResult> RemoveWifiIpAddressAsync([FromBody] string IP)
         {
-            if (string.IsNullOrWhiteSpace(IP))
-            {
-                return BadRequest("IP không hợp lệ.");
-            }
-
-            string encryptedIp = ComputeMD5Hash(IP);
-            string existingContent;
-
             try
             {
-                existingContent = await System.IO.File.ReadAllTextAsync(filePath);
+                if (string.IsNullOrWhiteSpace(IP))
+                {
+                    return BadRequest("IP không hợp lệ.");
+                }
+
+                string encryptedIp = ComputeSHA256Hash(IP);
+
+                var existingContent = await System.IO.File.ReadAllTextAsync(filePath);
+
+                var ipList = existingContent.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                if (!ipList.Contains(encryptedIp))
+                {
+                    return BadRequest("IP không tồn tại.");
+                }
+                ipList.Remove(encryptedIp);
+                string updatedContent = string.Join(";", ipList);
+                await System.IO.File.WriteAllTextAsync(filePath, updatedContent);
+
+                return Ok("Xóa thành công.");
+
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, "Lỗi khi đọc tệp: " + ex.Message);
+                return StatusCode(500, "Lỗi đọc tệp");
             }
 
-            var ipList = existingContent.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-            if (!ipList.Contains(encryptedIp))
-            {
-                return BadRequest("IP không tồn tại.");
-            }
-            ipList.Remove(encryptedIp);
-            string updatedContent = string.Join(";", ipList);
-            await System.IO.File.WriteAllTextAsync(filePath, updatedContent);
-
-            return Ok("IP đã được xóa thành công.");
         }
 
-
-        public string ComputeMD5Hash(string input)
+        private static string ComputeSHA256Hash(string rawData)
         {
-            using (MD5 md5 = MD5.Create())
-            {
-                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-                StringBuilder sb = new StringBuilder();
-                foreach (byte b in hashBytes)
-                {
-                    sb.Append(b.ToString("x2"));
-                }
-                return sb.ToString();
-            }
+            using var sha256 = SHA256.Create();
+            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+            return Convert.ToBase64String(bytes);
         }
     }
 }

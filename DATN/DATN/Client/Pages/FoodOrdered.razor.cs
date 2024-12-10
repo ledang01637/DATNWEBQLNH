@@ -404,7 +404,7 @@ namespace DATN.Client.Pages
             }
         }
 
-        private int GetTableNumberFromToken(string token)
+        private static int GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;

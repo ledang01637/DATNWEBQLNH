@@ -1,20 +1,10 @@
-﻿* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background-color: #f9f9f9;
-}
-
-.container-custom {
+﻿.container-custom {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: center; /* Centers content horizontally */
+    align-items: center;
     min-height: 100vh; /* Ensures that the content takes at least full screen height */
-    padding-bottom: 80px; /* Adjust for the navbar height */
+    padding-bottom: 80px;
     overflow-y: auto; /* Enables scrolling if content overflows the screen */
     text-align: center; /* Center-align the text content */
 }
@@ -27,7 +17,6 @@ body {
     font-size: 14px;
     color: #333;
     margin-bottom: 10px;
-
     width: 100%;
     text-align: right; /* Align points to the right */
 }
@@ -115,35 +104,4 @@ body {
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Increase shadow depth on hover */
         transform: translateY(-2px); /* Slightly lift the button */
         color: #fff; /* Maintain white text */
-    }
-
-
-/* Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px;
-    z-index: 10;
-}
-
-/* Navbar items */
-.nav-item {
-    flex: 1;
-    text-align: center;
-}
-
-    .nav-item .icon {
-        font-size: 24px;
-        transition: color 0.3s ease;
-    }
-
-    .nav-item:hover .icon {
-        color: #ff6600; /* Change icon color on hover */
     }

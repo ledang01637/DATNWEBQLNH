@@ -19,7 +19,7 @@ namespace DATN.Client.Shared
             isLoading = true;
             try
             {
-                wifiIpAddress = await httpClient.GetStringAsync("api/Network/get-ip-host");
+                wifiIpAddress = await httpClient.GetStringAsync("api/Network/wifi-ip");
                 if (string.IsNullOrEmpty(wifiIpAddress))
                 {
                     isAcceptWifi = false;
@@ -37,17 +37,6 @@ namespace DATN.Client.Shared
             {
                 isLoading = false;
             }
-        }
-        private async void Navbar(bool isClose)
-        {
-            await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);
-        }
-
-        private void GoToManager(bool isCheck)
-        {
-            isShow = isCheck;
-            string query = "?isCheckBookTable=" + isCheck;
-            Navigation.NavigateTo("/manager" + query, true);
         }
 
         private void Logout()

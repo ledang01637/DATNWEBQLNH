@@ -28,7 +28,7 @@ namespace DATN.Client.Pages
         private int TotalQuantity;
         private decimal TotalAmount;
         private bool isProcessing = false;
-        private string messageText { get; set; }
+        private string MessageText { get; set; }
         private string note;
 
         protected override async Task OnInitializedAsync()
@@ -41,7 +41,7 @@ namespace DATN.Client.Pages
 
             carts = await _cartService.GetCartAsync();
             await UpdateCartTotals();
-            await LoadAll();
+            await LoadProductsAndCategories();
             await JS.InvokeVoidAsync("initializeIsotope");
         }
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -51,56 +51,20 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("initScrollToTop");
             }
         }
-        private async Task LoadAll()
+
+        private async Task LoadProductsAndCategories()
         {
             try
             {
                 var productTask = httpClient.GetFromJsonAsync<List<Product>>("api/Product/GetProductInclude");
                 var categoryTask = httpClient.GetFromJsonAsync<List<Category>>("api/Category/GetCategories");
-                var menuTask = httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
-                var accountTask = httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
 
-                await Task.WhenAll(productTask, categoryTask, menuTask, accountTask);
+                await Task.WhenAll(productTask, categoryTask);
 
                 products = (await productTask)?.Where(p => !p.IsDeleted).ToList() ?? new List<Product>();
                 categories = (await categoryTask)?.Where(c => !c.IsDeleted).ToList() ?? new List<Category>();
-                menus = await menuTask ?? new List<Menu>();
-                accounts = await accountTask ?? new List<Account>();
 
-                var accountType = await CheckTypeAccount();
-
-                if (accounts != null && (accountType != "customer"))
-                {
-                    loginUser.Email = "no account";
-                    loginUser.Password = "123456";
-
-                    var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
-                        if (loginResponse?.SuccsessFull == true)
-                        {
-                            var handler = new JwtSecurityTokenHandler();
-                            var jsonToken = handler.ReadToken(loginResponse.Token) as JwtSecurityToken;
-                            var accountId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
-
-                            var expiryTime = DateTime.Now.AddMinutes(45).ToString("o");
-                            await Task.WhenAll(
-                                _localStorageService.SetItemAsync("expiryTime", expiryTime),
-                                _localStorageService.SetItemAsync("AccountId", accountId),
-                                _localStorageService.SetItemAsync("authToken", loginResponse.Token)
-                            );
-                        }
-                    }
-                    else
-                    {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Tài khoản mật khẩu không chính xác");
-                        return;
-                    }
-                }
-
-                await JS.InvokeVoidAsync("initCallButton", "callButtonIndex", "expandButtons", "closeBtn");
-                StateHasChanged();
+                await LoadMenusAndAccounts();
             }
             catch (Exception ex)
             {
@@ -114,22 +78,67 @@ namespace DATN.Client.Pages
             }
         }
 
+        private async Task LoadMenusAndAccounts()
+        {
+            var menuTask = httpClient.GetFromJsonAsync<List<Menu>>("api/Menu/GetMenu");
+            var accountTask = httpClient.GetFromJsonAsync<List<Account>>("api/Account/GetAccount");
+
+            await Task.WhenAll(menuTask, accountTask);
+
+            menus = await menuTask ?? new List<Menu>();
+            accounts = await accountTask ?? new List<Account>();
+
+            var accountType = await CheckTypeAccount();
+
+            if (accounts != null && accountType != "customer")
+            {
+                loginUser.Email = "no account";
+                loginUser.Password = "123456";
+
+                var response = await httpClient.PostAsJsonAsync("api/AuthJWT/AuthUser", loginUser);
+                if (response.IsSuccessStatusCode)
+                {
+                    var loginResponse = await response.Content.ReadFromJsonAsync<LoginRespone>();
+                    if (loginResponse?.SuccsessFull == true)
+                    {
+                        var handler = new JwtSecurityTokenHandler();
+                        var jsonToken = handler.ReadToken(loginResponse.Token) as JwtSecurityToken;
+                        var accountId = jsonToken?.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
+
+                        var expiryTime = DateTime.Now.AddMinutes(45).ToString("o");
+                        await Task.WhenAll(
+                            _localStorageService.SetItemAsync("expiryTime", expiryTime),
+                            _localStorageService.SetItemAsync("AccountId", accountId),
+                            _localStorageService.SetItemAsync("authToken", loginResponse.Token)
+                        );
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Tài khoản mật khẩu không chính xác");
+                    return;
+                }
+            }
+
+            await JS.InvokeVoidAsync("initCallButton", "callButtonIndex", "expandButtons", "closeBtn");
+            StateHasChanged();
+        }
+
         private async Task LoadCombo(int MenuId)
         {
             if (MenuId <= 0) return;
 
             isProcessing = true;
-
             var selectedMenu = menus.FirstOrDefault(a => a.MenuId == MenuId);
             ComboName = selectedMenu?.MenuName ?? "No Combo";
 
             menuItems = (await httpClient.GetFromJsonAsync<List<MenuItem>>("api/MenuItem/GetMenuItem"))
-                                        .Where(item => item.MenuId == MenuId)
-                                        .ToList();
+                            .Where(item => item.MenuId == MenuId)
+                            .ToList();
 
             var productIds = menuItems.Select(item => item.ProductId).ToHashSet();
 
-            await LoadAll();
+            await LoadProductsAndCategories();
 
             var prods = products.Where(p => productIds.Contains(p.ProductId)).ToList();
             if (prods.Any())
@@ -141,12 +150,14 @@ namespace DATN.Client.Pages
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo","Sản phẩm đã hết");
+                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Sản phẩm đã hết");
+                ComboName = null;
             }
 
-            StateHasChanged();
             isProcessing = false;
+            StateHasChanged();
         }
+
 
         private async Task AddToCart(Product product)
         {
@@ -184,7 +195,6 @@ namespace DATN.Client.Pages
                 await UpdateCartTotals(-product.Price * product.Quantity, -product.Quantity);
             }
         }
-
 
         private async Task RemoveAllCarts()
         {
@@ -273,7 +283,7 @@ namespace DATN.Client.Pages
 
         private async Task SendMessage()
         {
-            if(string.IsNullOrEmpty(messageText)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng nhập yêu cầu"); return; }
+            if(string.IsNullOrEmpty(MessageText)) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng nhập yêu cầu"); return; }
             string token = await _localStorageService.GetItemAsync("n");
             if (string.IsNullOrEmpty(token))
             {
@@ -285,7 +295,7 @@ namespace DATN.Client.Pages
 
             if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
             {
-                await hubConnection.SendAsync("SendMessageTable", messageText, number);
+                await hubConnection.SendAsync("SendMessageTable", MessageText, number);
                 await JS.InvokeVoidAsync("closeModal", "sendMasageModal");
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành công","Đã gửi yêu cầu");
             }
