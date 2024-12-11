@@ -56,7 +56,7 @@ namespace DATN.Client.Pages.AdminManager
         private DateTime selectedDate;
         private DateTime selectedTime;
         private Timer _timer;
-        private Dictionary<int, string> timeLeftText = new();
+        private readonly Dictionary<int, string> timeLeftText = new();
         private int updateCounter = 0;
         private int _orderId;
         private string availableUntil;
@@ -144,7 +144,7 @@ namespace DATN.Client.Pages.AdminManager
                 await InvokeAsync(StateHasChanged);
             });
 
-            hubConnection.On<string, List<CartDTO>, string, int>("UpdateTable", async (_numTable, carts, note,orderId) =>
+            hubConnection.On<string, List<CartDTO>, string, int>("UpdateTable", async (_numTable, carts, note, orderId) =>
             {
                 numberTable = _numTable;
                 _orderId = orderId;
@@ -297,6 +297,7 @@ namespace DATN.Client.Pages.AdminManager
             try
             {
                 await JS.InvokeVoidAsync("closeModal", "tableModal");
+
                 _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote") ?? new CartNote();
 
                 if (_cartNote.CartDTOs is null || !_cartNote.CartDTOs.Any())
@@ -358,7 +359,7 @@ namespace DATN.Client.Pages.AdminManager
                 await _localStorageService.SetAsync("_cartNote", existingCartNote);
                 await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                 await GetTableColorAsync(selectedTableNumber);
-
+                await UpdateOrderStatus("processing");
                 await JS.InvokeVoidAsync("showAlert", "success", "Đã gửi đầu bếp");
                 await InitializeButtonVisibilityAsync(selectedTableNumber);
                 tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
@@ -373,6 +374,33 @@ namespace DATN.Client.Pages.AdminManager
                 IsProcess = false;
             }
 
+        }
+
+        private async Task UpdateOrderStatus(string status)
+        {
+            var _table = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
+
+            if (_table.TableId > 0)
+            {
+                var _order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={_table.TableId}&status={status}");
+
+                if (_order.OrderId > 0)
+                {
+                    _order.Status = "unpaid";
+                    var response = await httpClient.PutAsJsonAsync($"api/Order/{_order.OrderId}", _order);
+                    if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật hóa đơn"); return; }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy hóa đơn"); return;
+                }
+
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy bàn"); return;
+            }
+            
         }
 
         private async Task RemoveFromCartAsync(CartDTO product)
@@ -513,7 +541,7 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (order != null && order.OrderId > 0)
                 {
-                    order.Status = "Đã thanh toán";
+                    order.Status = "completed";
                     order.TotalAmount = TotalAmount;
                     order.EmployeeId = employee.EmployeeId;
                     order.Note = _cartNote.Note;
@@ -755,7 +783,7 @@ namespace DATN.Client.Pages.AdminManager
             Console.WriteLine($"{ex.Message}");
         }
 
-        private string MergeNotes(string existingNote, string newNote)
+        private static string MergeNotes(string existingNote, string newNote)
         {
             if (string.IsNullOrEmpty(existingNote))
             {

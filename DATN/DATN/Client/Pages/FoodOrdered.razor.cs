@@ -203,7 +203,7 @@ namespace DATN.Client.Pages
 
             if(tableId <= 0) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng quét mã QR trên bàn"); return; }
 
-            order = await GetOrderForTable(tableId);
+            order = await GetOrderForTable(tableId, "unpaid");
 
             if(order == null || order.OrderId <= 0) {
 
@@ -270,114 +270,118 @@ namespace DATN.Client.Pages
             await JS.InvokeVoidAsync("selectPaymentMethod", Cash, "cashBtnId", "transferBtnId");
         }
 
-        private async Task<Order> GetOrderForTable(int tableId)
+        private async Task<Order> GetOrderForTable(int tableId,string status)
         {
-            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}");
+            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}&status={status}");
 
             return order;
-        }
-
-        private bool IsCompleteAllProd(int tableNumber)
-        {
-            var notePR = NoteProdReq.noteProdReqs[tableNumber];
-
-            if (notePR == null || notePR.ProdReqs.Count == 0)
-            {
-                return true;
-            }
-
-            foreach (var i in notePR.ProdReqs)
-            {
-                if (!i.IsComplete)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         private async Task Payment()
         {
             try
             {
-                if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
-                {
-                    // Lấy mã token
-                    string token = await _localStorageService.GetItemAsync("n");
-                    if (string.IsNullOrEmpty(token))
-                    {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Vui lòng quét mã QR");
-                        return;
-                    }
-
-                    int numberTable = GetTableNumberFromToken(token);
-
-                    if (payMenthod != 'c' && payMenthod != 't')
-                    {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng chọn phương thức thanh toán");
-                        return;
-                    }
-                    else
-                    {
-                        order.PaymentMethod = (payMenthod == 'c') ? "Tiền mặt" : "Chuyển khoản";
-
-                        if (voucher != null && voucher.VoucherId > 0)
-                        {
-                            if(order.Status.Equals("Đang xác nhận")){ await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Hóa đơn đang chờ nhân viên xác nhận bạn vui lòng đợi tý nhé"); return; }
-
-                            order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
-                            order.Status = "Đang xác nhận";
-                            var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
-
-                            if (response.IsSuccessStatusCode)
-                            {
-                                customerVoucher.IsUsed = true;
-                                customerVoucher.Status = "Đã dùng";
-
-                                var res = await httpClient.PutAsJsonAsync($"api/CustomerVoucher/{customerVoucher.CustomerVoucherId}", customerVoucher);
-                                if (!res.IsSuccessStatusCode)
-                                {
-                                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật trạng thái voucher");
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật đơn hàng với voucher này");
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
-                            if (!response.IsSuccessStatusCode)
-                            {
-                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật đơn hàng không thành công");
-                                return;
-                            }
-                        }
-                        if (payMenthod == 't')
-                        {
-                            await Transfer(order);
-                            return;
-                        }
-                    }
-
-                    carts.Clear();
-                    await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
-                    await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Bạn vui lòng đợi giây lát");
-                    Navigation.NavigateTo("/");
-                }
-                else
+                if (hubConnection is null || hubConnection.State != HubConnectionState.Connected)
                 {
                     await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
+                    return;
                 }
+
+                // Lấy mã token
+                string token = await _localStorageService.GetItemAsync("n");
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    await ShowAlert("error", "Thông báo", "Vui lòng quét mã QR");
+                    return;
+                }
+
+                int numberTable = GetTableNumberFromToken(token);
+
+                if (!ValidatePaymentMethod(payMenthod))
+                {
+                    await ShowAlert("error", "Lỗi", "Vui lòng chọn phương thức thanh toán");
+                    return;
+                }
+
+                if (order.Status.Equals("unconfirmed"))
+                {
+                    await ShowAlert("warning", "Thông báo", "Hóa đơn đang chờ nhân viên xác nhận bạn vui lòng đợi tý nhé");
+                    return;
+                }
+
+                PrepareOrderForPayment();
+
+                if (!await UpdateOrder(order)) return;
+
+                if (voucher != null && voucher.VoucherId > 0 && !await UpdateVoucher(customerVoucher)) return;
+
+                if (payMenthod == 't')
+                {
+                    await Transfer(order);
+                    return;
+                }
+
+                await FinalizePayment(numberTable);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Lỗi: " + ex.Message);
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán","Vui lòng liên hệ Admin");
+                await ShowAlert("error", "Lỗi thanh toán", "Vui lòng liên hệ Admin");
             }
+        }
+
+        private async Task<bool> UpdateOrder(Order order)
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+            if (!response.IsSuccessStatusCode)
+            {
+                await ShowAlert("error", "Lỗi", "Cập nhật đơn hàng không thành công");
+                return false;
+            }
+            return true;
+        }
+
+        private async Task<bool> UpdateVoucher(CustomerVoucher customerVoucher)
+        {
+            customerVoucher.IsUsed = true;
+            customerVoucher.Status = "Đã dùng";
+
+            var response = await httpClient.PutAsJsonAsync($"api/CustomerVoucher/{customerVoucher.CustomerVoucherId}", customerVoucher);
+            if (!response.IsSuccessStatusCode)
+            {
+                await ShowAlert("error", "Lỗi", "Không thể cập nhật trạng thái voucher");
+                return false;
+            }
+            return true;
+        }
+
+        private async Task FinalizePayment(int numberTable)
+        {
+            carts.Clear();
+            await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
+            await ShowAlert("success", "Thông báo", "Bạn vui lòng đợi giây lát");
+            Navigation.NavigateTo("/");
+        }
+
+        private void PrepareOrderForPayment()
+        {
+            order.PaymentMethod = (payMenthod == 'c') ? "Tiền mặt" : "Chuyển khoản";
+            order.Status = (payMenthod == 'c') ? "unconfirmed" : "unpaid";
+            if (voucher != null && voucher.VoucherId > 0)
+            {
+                order.CustomerVoucherId = customerVoucher.CustomerVoucherId;
+            }
+        }
+
+        private static bool ValidatePaymentMethod(char payMenthod)
+        {
+            return payMenthod == 'c' || payMenthod == 't';
+        }
+
+        private async Task ShowAlert(string type, string title, string message)
+        {
+            await JS.InvokeVoidAsync("showAlert", type, title, message);
         }
 
         private async Task Transfer(Order order)

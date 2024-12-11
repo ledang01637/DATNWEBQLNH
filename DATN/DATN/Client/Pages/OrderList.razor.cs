@@ -1,17 +1,11 @@
-﻿using DATN.Client.Service;
-using DATN.Shared;
+﻿using DATN.Shared;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -170,7 +164,7 @@ namespace DATN.Client.Pages
                 }
                 catch
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật hóa đơn");
                 }
                 finally
                 {
@@ -266,7 +260,8 @@ namespace DATN.Client.Pages
             customer = await GetCustomer("no account");
             if(customer == null) { await JS.InvokeVoidAsync("showAlert","error","Lỗi","Không tìm thấy khách hàng"); return; }
 
-            order = await GetProcessingOrderForTable(table.TableId);
+            //order = await GetProcessingOrderForTable(table.TableId, "processing");
+            order = await GetProcessingOrderForTable(table.TableId, "unpaid");
 
             if(order.OrderId == 0)
             {
@@ -276,7 +271,7 @@ namespace DATN.Client.Pages
                     EmployeeId = 1,
                     CreateDate = DateTime.Now,
                     TotalAmount = Total,
-                    Status = "Tạo hóa đơn",
+                    Status = "pending",
                     CustomerId = customer.CustomerId,
                     PaymentMethod = "",
                     Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
@@ -301,7 +296,7 @@ namespace DATN.Client.Pages
                 return;
             }
           
-            order = await GetProcessingOrderForTable(table.TableId);
+            order = await GetProcessingOrderForTable(table.TableId, "processing");
             
             if(order.OrderId == 0)
             {
@@ -311,7 +306,7 @@ namespace DATN.Client.Pages
                     EmployeeId = 1,
                     CreateDate = DateTime.Now,
                     TotalAmount = Total,
-                    Status = "Tạo hóa đơn",
+                    Status = "pending",
                     CustomerId = customer.CustomerId,
                     PaymentMethod = "",
                     Note = string.IsNullOrEmpty(ListCartDTO.Note) ? "" : ListCartDTO.Note,
@@ -323,9 +318,9 @@ namespace DATN.Client.Pages
             await ProcessOrder(order);
         }
 
-        private async Task<Order> GetProcessingOrderForTable(int tableId)
+        private async Task<Order> GetProcessingOrderForTable(int tableId,string status)
         {
-            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}");
+            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}&status={status}");
 
             return order;
         }
@@ -364,7 +359,7 @@ namespace DATN.Client.Pages
         }
         private async Task SaveOrder(Order _order)
         {
-            if (order != null && order.Status == "Đang xử lý")
+            if (order != null && order.Status == "processing")
             {
                 order.TotalAmount += Total;
                 var updateOrder  = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
@@ -375,7 +370,7 @@ namespace DATN.Client.Pages
                 }
                 return;
             }
-            _order.Status = "Đang xử lý";
+            _order.Status = "processing";
             var response = await httpClient.PostAsJsonAsync("api/Order/AddOrder", _order);
 
             if (response.IsSuccessStatusCode)

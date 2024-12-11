@@ -39,16 +39,10 @@ namespace DATN.Server.Service
                 return existing;
             }
         }
-        public Order GetOrderStatus(int tableId)
+        public Order GetOrderStatus(int tableId, string status)
         {
-            var order = _context.Orders.Where(o => o.TableId == tableId && o.Status.Equals("Đang xử lý")).FirstOrDefault();
+            var order = _context.Orders.Where(o => o.TableId == tableId && o.Status.Equals(status)).FirstOrDefault();
 
-            return order ?? new Order();
-        }
-
-        public Order GetOrderStatusTrans(int tableId)
-        {
-            var order = _context.Orders.Where(o => o.TableId == tableId && o.Status.Equals("Đang xác nhận")).FirstOrDefault();
             return order ?? new Order();
         }
 
@@ -70,7 +64,7 @@ namespace DATN.Server.Service
 
         public List<Order> GetOrderLstInclude()
         {
-            const string ProcessingStatus = "Đang xử lý";
+            const string ProcessingStatus = "processing";
 
             return _context.Orders
                 .Include(o => o.OrderItems)

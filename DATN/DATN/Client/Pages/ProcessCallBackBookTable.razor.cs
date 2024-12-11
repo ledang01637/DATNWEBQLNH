@@ -119,10 +119,11 @@ namespace DATN.Client.Pages
 
                     if (tableId <= 0) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng quét mã QR trên bàn"); return; }
 
-                    order = await GetOrderForTable(tableId);
+                    order = await GetOrderForTable(tableId, "unpaid");
 
-                    if (order == null || order.OrderId <= 0)
+                    if (order.OrderId <= 0)
                     {
+                        Console.WriteLine(tableId);
                         await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy hóa đơn");
                         return;
                     }
@@ -138,6 +139,8 @@ namespace DATN.Client.Pages
                     int numberTable = GetTableNumberFromToken(token);
 
                     order.PaymentMethod = "Chuyển khoản";
+                    order.Status = "unconfirmed";
+
                     var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 
                     if (!response.IsSuccessStatusCode)
@@ -150,6 +153,7 @@ namespace DATN.Client.Pages
                     await hubConnection.SendAsync("SendPay", "payReq", numberTable, order.OrderId, customer.CustomerId);
 
                     await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Bạn vui lòng đợi giây lát");
+
                     Navigation.NavigateTo("/", true);
                 }
                 else
@@ -163,7 +167,7 @@ namespace DATN.Client.Pages
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi thanh toán", "Vui lòng liên hệ Admin");
             }
         }
-        private int GetTableNumberFromToken(string token)
+        private static int GetTableNumberFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
@@ -171,9 +175,9 @@ namespace DATN.Client.Pages
             return int.Parse(userId?.Value);
         }
 
-        private async Task<Order> GetOrderForTable(int tableId)
+        private async Task<Order> GetOrderForTable(int tableId, string status)
         {
-            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatusTrans?tableId={tableId}");
+            var order = await httpClient.GetFromJsonAsync<Order>($"api/Order/GetOrderStatus?tableId={tableId}&status={status}");
             return order;
         }
         private async Task<string> CheckAccountId()
