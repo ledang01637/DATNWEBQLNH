@@ -31,6 +31,8 @@ namespace DATN.Client.Pages.AdminManager
         public DotNetObjectReference<ManagerEmployeeTable> dotNetObjectReference;
         public static List<RequestCustomer> requests = new();
         public Customer customer = new();
+        private Dictionary<int, PaymentInfo> paymentRequests = new();
+        private Dictionary<int, TableState> tableStates = new();
 
         private Dictionary<int, ButtonVisibility> tableButtonVisibility = new();
         private Dictionary<int, ColorTable> tableColorsCache = new();
@@ -41,12 +43,9 @@ namespace DATN.Client.Pages.AdminManager
         private decimal TotalAmount = 0;
         private decimal Amount = 0;
         private bool IsUsing = false;
-        private int selectedTableNumber;
+        private int selectedTableNumber = 0;
         private static int nextRequestId = 1;
-        private string numberTable;
         private string messagePay;
-        private int orderIdPay;
-        private int numberTablePay;
         private string token;
         private string from;
         private string to;
@@ -59,7 +58,6 @@ namespace DATN.Client.Pages.AdminManager
         private readonly Dictionary<int, string> timeLeftText = new();
         private int updateCounter = 0;
         private int _orderId;
-        private string availableUntil;
         private bool IsProcess = false;
         private readonly string urlBookTable = "/employee-book-table";
 
@@ -117,12 +115,23 @@ namespace DATN.Client.Pages.AdminManager
 
         private async Task GetLocalStorageAsync()
         {
-            numtables = await _localStorageService.GetListAsync<int>("numtables") ?? new List<int>();
-            requests = await _localStorageService.GetListAsync<RequestCustomer>("requests") ?? new List<RequestCustomer>();
-            _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote") ?? new CartNote();
-            cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable") ?? new Dictionary<int, CartNote>();
-            tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
-            tableColorsCache = await _localStorageService.GetDictionaryAsync<int, ColorTable>("tableColorsCache") ?? new Dictionary<int, ColorTable>();
+            var numTablesTask = _localStorageService.GetListAsync<int>("numtables");
+            var requestsTask = _localStorageService.GetListAsync<RequestCustomer>("requests");
+            var cartNoteTask = _localStorageService.GetAsync<CartNote>("_cartNote");
+            var cartsByTableTask = _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
+            var tableButtonVisibilityTask = _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility");
+            var tableColorsCacheTask = _localStorageService.GetDictionaryAsync<int, ColorTable>("tableColorsCache");
+            var tableStatesTask = _localStorageService.GetDictionaryAsync<int, TableState>("TableState");
+
+            await Task.WhenAll(numTablesTask, requestsTask, cartNoteTask, cartsByTableTask, tableButtonVisibilityTask, tableColorsCacheTask, tableStatesTask);
+
+            numtables = numTablesTask.Result ?? new List<int>();
+            requests = requestsTask.Result ?? new List<RequestCustomer>();
+            _cartNote = cartNoteTask.Result ?? new CartNote();
+            cartsByTable = cartsByTableTask.Result ?? new Dictionary<int, CartNote>();
+            tableButtonVisibility = tableButtonVisibilityTask.Result ?? new Dictionary<int, ButtonVisibility>();
+            tableColorsCache = tableColorsCacheTask.Result ?? new Dictionary<int, ColorTable>();
+            tableStates = tableStatesTask.Result ?? new Dictionary<int, TableState>();
         }
 
         // HubEvents
@@ -146,29 +155,71 @@ namespace DATN.Client.Pages.AdminManager
 
             hubConnection.On<string, List<CartDTO>, string, int>("UpdateTable", async (_numTable, carts, note, orderId) =>
             {
-                numberTable = _numTable;
-                _orderId = orderId;
-                if (int.TryParse(numberTable, out int tableNumber))
+                try
                 {
-                    await UpdateCartNoteAsync(tableNumber, carts, note);
-                    await InitializeButtonVisibilityAsync(tableNumber);
-                    await GetTableColorAsync(tableNumber);
+                    _orderId = orderId;
+                    tableStates = await _localStorageService.GetDictionaryAsync<int, TableState>("tableStates")
+                                     ?? new Dictionary<int, TableState>();
+
+                    if (int.TryParse(_numTable, out int tableNumber))
+                    {
+                        if (!tableStates.ContainsKey(tableNumber))
+                        {
+                            tableStates[tableNumber] = new TableState();
+                        }
+                        tableStates[tableNumber].HasPreviousOrder = true;
+                        await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
+                        await UpdateCartNoteAsync(tableNumber, carts, note);
+                        await InitializeButtonVisibilityAsync(tableNumber);
+                        await GetTableColorAsync(tableNumber);
+                    }
                     await InvokeAsync(StateHasChanged);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi UpdateTable: {ex.Message}");
                 }
             });
 
+
             hubConnection.On<string, int, int, int>("ReqPay", async (message, _numberTable, _orderId, _customerId) =>
             {
-                messagePay = message;
-                numberTablePay = _numberTable;
-                await GetTableColorAsync(numberTablePay);
-                orderIdPay = _orderId;
-                order = await GetOrderInvoice(orderIdPay) ?? new Order();
-                if(_customerId > 0)
+                try
                 {
-                    customer = await GetCustomerById(_customerId) ?? new Customer();
+                    tableStates = await _localStorageService.GetDictionaryAsync<int, TableState>("tableStates")
+                                     ?? new Dictionary<int, TableState>();
+
+                    if (!tableStates.ContainsKey(_numberTable))
+                    {
+                        tableStates[_numberTable] = new TableState();
+                    }
+
+                    tableStates[_numberTable].HasPaymentRequest = true;
+                    tableStates[_numberTable].IsUsing = true;
+
+                    await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
+
+                    var customer = _customerId > 0 ? await GetCustomerById(_customerId) : new Customer();
+                    paymentRequests[_numberTable] = new PaymentInfo
+                    {
+                        Message = message,
+                        OrderId = _orderId,
+                        Customer = customer
+                    };
+
+                    order = await GetOrderInvoice(_orderId) ?? new Order();
+
+                    await GetTableColorAsync(_numberTable);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi ReqPay: {ex.Message}");
                 }
             });
+
+
+
+
 
             return Task.CompletedTask;
         }
@@ -269,25 +320,19 @@ namespace DATN.Client.Pages.AdminManager
         private void ShowModalForTable(int numberTable)
         {
             selectedTableNumber = numberTable;
-            if (cartsByTable.TryGetValue(numberTable, out var existingCartNote))
-            {
-                _cartNote = new CartNote
+            _cartNote = cartsByTable.TryGetValue(numberTable, out var existingCartNote)
+                ? new CartNote
                 {
-                    CartDTOs = existingCartNote.CartDTOs.ToList(),   
+                    CartDTOs = existingCartNote.CartDTOs.ToList(),
                     PreviousCartDTOs = existingCartNote.PreviousCartDTOs.ToList(),
                     Note = existingCartNote.Note
-                };
-            }
-            else
-            {
-                _cartNote = new CartNote
+                }
+                : new CartNote
                 {
-                    CartDTOs = new(),
-                    PreviousCartDTOs = new(),
+                    CartDTOs = new List<CartDTO>(),
+                    PreviousCartDTOs = new List<CartDTO>(),
                     Note = string.Empty
                 };
-            }
-
             StateHasChanged();
         }
 
@@ -298,84 +343,78 @@ namespace DATN.Client.Pages.AdminManager
             {
                 await JS.InvokeVoidAsync("closeModal", "tableModal");
 
-                _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote") ?? new CartNote();
+                cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable") ?? new Dictionary<int, CartNote>();
+
+                if (!cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
+                {
+                    existingCartNote = new CartNote
+                    {
+                        CartDTOs = new List<CartDTO>(),
+                        PreviousCartDTOs = new List<CartDTO>(),
+                        Note = string.Empty
+                    };
+                }
+
+                _cartNote = existingCartNote;
 
                 if (_cartNote.CartDTOs is null || !_cartNote.CartDTOs.Any())
                 {
                     await JS.InvokeVoidAsync("showAlert", "warning", "Không có món mới");
                     return;
                 }
-                cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
 
-                if (cartsByTable is null) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!"); return; }
-
-                if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
+                foreach (var newItem in _cartNote.CartDTOs)
                 {
-
-                    foreach (var newItem in _cartNote.CartDTOs)
+                    var existingItem = _cartNote.PreviousCartDTOs.FirstOrDefault(item => item.ProductId == newItem.ProductId);
+                    if (existingItem != null)
                     {
-                        var existingItem = existingCartNote.PreviousCartDTOs.FirstOrDefault(item => item.ProductId == newItem.ProductId);
-                        if (existingItem != null)
-                        {
-                            existingItem.Quantity += newItem.Quantity;
-                        }
-                        else
-                        {
-                            existingCartNote.PreviousCartDTOs.Add(new CartDTO
-                            {
-                                ProductId = newItem.ProductId,
-                                ProductName = newItem.ProductName,
-                                Quantity = newItem.Quantity,
-                                Price = newItem.Price
-                            });
-                        }
-                    }
-                    if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
-                    {
-                        await hubConnection.SendAsync("SendChef", selectedTableNumber.ToString(), _cartNote.CartDTOs, _cartNote.Note);
+                        existingItem.Quantity += newItem.Quantity;
                     }
                     else
                     {
-                        await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
-                        return;
+                        _cartNote.PreviousCartDTOs.Add(newItem);
                     }
-                    existingCartNote.CartDTOs = new List<CartDTO>();
+                }
+
+                if (hubConnection is not null && hubConnection.State == HubConnectionState.Connected)
+                {
+                    await hubConnection.SendAsync("SendChef", selectedTableNumber.ToString(), _cartNote.CartDTOs, _cartNote.Note);
                 }
                 else
                 {
-                    cartsByTable[selectedTableNumber] = new CartNote
-                    {
-                        PreviousCartDTOs = new List<CartDTO>(_cartNote.CartDTOs),
-                        CartDTOs = new List<CartDTO>(),
-                        Note = _cartNote.Note
-                    };
-                    existingCartNote.CartDTOs = new List<CartDTO>();
-
+                    await JS.InvokeVoidAsync("alert", "Không thể kết nối tới server!");
+                    return;
                 }
-                
 
-                IsUsing = true;
-                numberTable = null;
+                tableStates = await _localStorageService.GetDictionaryAsync<int, TableState>("tableStates")
+                 ?? new Dictionary<int, TableState>();
+
+                tableStates[selectedTableNumber].HasPreviousOrder = false;
+                tableStates[selectedTableNumber].IsUsing = true;
+
+
+                _cartNote.CartDTOs = new List<CartDTO>();
+                cartsByTable[selectedTableNumber] = _cartNote;
+
+                await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                 await _localStorageService.SetAsync("_cartNote", existingCartNote);
                 await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                 await GetTableColorAsync(selectedTableNumber);
                 await UpdateOrderStatus("processing");
-                await JS.InvokeVoidAsync("showAlert", "success", "Đã gửi đầu bếp");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành công ","Món đã gửi đầu bếp");
                 await InitializeButtonVisibilityAsync(selectedTableNumber);
-                tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
+
                 StateHasChanged();
             }
             catch
             {
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng gọi Admin");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng gọi Admin");
             }
             finally
             {
                 IsProcess = false;
             }
-
         }
-
         private async Task UpdateOrderStatus(string status)
         {
             var _table = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
@@ -504,14 +543,14 @@ namespace DATN.Client.Pages.AdminManager
             TotalAmount = order.TotalAmount;
             order.TableId = getTable.TableId;
         }
-
         private async void ProcessPayment()
         {
             IsProcess = true;
             try
             {
                 await JS.InvokeVoidAsync("closeModal", "invoiceModal");
-                if (string.IsNullOrEmpty(messagePay))
+
+                if (!paymentRequests.TryGetValue(selectedTableNumber, out var paymentInfo) || string.IsNullOrEmpty(paymentInfo.Message))
                 {
                     await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Khách hàng chưa yêu cầu thanh toán");
                     return;
@@ -519,24 +558,16 @@ namespace DATN.Client.Pages.AdminManager
 
                 cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
 
-                if (cartsByTable is null) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!"); return; }
+                if (cartsByTable is null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin!");
+                    return;
+                }
 
                 if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
                 {
                     cartsByTable.Remove(selectedTableNumber);
                     IsUsing = false;
-                }
-                else
-                {
-                    cartsByTable[selectedTableNumber] = new CartNote
-                    {
-                        PreviousCartDTOs = new List<CartDTO>(),
-                        CartDTOs = new List<CartDTO>(),
-                        Note = _cartNote.Note
-                    };
-                    existingCartNote.CartDTOs = new List<CartDTO>();
-                    existingCartNote.PreviousCartDTOs = new List<CartDTO>();
-
                 }
 
                 if (order != null && order.OrderId > 0)
@@ -546,47 +577,58 @@ namespace DATN.Client.Pages.AdminManager
                     order.EmployeeId = employee.EmployeeId;
                     order.Note = _cartNote.Note;
 
-
-                    if (customer != null && customer.CustomerId > 0 && customer.Email != "no account")
+                    if (paymentInfo.Customer != null && paymentInfo.Customer.CustomerId > 0 && paymentInfo.Customer.Email != "no account")
                     {
-                        order.CustomerId = customer.CustomerId;
+                        order.CustomerId = paymentInfo.Customer.CustomerId;
                         await SaveRewarPointes(order);
                     }
 
                     var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 
-                    if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order"); return; }
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order");
+                        return;
+                    }
 
                     getTable.Status = "empty";
 
                     var res = await httpClient.PutAsJsonAsync($"api/Table/{getTable.TableId}", getTable);
 
-                    if (!res.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn"); return; }
+                    if (!res.IsSuccessStatusCode)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật bàn");
+                        return;
+                    }
 
+                    tableStates = await _localStorageService.GetDictionaryAsync<int, TableState>("tableStates")
+                 ?? new Dictionary<int, TableState>();
 
+                    tableStates[selectedTableNumber].HasPreviousOrder = false;
+                    tableStates[selectedTableNumber].IsUsing = false;
+                    tableStates[selectedTableNumber].HasPaymentRequest = false;
+
+                    paymentRequests.Remove(selectedTableNumber);
                     TotalAmount = 0;
                     IsUsing = false;
-                    messagePay = null;
-                    orderIdPay = 0;
-                    numberTablePay = 0;
-                    numberTable = null;
 
+                    await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                     await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                     await JS.InvokeVoidAsync("closeModal", "tableModal");
                     await JS.InvokeVoidAsync("closeModal", "invoiceModal");
                     await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
                     await InitializeButtonVisibilityAsync(selectedTableNumber);
                     await GetTableColorAsync(selectedTableNumber);
+
                     tableButtonVisibility = await _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility") ?? new Dictionary<int, ButtonVisibility>();
                     StateHasChanged();
-                    return;
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìn thấy hóa đơn");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy hóa đơn");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
                 await JS.InvokeVoidAsync("openChatGPT", query);
@@ -595,8 +637,6 @@ namespace DATN.Client.Pages.AdminManager
             {
                 IsProcess = false;
             }
-            
-
         }
 
         private async Task SaveRewarPointes(Order _order)
@@ -704,7 +744,52 @@ namespace DATN.Client.Pages.AdminManager
         }
 
         //Visibility&Color
-        private async Task GetTableColorAsync(int tableNumber) 
+        //private async Task GetTableColorAsync(int tableNumber) 
+        //{
+        //    try
+        //    {
+        //        if (!tableColorsCache.ContainsKey(tableNumber))
+        //        {
+        //            tableColorsCache[tableNumber] = new ColorTable();
+        //        }
+
+        //        var color = tableColorsCache[tableNumber];
+        //        string previousColor = color.Color;
+
+        //        if (!string.IsNullOrEmpty(messagePay) && numtables.Contains(tableNumber) && IsUsing)
+        //        {
+        //            color.Color = "#FFD700";
+        //        }
+        //        else if (IsUsing && !string.IsNullOrEmpty(numberTable))
+        //        {
+        //            color.Color = "#ADD8E6";
+        //        }
+        //        else if (IsUsing)
+        //        {
+        //            color.Color = "#FFA500";
+        //        }
+        //        else if (!string.IsNullOrEmpty(numberTable))
+        //        {
+        //            color.Color = "#ADD8E6";
+
+        //        }
+        //        else
+        //        {
+        //            color.Color = "#32CD32";
+        //        }
+
+        //        if (previousColor != color.Color)
+        //        {
+        //            await _localStorageService.SetDictionaryAsync("tableColorsCache", tableColorsCache);
+        //            StateHasChanged();
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+        //    }
+        //}
+        private async Task GetTableColorAsync(int tableNumber)
         {
             try
             {
@@ -714,24 +799,22 @@ namespace DATN.Client.Pages.AdminManager
                 }
 
                 var color = tableColorsCache[tableNumber];
+
                 string previousColor = color.Color;
 
-                if (!string.IsNullOrEmpty(messagePay) && numtables.Contains(tableNumber) && IsUsing)
+                var tableState = await GetTableStateAsync(tableNumber);
+
+                if (tableState.HasPaymentRequest)
                 {
                     color.Color = "#FFD700";
                 }
-                else if (IsUsing && !string.IsNullOrEmpty(numberTable))
-                {
-                    color.Color = "#ADD8E6";
-                }
-                else if (IsUsing)
+                else if (tableState.IsUsing)
                 {
                     color.Color = "#FFA500";
                 }
-                else if (!string.IsNullOrEmpty(numberTable))
+                else if (tableState.HasPreviousOrder)
                 {
                     color.Color = "#ADD8E6";
-
                 }
                 else
                 {
@@ -749,6 +832,25 @@ namespace DATN.Client.Pages.AdminManager
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
             }
         }
+
+        private async Task<TableState> GetTableStateAsync(int tableNumber)
+        {
+            tableStates = await _localStorageService.GetDictionaryAsync<int, TableState>("tableStates");
+
+            if (tableStates != null && tableStates.TryGetValue(tableNumber, out var state))
+            {
+                return state;
+            }
+
+            return new TableState
+            {
+                IsUsing = false,
+                HasPaymentRequest = false,
+                HasPreviousOrder = false
+            };
+        }
+
+
         private async Task InitializeButtonVisibilityAsync(int tableNumber)
         {
             if (!tableButtonVisibility.ContainsKey(tableNumber))
@@ -940,8 +1042,6 @@ namespace DATN.Client.Pages.AdminManager
                     else if (timeLeft.TotalHours <= 2.5 && table.Status != "availableuntil")
                     {
                         table.Status = "availableuntil";
-
-                        availableUntil = "availableuntil";
 
                         _ = UpdateTableStatusAsync(table);
 
@@ -1252,5 +1352,17 @@ namespace DATN.Client.Pages.AdminManager
     {
         public string FromNumber { get; set; }
         public string Time { get; set; }
+    }
+    public class PaymentInfo
+    {
+        public string Message { get; set; }
+        public int OrderId { get; set; }
+        public Customer Customer { get; set; }
+    }
+    public class TableState
+    {
+        public bool IsUsing { get; set; }
+        public bool HasPaymentRequest { get; set; }
+        public bool HasPreviousOrder { get; set; }
     }
 }

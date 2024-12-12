@@ -491,12 +491,6 @@ else
                 <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#CheckColorModal">Chú thích</button>
                 <button class="btn btn-primary" @onclick="() => Navigation.NavigateTo(urlBookTable)">Đặt bàn</button>
             </div>
-
-
-
-            @*     <div class="d-flex justify-content-end position-absolute bottom-0 end-0">
-    <button class="btn btn-primary" @onclick="() => CallButton(false)">Gọi cho customer </button>
-    </div> *@
         </div>
     }
 
@@ -794,10 +788,10 @@ else
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
-            @if (messagePay != "payReq")
+            @if (selectedTableNumber > 0 && tableStates.ContainsKey(selectedTableNumber) && !tableStates[selectedTableNumber].HasPaymentRequest)
             {
                 <div class="modal-header">
-                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
+                    <h5 class="modal-title" id="invoiceModalHd">Bàn số: @selectedTableNumber</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="max-height: 500px !important">
@@ -818,7 +812,7 @@ else
             else
             {
                 <div class="modal-header">
-                    <h5 class="modal-title" id="invoiceModal">Bàn số: @selectedTableNumber</h5>
+                    <h5 class="modal-title" id="invoiceModalH5">Bàn số: @selectedTableNumber</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="max-height: 500px !important">
