@@ -788,65 +788,37 @@ else
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
-            @if (selectedTableNumber > 0 && tableStates.ContainsKey(selectedTableNumber) && !tableStates[selectedTableNumber].HasPaymentRequest)
+            @if (IsProcessOrder)
             {
-                <div class="modal-header">
-                    <h5 class="modal-title" id="invoiceModalHd">Bàn số: @selectedTableNumber</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="max-height: 500px !important">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Nội dung</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Khách hàng chưa yêu cầu thanh toán</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-white" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
                 </div>
             }
             else
             {
-                <div class="modal-header">
-                    <h5 class="modal-title" id="invoiceModalH5">Bàn số: @selectedTableNumber</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="max-height: 500px !important">
-                    <div class="invoice-container" id="invoice-preview">
+                @if (order != null && order.OrderItems.Any(o => o.Quantity > 0))
+                {
+                    <div class="invoice-container">
                         <div class="invoice-header">
-                            <h1>LHDMHHNTTLQVHHMNVT</h1>
-                            <h2 class="mb-2">NHÀ HÀNG 5 SAO</h2>
+                            <h2>NHÀ HÀNG 5 SAO</h2>
                             <h4>HÓA ĐƠN</h4>
                         </div>
-
                         <div class="invoice-details">
+                            <!-- Thông tin nhân viên và thời gian -->
                             <div class="row">
                                 <div class="col-md-6">
-                                    <strong>TIỆN NGHI NHÀ HÀNG CỦA CHÚNG TÔI</strong> <br />
-                                    @{
-                                        if (employee != null && employee.EmployeeId > 0)
-                                        {
-                                            <strong>Nhân viên: @employee.EmployeeName</strong>
-                                        }
-                                        else
-                                        {
-                                            <strong>Nhân viên: hihi</strong>
-                                        }
-                                    }
-
+                                    <strong>Nhân viên: @employee?.EmployeeName ?? "N/A"</strong>
                                 </div>
                                 <div class="col-md-6 text-end">
                                     Số bàn: @selectedTableNumber<br>
-                                    Thời gian vào: @order.CreateDate <br>
+                                    Thời gian vào: @order.CreateDate<br>
                                     Thời gian ra: @DateTime.Now
                                 </div>
                             </div>
                         </div>
-
+                        <!-- Bảng sản phẩm -->
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
@@ -858,87 +830,33 @@ else
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (order == null || order.OrderId <= 0)
+                                @foreach (var item in order.OrderItems.Where(i => !i.IsDeleted && i.Quantity > 0))
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center">Không tìm thấy sản phẩm</td>
-                                    </tr>
-                                }
-                                else
-                                {
-                                    foreach (var c in order.OrderItems.Where(a => !a.IsDeleted && a.Quantity > 0).ToList())
-                                    {
-                                        <tr>
-                                            <td><img src="data:image/png;base64,@Convert.ToBase64String(c.Products.ProductImage)" alt="Product"></td>
-                                            <td>@c.Products.ProductName</td>
-                                            <td>@c.Quantity</td>
-                                            <td>@c.Products.Price.ToString("N0") VND</td>
-                                            <td>@c.TotalPrice.ToString("N0") VND</td>
-                                        </tr>
-                                    }
-                                    <tr>
-                                        <td class="fw-samibold">Ghi chú: @order.Note</td>
-                                        <td class="fw-samibold">Phương thức thanh toán: @order.PaymentMethod</td>
+                                        <td><img src="data:image/png;base64,@Convert.ToBase64String(item.Products.ProductImage)" alt="Product"></td>
+                                        <td>@item.Products.ProductName</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.Products.Price.ToString("N0") VND</td>
+                                        <td>@item.TotalPrice.ToString("N0") VND</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
-                        <div class="total-section-bill text-end">
-                            @{
-                                var totalAmount = order.TotalAmount;
-                                var totalTax = totalAmount * 0.1m;
-                                var serviceFee = totalAmount * 0.05m;
-                                var totalPayable = 0m;
-
-
-                                <span>Tổng tiền đơn hàng đã bao gồm voucher (nếu có): @totalAmount.ToString("N0") VND</span>
-
-                                <br />
-                                <span> Thuế VAT (10%): @totalTax.ToString("N0") VND</span>                        <br />
-                                <span>Phí dịch vụ (5%): @serviceFee.ToString("N0") VND</span>                        <br />
-                                @if (getTable != null && getTable.Status == "inusebooktable")
-                                {
-                                    @if (getReservation != null && getReservation.ReservationId > 0)
-                                    {
-                                        totalAmount = totalPayable = (totalAmount - getReservation.DepositPayment) + totalTax + serviceFee;
-                                        <span>Tiền đặt cọc: @getReservation.DepositPayment.ToString("N0") VND</span>                        <br />
-                                        <strong>Tổng tiền thanh toán: @totalPayable.ToString("N0") VND</strong>                        <br />
-                                    }
-                                }
-                                else
-                                {
-                                    totalAmount = totalAmount + totalTax + serviceFee;
-                                    <strong>Tổng tiền thanh toán: @totalAmount.ToString("N0") VND</strong>                        <br />
-                                }
-                                TotalAmount = totalAmount;
-                            }
-
+                        <!-- Tổng tiền -->
+                        <div class="text-end">
+                            <p>Tổng tiền: @order.TotalAmount.ToString("N0") VND</p>
                         </div>
-
-                        <div class="footer-section">
-                            <div>
-                                <strong>Thông tin ngân hàng</strong>
-                                Ngân hàng: Tiên phong<br>
-                                Tên tài khoản: FFOOD<br>
-                                Số tài khoản: 123 456 7890
-                            </div>
-                            <div class="text-end">
-                                <strong>Thông tin liên hệ</strong>
-                                Email: ffood@teach.com<br>
-                                Điện thoại: +84 912 345 678<br>
-                                Địa chỉ: 3/2 Hưng Lợi, Ninh Kiều, Cần Thơ
-                            </div>
-                        </div>
-                        <footer class="mt-2" style="text-align: center;"><b>Xin cảm ơn và hẹn gặp lại.</b></footer>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary mt-3" @onclick="ProcessPayment">Xác nhận</button>
-                </div>
+                }
+                else
+                {
+                    <p>Không tìm thấy sản phẩm.</p>
+                }
             }
         </div>
     </div>
 </div>
+
 
 <div class="box" id="call-box">
         <div id="particles-js"></div>

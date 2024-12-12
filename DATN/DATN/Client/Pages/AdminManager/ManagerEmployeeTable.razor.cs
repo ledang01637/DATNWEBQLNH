@@ -32,8 +32,8 @@ namespace DATN.Client.Pages.AdminManager
         public static List<RequestCustomer> requests = new();
         public Customer customer = new();
         private Dictionary<int, PaymentInfo> paymentRequests = new();
+        private Dictionary<int, List<Order>> tableOrders = new();
         private Dictionary<int, TableState> tableStates = new();
-
         private Dictionary<int, ButtonVisibility> tableButtonVisibility = new();
         private Dictionary<int, ColorTable> tableColorsCache = new();
         private Dictionary<int, CartNote> cartsByTable = new();
@@ -50,7 +50,7 @@ namespace DATN.Client.Pages.AdminManager
         private string from;
         private string to;
         private bool isEdit = false;
-        private int selectedTableId ;
+        private int selectedTableId;
         private bool isCheckBookTable = false;
         private DateTime selectedDate;
         private DateTime selectedTime;
@@ -59,6 +59,7 @@ namespace DATN.Client.Pages.AdminManager
         private int updateCounter = 0;
         private int _orderId;
         private bool IsProcess = false;
+        private bool IsProcessOrder = false;
         private readonly string urlBookTable = "/employee-book-table";
 
 
@@ -102,17 +103,17 @@ namespace DATN.Client.Pages.AdminManager
                 await LoadAll();
                 await SetupTimer();
             }
-            catch
+            catch (Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi không xác định");
+                await HandleError(ex);
             }
             finally
             {
                 IsProcess = false;
             }
-            
-        }
 
+        }
         private async Task GetLocalStorageAsync()
         {
             var numTablesTask = _localStorageService.GetListAsync<int>("numtables");
@@ -122,8 +123,9 @@ namespace DATN.Client.Pages.AdminManager
             var tableButtonVisibilityTask = _localStorageService.GetDictionaryAsync<int, ButtonVisibility>("tableButtonVisibility");
             var tableColorsCacheTask = _localStorageService.GetDictionaryAsync<int, ColorTable>("tableColorsCache");
             var tableStatesTask = _localStorageService.GetDictionaryAsync<int, TableState>("TableState");
+            var tableOrdersTask = _localStorageService.GetDictionaryAsync<int, List<Order>>("tableOrders");
 
-            await Task.WhenAll(numTablesTask, requestsTask, cartNoteTask, cartsByTableTask, tableButtonVisibilityTask, tableColorsCacheTask, tableStatesTask);
+            await Task.WhenAll(numTablesTask, requestsTask, cartNoteTask, cartsByTableTask, tableButtonVisibilityTask, tableColorsCacheTask, tableStatesTask,tableOrdersTask);
 
             numtables = numTablesTask.Result ?? new List<int>();
             requests = requestsTask.Result ?? new List<RequestCustomer>();
@@ -132,6 +134,7 @@ namespace DATN.Client.Pages.AdminManager
             tableButtonVisibility = tableButtonVisibilityTask.Result ?? new Dictionary<int, ButtonVisibility>();
             tableColorsCache = tableColorsCacheTask.Result ?? new Dictionary<int, ColorTable>();
             tableStates = tableStatesTask.Result ?? new Dictionary<int, TableState>();
+            tableOrders = tableOrdersTask.Result ?? new Dictionary<int, List<Order>>();
         }
 
         // HubEvents
@@ -177,7 +180,8 @@ namespace DATN.Client.Pages.AdminManager
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Lỗi UpdateTable: {ex.Message}");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi xử lý khi nhận yêu cầu");
+                    await HandleError(ex);
                 }
             });
 
@@ -199,7 +203,22 @@ namespace DATN.Client.Pages.AdminManager
 
                     await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
 
+                    var currentOrder = await GetOrderInvoice(_orderId) ?? new Order();
+
+                    if (!tableOrders.ContainsKey(_numberTable))
+                    {
+                        tableOrders[_numberTable] = new List<Order>();
+                    }
+
+                    if (!tableOrders[_numberTable].Any(o => o.OrderId == _orderId))
+                    {
+                        tableOrders[_numberTable].Add(currentOrder);
+                    }
+
+                    await _localStorageService.SetDictionaryAsync("tableOrders", tableOrders);
+
                     var customer = _customerId > 0 ? await GetCustomerById(_customerId) : new Customer();
+
                     paymentRequests[_numberTable] = new PaymentInfo
                     {
                         Message = message,
@@ -207,24 +226,18 @@ namespace DATN.Client.Pages.AdminManager
                         Customer = customer
                     };
 
-                    order = await GetOrderInvoice(_orderId) ?? new Order();
-
                     await GetTableColorAsync(_numberTable);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Lỗi ReqPay: {ex.Message}");
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi xử lý khi nhận yêu cầu");
+                    await HandleError(ex);
                 }
             });
-
-
-
-
 
             return Task.CompletedTask;
         }
 
-        //InitLoad
         private async Task LoadAll()
         {
             IsProcess = true;
@@ -238,7 +251,7 @@ namespace DATN.Client.Pages.AdminManager
                 var loadReservationsIncludeTask = httpClient.GetFromJsonAsync<List<Reservation>>("api/Reservation/GetReservationInclude");
 
 
-                await Task.WhenAll(loadTablesTask, loadFloorsTask, loadProductsTask, loadOrdersTask,  loadReservationsIncludeTask, loadReservationsTask);
+                await Task.WhenAll(loadTablesTask, loadFloorsTask, loadProductsTask, loadOrdersTask, loadReservationsIncludeTask, loadReservationsTask);
 
                 tables = loadTablesTask.Result?.Where(a => !a.IsDeleted).ToList() ?? new List<Table>();
                 floors = loadFloorsTask.Result?.Where(a => !a.IsDeleted).ToList() ?? new List<Floor>();
@@ -272,12 +285,12 @@ namespace DATN.Client.Pages.AdminManager
             catch (Exception ex)
             {
                 await HandleError(ex);
-            }finally
+            }
+            finally
             {
                 IsProcess = false;
             }
         }
-
 
         #region ProcessOrder
 
@@ -316,7 +329,6 @@ namespace DATN.Client.Pages.AdminManager
             await _localStorageService.SetAsync("_cartNote", existingCartNote);
             await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
         }
-        //Modal
         private void ShowModalForTable(int numberTable)
         {
             selectedTableNumber = numberTable;
@@ -335,7 +347,6 @@ namespace DATN.Client.Pages.AdminManager
                 };
             StateHasChanged();
         }
-
         private async Task ConfirmOrder()
         {
             IsProcess = true;
@@ -392,23 +403,25 @@ namespace DATN.Client.Pages.AdminManager
                 tableStates[selectedTableNumber].HasPreviousOrder = false;
                 tableStates[selectedTableNumber].IsUsing = true;
 
-
                 _cartNote.CartDTOs = new List<CartDTO>();
                 cartsByTable[selectedTableNumber] = _cartNote;
+
+
 
                 await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                 await _localStorageService.SetAsync("_cartNote", existingCartNote);
                 await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
                 await GetTableColorAsync(selectedTableNumber);
                 await UpdateOrderStatus("processing");
-                await JS.InvokeVoidAsync("showAlert", "success", "Thành công ","Món đã gửi đầu bếp");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thành công ", "Món đã gửi đầu bếp");
                 await InitializeButtonVisibilityAsync(selectedTableNumber);
 
                 StateHasChanged();
             }
-            catch
+            catch (Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng gọi Admin");
+                await HandleError(ex);
             }
             finally
             {
@@ -439,9 +452,8 @@ namespace DATN.Client.Pages.AdminManager
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy bàn"); return;
             }
-            
-        }
 
+        }
         private async Task RemoveFromCartAsync(CartDTO product)
         {
             if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
@@ -460,7 +472,7 @@ namespace DATN.Client.Pages.AdminManager
                         order = await GetOrderInvoice(order.OrderId);
                     }
                 }
-                
+
             }
             await _localStorageService.SetAsync("_cartNote", existingCartNote);
             _cartNote = await _localStorageService.GetAsync<CartNote>("_cartNote");
@@ -487,7 +499,7 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (existingCart.Quantity <= 0)
                 {
-                  await RemoveFromCartAsync(existingCart);
+                    await RemoveFromCartAsync(existingCart);
                 }
 
                 var oi = order.OrderItems.FirstOrDefault(p => p.ProductId == existingCart.ProductId);
@@ -496,7 +508,7 @@ namespace DATN.Client.Pages.AdminManager
                 {
                     oi.Quantity = existingCart.Quantity;
 
-                    if(oi.Quantity <=0)
+                    if (oi.Quantity <= 0)
                     {
                         oi.IsDeleted = true;
                     }
@@ -513,35 +525,57 @@ namespace DATN.Client.Pages.AdminManager
         private async Task UpdateQuantityOrderItem(OrderItem orderItem)
         {
             var response = await httpClient.PutAsJsonAsync($"api/OrderItem/{orderItem.OrderItemId}", orderItem);
-            if(!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "Lỗi", "Không thể cập nhật đơn hàng"); return; }
+            if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "Lỗi", "Không thể cập nhật đơn hàng"); return; }
         }
 
         private async void CalculatorAmount()
         {
-            getTable = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
-            if (getTable == null || getTable.TableId <= 0)
+            IsProcessOrder = true;
+            try
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn"); return;
-            }
-
-            if (getTable.Status == "inusebooktable")
-            {
-
-                getReservation = await httpClient.GetFromJsonAsync<Reservation>($"api/Reservation/GetReservationByTimeTableId?tableId={getTable.TableId}");
-
-                if (getReservation == null || getReservation.ReservationId <= 0)
+                getTable = await httpClient.GetFromJsonAsync<Table>($"api/Table/GetTableByNumber?numberTable={selectedTableNumber}");
+                if (getTable == null || getTable.TableId <= 0)
                 {
-                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy đơn đặt bàn"); return;
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn"); return;
                 }
-                getReservation.ReservationStatus = "Hoàn tất";
-                getReservation.UpdatedDate = DateTime.Now;
 
-                var resReser = await httpClient.PutAsJsonAsync($"api/Reservation/{getReservation.ReservationId}", getReservation);
+                order = await GetOrderForTable();
 
-                if (!resReser.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật đơn đặt bàn"); return; }
+                if (order == null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Hóa đơn đã được thanh toán hoặc không tồn tại");
+                    return;
+                }
+
+                if (getTable.Status == "inusebooktable")
+                {
+
+                    getReservation = await httpClient.GetFromJsonAsync<Reservation>($"api/Reservation/GetReservationByTimeTableId?tableId={getTable.TableId}");
+
+                    if (getReservation == null || getReservation.ReservationId <= 0)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy đơn đặt bàn"); return;
+                    }
+                    getReservation.ReservationStatus = "Hoàn tất";
+                    getReservation.UpdatedDate = DateTime.Now;
+
+                    var resReser = await httpClient.PutAsJsonAsync($"api/Reservation/{getReservation.ReservationId}", getReservation);
+
+                    if (!resReser.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không thể cập nhật đơn đặt bàn"); return; }
+                }
+                TotalAmount = order.TotalAmount;
+                order.TableId = getTable.TableId;
             }
-            TotalAmount = order.TotalAmount;
-            order.TableId = getTable.TableId;
+            catch(Exception ex)
+            {
+                await HandleError(ex);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi xử lý tính toán hóa đơn");
+            }
+            finally
+            {
+                IsProcessOrder = false;
+            }
+            
         }
         private async void ProcessPayment()
         {
@@ -555,6 +589,7 @@ namespace DATN.Client.Pages.AdminManager
                     await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Khách hàng chưa yêu cầu thanh toán");
                     return;
                 }
+
 
                 cartsByTable = await _localStorageService.GetDictionaryAsync<int, CartNote>("cartsByTable");
 
@@ -612,8 +647,11 @@ namespace DATN.Client.Pages.AdminManager
                     TotalAmount = 0;
                     IsUsing = false;
 
+                    tableOrders = new Dictionary<int, List<Order>>();
+
                     await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                     await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
+                    await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                     await JS.InvokeVoidAsync("closeModal", "tableModal");
                     await JS.InvokeVoidAsync("closeModal", "invoiceModal");
                     await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
@@ -630,14 +668,44 @@ namespace DATN.Client.Pages.AdminManager
             }
             catch (Exception ex)
             {
-                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
-                await JS.InvokeVoidAsync("openChatGPT", query);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xử lý hóa đơn");
+                await HandleError(ex);
             }
             finally
             {
                 IsProcess = false;
             }
         }
+
+        private async Task<Order> GetOrderForTable()
+        {
+            try
+            {
+                tableOrders = await _localStorageService.GetDictionaryAsync<int, List<Order>>("tableOrders");
+
+                if (!tableOrders.TryGetValue(selectedTableNumber, out var orders) || orders == null || !orders.Any())
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy hóa đơn cho bàn này");
+                    return null;
+                }
+
+                var currentOrder = orders.LastOrDefault(order => order.Status != "completed");
+
+                if (currentOrder == null)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Hóa đơn đã được thanh toán hoặc không tồn tại");
+                    return null;
+                }
+
+                return currentOrder;
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Lỗi khi lấy hóa đơn: {ex.Message}");
+                return null;
+            }
+        }
+
 
         private async Task SaveRewarPointes(Order _order)
         {
@@ -661,7 +729,7 @@ namespace DATN.Client.Pages.AdminManager
                     if (response.IsSuccessStatusCode)
                     {
                         var createdRewardPoint = await response.Content.ReadFromJsonAsync<RewardPointe>();
-                        if(createdRewardPoint != null)
+                        if (createdRewardPoint != null)
                         {
                             customer.TotalRewardPoint += createdRewardPoint.RewardPoint;
                             var res = await httpClient.PutAsJsonAsync($"api/Customer/{customer.CustomerId}", customer);
@@ -685,9 +753,10 @@ namespace DATN.Client.Pages.AdminManager
                     return;
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không lưu điểm được");
+                await HandleError(ex);
                 return;
             }
             finally
@@ -699,7 +768,7 @@ namespace DATN.Client.Pages.AdminManager
         private async Task<Customer> GetCustomerById(int customerId)
         {
             var customer = await httpClient.GetFromJsonAsync<Customer>($"api/Customer/{customerId}");
-            if(customer == null) { return null; }
+            if (customer == null) { return null; }
             return customer;
         }
 
@@ -727,7 +796,7 @@ namespace DATN.Client.Pages.AdminManager
 
         private async void CancelOrder()
         {
-            await JS.InvokeVoidAsync("showAlert","success","Thông báo","Hủy thành công");
+            await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Hủy thành công");
         }
 
         private async Task ConfirmRequestAsync(int RequestId)
@@ -742,53 +811,7 @@ namespace DATN.Client.Pages.AdminManager
                 StateHasChanged();
             }
         }
-
         //Visibility&Color
-        //private async Task GetTableColorAsync(int tableNumber) 
-        //{
-        //    try
-        //    {
-        //        if (!tableColorsCache.ContainsKey(tableNumber))
-        //        {
-        //            tableColorsCache[tableNumber] = new ColorTable();
-        //        }
-
-        //        var color = tableColorsCache[tableNumber];
-        //        string previousColor = color.Color;
-
-        //        if (!string.IsNullOrEmpty(messagePay) && numtables.Contains(tableNumber) && IsUsing)
-        //        {
-        //            color.Color = "#FFD700";
-        //        }
-        //        else if (IsUsing && !string.IsNullOrEmpty(numberTable))
-        //        {
-        //            color.Color = "#ADD8E6";
-        //        }
-        //        else if (IsUsing)
-        //        {
-        //            color.Color = "#FFA500";
-        //        }
-        //        else if (!string.IsNullOrEmpty(numberTable))
-        //        {
-        //            color.Color = "#ADD8E6";
-
-        //        }
-        //        else
-        //        {
-        //            color.Color = "#32CD32";
-        //        }
-
-        //        if (previousColor != color.Color)
-        //        {
-        //            await _localStorageService.SetDictionaryAsync("tableColorsCache", tableColorsCache);
-        //            StateHasChanged();
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
-        //    }
-        //}
         private async Task GetTableColorAsync(int tableNumber)
         {
             try
@@ -827,12 +850,12 @@ namespace DATN.Client.Pages.AdminManager
                     StateHasChanged();
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
+                await HandleError(ex);
             }
         }
-
         private async Task<TableState> GetTableStateAsync(int tableNumber)
         {
             tableStates = await _localStorageService.GetDictionaryAsync<int, TableState>("tableStates");
@@ -849,8 +872,6 @@ namespace DATN.Client.Pages.AdminManager
                 HasPreviousOrder = false
             };
         }
-
-
         private async Task InitializeButtonVisibilityAsync(int tableNumber)
         {
             if (!tableButtonVisibility.ContainsKey(tableNumber))
@@ -884,7 +905,6 @@ namespace DATN.Client.Pages.AdminManager
             await JS.InvokeVoidAsync("openChatGPT", query);
             Console.WriteLine($"{ex.Message}");
         }
-
         private static string MergeNotes(string existingNote, string newNote)
         {
             if (string.IsNullOrEmpty(existingNote))
@@ -924,7 +944,7 @@ namespace DATN.Client.Pages.AdminManager
 
                     if (handler.ReadToken(token) is not JwtSecurityToken jsonToken)
                     {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng thử đăng nhập lại nếu không được thì liên hệ Admin");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng thử đăng nhập lại nếu không được thì liên hệ Admin");
                     }
                     else
                     {
@@ -936,7 +956,7 @@ namespace DATN.Client.Pages.AdminManager
                         }
                         else
                         {
-                            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Vui lòng đăng nhập lại");
+                            await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại");
                             Navigation.NavigateTo("/login-admin");
                         }
                     }
@@ -944,11 +964,11 @@ namespace DATN.Client.Pages.AdminManager
             }
             catch (Exception ex)
             {
-                var query = $"[C#] fix error bằng tiếng việt: {ex.Message}";
-                await JS.InvokeVoidAsync("openChatGPT", query);
-                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi","Không thể setup cuộc gọi");
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể setup cuộc gọi");
+                await HandleError(ex);
 
-            }finally
+            }
+            finally
             {
                 IsProcess = false;
             }
@@ -973,7 +993,7 @@ namespace DATN.Client.Pages.AdminManager
         [JSInvokable("LstCall")]
         public void LstCall(List<CallInfo> numberCall)
         {
-            if(numberCall.Count > 0)
+            if (numberCall.Count > 0)
             {
                 callInfos = numberCall.ToList();
             }
@@ -1101,12 +1121,13 @@ namespace DATN.Client.Pages.AdminManager
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("showAlert", "warning","Thông báo","Không tìm thấy đơn đặt bàn");
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy đơn đặt bàn");
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xử lý bàn");
+                await HandleError(ex);
             }
             finally
             {
@@ -1123,7 +1144,7 @@ namespace DATN.Client.Pages.AdminManager
 
             reservations = loadReservationsTask.Result?.Where(a => !a.IsDeleted && a.ReservationStatus.Equals("Đang xử lý")).ToList() ?? new List<Reservation>();
             reservationsProcess = loadReservationsTask.Result?.Where(a => !a.IsDeleted && a.ReservationStatus.Equals("Đặt bàn thành công")).ToList() ?? new List<Reservation>();
-            StateHasChanged(); 
+            StateHasChanged();
         }
 
         private void EditInforCustomer()
@@ -1176,8 +1197,8 @@ namespace DATN.Client.Pages.AdminManager
             var hasConflict = reservationsProcess.Any(r =>
                 r.TableId == reservationModel.TableId &&
                 !r.IsDeleted &&
-                r.ReservationTime.AddMinutes(-150) < reservationModel.ReservationTime && 
-                r.ReservationTime.AddMinutes(150) > reservationModel.ReservationTime); 
+                r.ReservationTime.AddMinutes(-150) < reservationModel.ReservationTime &&
+                r.ReservationTime.AddMinutes(150) > reservationModel.ReservationTime);
 
             if (hasConflict)
             {
@@ -1187,12 +1208,12 @@ namespace DATN.Client.Pages.AdminManager
 
             var tableBook = await httpClient.GetFromJsonAsync<Table>($"api/Table/{selectedTableId}");
 
-            if( tableBook != null && tableBook.TableId > 0)
+            if (tableBook != null && tableBook.TableId > 0)
             {
                 tableBook.Status = "reserved";
                 var updateTableStatus = await httpClient.PutAsJsonAsync($"api/Table/{selectedTableId}", tableBook);
 
-                if(!updateTableStatus.IsSuccessStatusCode) 
+                if (!updateTableStatus.IsSuccessStatusCode)
                 {
                     await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật trạng thái bàn thất bại.");
                     return;
@@ -1204,7 +1225,7 @@ namespace DATN.Client.Pages.AdminManager
                 return;
             }
 
-            var response =  await httpClient.PutAsJsonAsync($"api/Reservation/{reservationModel.ReservationId}", reservationModel);
+            var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservationModel.ReservationId}", reservationModel);
 
             if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xác nhận đặt bàn"); return; }
 
@@ -1327,11 +1348,12 @@ namespace DATN.Client.Pages.AdminManager
             }
         }
     }
+    #region ClassDTO
     public class CartNote
     {
         public List<CartDTO> CartDTOs { get; set; }
         public List<CartDTO> PreviousCartDTOs { get; set; }
-        public string Note {  get; set; }
+        public string Note { get; set; }
     }
     public class ButtonVisibility
     {
@@ -1346,7 +1368,7 @@ namespace DATN.Client.Pages.AdminManager
     {
         public string NumberTable { get; set; }
         public DateTime Time { get; set; }
-        public static List<Voiecall> VoiecallList { get; set;}
+        public static List<Voiecall> VoiecallList { get; set; }
     }
     public class CallInfo
     {
@@ -1365,4 +1387,5 @@ namespace DATN.Client.Pages.AdminManager
         public bool HasPaymentRequest { get; set; }
         public bool HasPreviousOrder { get; set; }
     }
+    #endregion
 }
