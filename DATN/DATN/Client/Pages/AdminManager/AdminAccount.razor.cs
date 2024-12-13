@@ -95,7 +95,7 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (account != null && role != null)
                 {
-                    account.AccountType = "Employee";
+                    account.AccountType = "employee";
                     role.RoleId = 2;
 
                     var accountResponse = await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);
@@ -127,7 +127,7 @@ namespace DATN.Client.Pages.AdminManager
 
                 if (account != null && role != null)
                 {
-                    account.AccountType = "Customer";
+                    account.AccountType = "customer";
                     role.RoleId = 3;
 
                     var accountResponse = await httpClient.PutAsJsonAsync($"api/Account/{accountId}", account);

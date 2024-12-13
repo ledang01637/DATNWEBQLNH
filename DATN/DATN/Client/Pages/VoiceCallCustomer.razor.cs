@@ -51,7 +51,7 @@ namespace DATN.Client.Pages
                     return;
                 }
                 await SetupCall(token, from.ToLower(), to.ToLower());
-                await setupVideo();
+                await SetupVideo();
             }
             catch (Exception ex)
             {
@@ -97,7 +97,7 @@ namespace DATN.Client.Pages
                 Navigation.NavigateTo("/");
             }
         }
-        private async Task setupVideo()
+        private async Task SetupVideo()
         {
             await JS.InvokeVoidAsync("setupVideo", "btn-answer", "btn-call", "remoteVideo", "localVideo");
         }

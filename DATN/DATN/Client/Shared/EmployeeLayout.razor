@@ -124,7 +124,9 @@
         clearInterval(snowfallInterval);
     }
 
-    startSnowfall();
+    document.addEventListener('DOMContentLoaded', () => {
+        startSnowfall();
+    });
 </script>
 <CascadingAuthenticationState>
     <AuthorizeView Roles="admin,employee">
@@ -161,7 +163,7 @@
                                 <h2 class="fs-3 d-inline text-center text-white">Nhân viên</h2>
                             </div>
                             <div>
-                                <span>Xin chào, <strong class="text-white" id="user-name">@Username</strong></span>
+                                <span class="text-white">Xin chào, <strong class="text-white" id="user-name">@Username</strong></span>
                                 <button class="btn btn-sm btn-outline-danger ms-3" id="logout-btn" @onclick="Logout">Đăng xuất</button>
                             </div>
                         </div>
@@ -182,9 +184,9 @@
                                     <a href="#" class="text-dark mx-2 footer-link">Chính sách bảo mật</a>
                                 </div>
                                 <div class="col-12 mb-2" data-aos="fade-up" data-aos-once="true" data-aos-delay="200">
-                                    <p>Địa chỉ: 123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
-                                    <p>Email: info@example.com</p>
-                                    <p>Phone: +123 456 789</p>
+                                    <p>Địa chỉ: 127 Võ Văn Kiệt, P. An Hòa, Q. Ninh Kiều, TP. Cần Thơ</p>
+                                    <p>Email: restaurantvietnam@gmail.com</p>
+                                    <p>Phone: 0939 660 295</p>
                                     <br>
                                     <p class="small">&copy; 2024 Công ty của bạn. All rights reserved.</p>
                                 </div>

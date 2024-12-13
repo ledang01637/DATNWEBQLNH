@@ -651,7 +651,7 @@ namespace DATN.Client.Pages.AdminManager
 
                     await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                     await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
-                    await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
+                    await _localStorageService.SetDictionaryAsync("tableOrders", tableOrders);
                     await JS.InvokeVoidAsync("closeModal", "tableModal");
                     await JS.InvokeVoidAsync("closeModal", "invoiceModal");
                     await JS.InvokeVoidAsync("showAlert", "success", "Đã thanh toán");
@@ -929,7 +929,7 @@ namespace DATN.Client.Pages.AdminManager
                 from = GetTableNumberFromToken(token);
 
                 await SetupCall(token, from, to);
-                await setupVideo();
+                await SetupVideo();
             }
         }
         private async Task SetupCall(string token, string from, string to)
@@ -973,7 +973,7 @@ namespace DATN.Client.Pages.AdminManager
                 IsProcess = false;
             }
         }
-        private async Task setupVideo()
+        private async Task SetupVideo()
         {
             await JS.InvokeVoidAsync("setupVideo", "btn-answer", "btn-call", "remoteVideo", "localVideo");
         }
@@ -998,7 +998,7 @@ namespace DATN.Client.Pages.AdminManager
                 callInfos = numberCall.ToList();
             }
             StateHasChanged();
-            JS.InvokeVoidAsync("showAler", "success", callInfos.Count);
+            _ = JS.InvokeVoidAsync("showAler", "success", callInfos.Count);
         }
 
         private string GetTableNumberFromToken(string token)
