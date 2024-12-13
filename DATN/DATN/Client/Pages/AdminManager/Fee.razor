@@ -1,0 +1,71 @@
+﻿@page "/fee"
+@using DATN.Client.Service
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject LocalStorageService _localStorageService
+@layout InitLayout
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .login-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        margin: auto;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #e67e22;
+    }
+</style>
+<CascadingAuthenticationState>
+    <AuthorizeView Roles="admin">
+        <Authorized>
+            <div class="frame-parent">
+                <div class="frame-wrapper">
+                    <div class="frame-group">
+                        <div class="frame-container d-flex align-items-center justify-content-between">
+                            <a class="nav-link" href="/Statistic"><i class="fas fa-arrow-left fs-2"></i></a>
+                            <h1 class="foodgo m-0 text-center" style="font-size: 40px">Foodgo</h1>
+                            <div class="ellipse4-31-iphone13mini-1-wrapper">
+                                <img class="ellipse4-31-iphone13mini-1-icon" loading="lazy" alt="" src="/images/hinhanh/hambuger.png" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="login-card w-100 h-100">
+                <h3 class="text-center mb-4" style="font-size: 24px;">Cập nhật phí đặt bàn trên 1 người</h3>
+
+                <div class="mb-3">
+                    <input class="form-control" placeholder="Fee" @bind-value="TableFee" />
+                </div>
+                <div class="form-group text-center">
+                    <button type="submit" @onclick="HandleSubmit" class="btn btn-success">Xác nhận</button>
+                </div>
+            </div>
+
+        </Authorized>
+        <NotAuthorized>
+            <div class="container-fluid access-denied-container">
+                <div class="access-denied-card">
+                    <h1>403</h1>
+                    <p><strong>Access Denied</strong></p>
+                    <p>You do not have permission to access this page.</p>
+                    <a href="/" class="btn btn-primary mt-3">Go to Homepage</a>
+                </div>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>

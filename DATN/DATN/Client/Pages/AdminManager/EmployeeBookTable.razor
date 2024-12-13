@@ -85,21 +85,12 @@
 
 </style>
 
-<div class="d-flex d-inline-block">
-    <div class="align-items-start">
-        <a href="/" class="link-dark fw-semibold">
-            <i class="bi bi-box-arrow-left" style="font-size: 20px;"></i>
-        </a>
-    </div>
-    <h5 class="text-center mx-auto mb-4 fw-semibold">Đặt bàn</h5>
-</div>
-
 <div class="container my-3">
     <div class="row g-4">
         <!-- Thông tin người đặt -->
         <div class="col-lg-12">
             <div class="card">
-                <h5 class="mb-4">Thông tin người đặt</h5>
+                <h5 class="mb-4 text-center">Thông tin người đặt</h5>
                 <EditForm Model="@reservationModel" OnValidSubmit="OnSubmitForm">
                     <DataAnnotationsValidator />
                     <div class="mb-3">
@@ -154,7 +145,7 @@
 
                     <div class="mb-3">
                         <label for="note" class="form-label">Tiền cọc:</label>
-                        <div class="fs-5 text-danger">Khách hàng vui lòng thanh toán trước khoản tiền cọc để giữ bàn với (số tiền = tổng số người lớn x 50,000). Số tiền sẽ được trừ vào hóa đơn khi khách hàng dùng món tại nhà hàng.</div>
+                        <div class="fs-5 text-danger">Khách hàng vui lòng thanh toán trước khoản tiền cọc để giữ bàn với (số tiền = tổng số người lớn x @feeBookTable). Số tiền sẽ được trừ vào hóa đơn khi khách hàng dùng món tại nhà hàng.</div>
                     </div>
 
                     <div class="mb-3">
@@ -216,7 +207,7 @@
                             <p>@reservationModel.ReservationTime</p>
                         </div>
                         <div class="mb-3 order-booking-item">
-                            <label class="form-label fw-bold">Tiền cọc = (Người lớn x 50000):</label>
+                            <label class="form-label fw-bold">Tiền cọc = (Người lớn x @feeBookTable):</label>
                             <p>@reservationModel.DepositPayment.ToString("N0") VNĐ</p>
                         </div>
                         <div class="mb-3 order-booking-item">

@@ -17,6 +17,8 @@ namespace DATN.Client.Pages.AdminManager
         private DateTime selectedDate = DateTime.Now;
         private DateTime selectedTime = DateTime.Now;
         private int countSeat;
+        private string feeBookTable;
+        private decimal adultDeposit;
 
         protected override async void OnInitialized()
         {
@@ -30,6 +32,14 @@ namespace DATN.Client.Pages.AdminManager
                     countSeat += table.SeatingCapacity;
                 }
             }
+            adultDeposit = await GetFee();
+
+            if (adultDeposit == 0)
+            {
+                return;
+            }
+            feeBookTable = adultDeposit.ToString("N0");
+            StateHasChanged();
         }
 
         public async Task HandleBookTableAsync()
@@ -93,7 +103,6 @@ namespace DATN.Client.Pages.AdminManager
 
         private Task CatulatorDepositPaymentAsync()
         {
-            const decimal adultDeposit = 50000;
             const decimal childDeposit = 0;
 
             var adults = reservationModel.Adults;
@@ -102,6 +111,35 @@ namespace DATN.Client.Pages.AdminManager
             reservationModel.DepositPayment = adults * adultDeposit + children * childDeposit;
             StateHasChanged();
             return Task.CompletedTask;
+        }
+
+        private async Task<decimal> GetFee()
+        {
+            try
+            {
+                string fee = await httpClient.GetStringAsync("api/Fee/get-fee");
+
+                if (string.IsNullOrEmpty(fee))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy phí đặt cọc");
+                    return 0;
+                }
+
+                if (decimal.TryParse(fee, out var parsedFee))
+                {
+                    return parsedFee;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Phí đặt cọc không hợp lệ");
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Đã xảy ra lỗi khi lấy phí: {ex.Message}");
+                return 0;
+            }
         }
 
         private async void OnSubmitForm()

@@ -58,6 +58,7 @@ namespace DATN.Client.Pages.AdminManager
         private readonly Dictionary<int, string> timeLeftText = new();
         private int updateCounter = 0;
         private int _orderId;
+        private int numberSeatBookTable = 0;
         private bool IsProcess = false;
         private bool IsProcessOrder = false;
         private readonly string urlBookTable = "/employee-book-table";
@@ -1086,7 +1087,7 @@ namespace DATN.Client.Pages.AdminManager
             _ = InvokeAsync(StateHasChanged);
         }
 
-        private string FormatTimeLeft(TimeSpan timeLeft)
+        private static string FormatTimeLeft(TimeSpan timeLeft)
         {
             if (timeLeft.TotalHours <= 2.5)
             {
@@ -1165,73 +1166,112 @@ namespace DATN.Client.Pages.AdminManager
             selectedTableId = tableId;
         }
 
-        private async void OnSubmitForm()
+        private async Task OnSubmitForm()
         {
+            numberSeatBookTable = 0;
             await CatulatorDepositPaymentAsync();
+
             if (selectedTableId <= 0)
             {
                 await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng chọn bàn.");
                 return;
             }
 
-            reservationModel.TableId = selectedTableId;
-            reservationModel.IsPayment = true;
-            reservationModel.UpdatedDate = DateTime.Now;
-            reservationModel.ReservationStatus = "Đặt bàn thành công";
+            var table = await httpClient.GetFromJsonAsync<Table>($"api/Table/{selectedTableId}");
 
-            reservationModel.ReservationTime = new DateTime(
-                    selectedDate.Year,
-                    selectedDate.Month,
-                    selectedDate.Day,
-                    selectedTime.Hour,
-                    selectedTime.Minute,
-                    0
-                );
-
-            if (reservationModel.ReservationTime < DateTime.Now.AddHours(2))
+            if (table == null)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải ít nhất sau 2 giờ kể từ hiện tại.");
+                await JS.InvokeVoidAsync("showAlert", "error", "Thông báo", "Không tìm thấy bàn.");
                 return;
             }
 
-            var hasConflict = reservationsProcess.Any(r =>
-                r.TableId == reservationModel.TableId &&
-                !r.IsDeleted &&
-                r.ReservationTime.AddMinutes(-150) < reservationModel.ReservationTime &&
-                r.ReservationTime.AddMinutes(150) > reservationModel.ReservationTime);
+            var totalSeat = reservationModel.Adults + reservationModel.Children;
 
-            if (hasConflict)
+            if (totalSeat > table.SeatingCapacity)
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Bàn đã được đặt trong khoảng thời gian này. Vui lòng chọn bàn hoặc thời gian khác cách ít nhất 2 giờ 30 phút.");
+                numberSeatBookTable = totalSeat - table.SeatingCapacity;
+                await JS.InvokeVoidAsync("closeModal", "bookTableModal");
+                await JS.InvokeVoidAsync("showModal", "ConfirmModalSeatTable");
                 return;
-            }
-
-            var tableBook = await httpClient.GetFromJsonAsync<Table>($"api/Table/{selectedTableId}");
-
-            if (tableBook != null && tableBook.TableId > 0)
-            {
-                tableBook.Status = "reserved";
-                var updateTableStatus = await httpClient.PutAsJsonAsync($"api/Table/{selectedTableId}", tableBook);
-
-                if (!updateTableStatus.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật trạng thái bàn thất bại.");
-                    return;
-                }
             }
             else
             {
-                await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn.");
-                return;
+                await ProcessSeatBookTableAsync(true);
             }
+        }
 
-            var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservationModel.ReservationId}", reservationModel);
+        private async Task ProcessSeatBookTableAsync(bool isAccept)
+        {
+            if (isAccept)
+            {
+                reservationModel.TableId = selectedTableId;
+                reservationModel.IsPayment = true;
+                reservationModel.UpdatedDate = DateTime.Now;
+                reservationModel.ReservationStatus = "Đặt bàn thành công";
 
-            if (!response.IsSuccessStatusCode) { await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xác nhận đặt bàn"); return; }
+                reservationModel.ReservationTime = new DateTime(
+                    selectedDate.Year, selectedDate.Month, selectedDate.Day,
+                    selectedTime.Hour, selectedTime.Minute, 0);
 
-            await JS.InvokeVoidAsync("closeModal", "bookTableModal");
-            await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đã xác nhận đặt bàn.");
-            StateHasChanged();
+                if (reservationModel.ReservationTime < DateTime.Now.AddHours(2))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Thời gian đặt bàn phải ít nhất sau 2 giờ kể từ hiện tại.");
+                    return;
+                }
+
+                if (CheckReservationConflict(reservationModel.TableId, reservationModel.ReservationTime))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo",
+                        "Bàn đã được đặt trong khoảng thời gian này. Vui lòng chọn bàn hoặc thời gian khác cách ít nhất 2 giờ 30 phút.");
+                    return;
+                }
+
+                var tableBook = await httpClient.GetFromJsonAsync<Table>($"api/Table/{selectedTableId}");
+
+                if (tableBook != null)
+                {
+                    tableBook.Status = "reserved";
+                    var updateTableStatus = await httpClient.PutAsJsonAsync($"api/Table/{selectedTableId}", tableBook);
+
+                    if (!updateTableStatus.IsSuccessStatusCode)
+                    {
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Cập nhật trạng thái bàn thất bại.");
+                        return;
+                    }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Không tìm thấy bàn.");
+                    return;
+                }
+
+                var response = await httpClient.PutAsJsonAsync($"api/Reservation/{reservationModel.ReservationId}", reservationModel);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể xác nhận đặt bàn.");
+                    return;
+                }
+
+                await JS.InvokeVoidAsync("closeModal", "ConfirmModalSeatTable");
+                await JS.InvokeVoidAsync("closeModal", "bookTableModal");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đã xác nhận đặt bàn.");
+                StateHasChanged();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("showModal", "bookTableModal");
+                await JS.InvokeVoidAsync("closeModal", "ConfirmModalSeatTable");
+            }
+        }
+
+        private bool CheckReservationConflict(int tableId, DateTime reservationTime)
+        {
+            return reservationsProcess.Any(r =>
+                r.TableId == tableId &&
+                !r.IsDeleted &&
+                r.ReservationTime.AddMinutes(-150) < reservationTime &&
+                r.ReservationTime.AddMinutes(150) > reservationTime);
         }
 
         private async void ConfirmCancelBookTable()

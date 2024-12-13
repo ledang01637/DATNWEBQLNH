@@ -604,8 +604,6 @@ else
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
 </div>
@@ -708,7 +706,7 @@ else
 </div>
 
 <div class="modal fade" id="ConfirmCancelModal" tabindex="-1" aria-labelledby="ConfirmCancelModal" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Xác nhận hủy</h5>
@@ -724,8 +722,25 @@ else
     </div>
 </div>
 
+<div class="modal fade" id="ConfirmModalSeatTable" tabindex="-1" aria-labelledby="ConfirmModalSeatTable" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận chọn bàn</h5>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn chọn bàn này không, sẽ <span class="fw-bold text-danger">thiếu @numberSeatBookTable chỗ</span> so với số khách đặt.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" @onclick="() => ProcessSeatBookTableAsync(true)">Xác nhận</button>
+                <button type="button" class="btn btn-danger" @onclick="() => ProcessSeatBookTableAsync(false)">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="CheckColorModal" tabindex="-1" aria-labelledby="CheckColorLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Kiểm tra màu của bàn</h5>
