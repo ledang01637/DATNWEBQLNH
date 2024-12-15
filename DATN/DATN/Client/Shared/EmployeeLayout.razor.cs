@@ -39,6 +39,13 @@ namespace DATN.Client.Shared
                 isLoading = false;
             }
         }
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (isAcceptWifi)
+            {
+                await JS.InvokeVoidAsync("startSnowfall");
+            }
+        }
         private async void Navbar(bool isClose)
         {
             await JS.InvokeVoidAsync("Navbar", "overlay", "mySidebar", isClose);

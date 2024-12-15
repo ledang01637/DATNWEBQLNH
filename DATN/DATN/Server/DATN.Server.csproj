@@ -48,7 +48,10 @@
   <None Update="Data\valid_wifi.txt">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
-    <None Update="Data\message-res.txt">
+  <None Update="Data\message-res.txt">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Update="Data\fee.txt">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
 </ItemGroup>

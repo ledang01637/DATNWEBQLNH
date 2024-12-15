@@ -218,7 +218,7 @@ namespace DATN.Client.Pages.AdminManager
 
                     await _localStorageService.SetDictionaryAsync("tableOrders", tableOrders);
 
-                    var customer = _customerId > 0 ? await GetCustomerById(_customerId) : new Customer();
+                    customer = _customerId > 0 ? await GetCustomerById(_customerId) : new Customer();
 
                     paymentRequests[_numberTable] = new PaymentInfo
                     {
@@ -706,14 +706,12 @@ namespace DATN.Client.Pages.AdminManager
                 return null;
             }
         }
-
-
         private async Task SaveRewarPointes(Order _order)
         {
             IsProcess = true;
             try
             {
-                if (customer != null)
+                if (customer != null && customer.CustomerId > 0)
                 {
                     int newRewardPoints = (int)(_order.TotalAmount / 100000);
 
