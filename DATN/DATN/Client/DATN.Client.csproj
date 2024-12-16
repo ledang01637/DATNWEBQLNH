@@ -32,4 +32,8 @@
     <Folder Include="wwwroot\js\lib\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\landingpage\image-slogan.png" />
+  </ItemGroup>
+
 </Project>
