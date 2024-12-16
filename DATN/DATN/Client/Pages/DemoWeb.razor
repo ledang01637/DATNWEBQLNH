@@ -1,0 +1,427 @@
+﻿@page "/techtitan-landingpage"
+@using DATN.Client.Service
+@inject HttpClient httpClient
+@inject IJSRuntime JS
+@layout InitLayout
+@inject NavigationManager Navigation
+@inject HttpClient httpClient
+@inject LocalStorageService _localStorageService
+
+
+<style>
+    body {
+        background-color: black;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+
+        overflow-y: scroll;
+        scrollbar-width: none;
+    }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+    .highlight-main {
+        color: #ff6600;
+        font-weight: bold;
+    }
+
+    .yellow-text {
+        color: #ffcc00;
+    }
+
+    .food-special-today-box {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+        margin: 10px;
+    }
+
+    .button-custom {
+        background-color: #ff6600;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        text-decoration: none;
+    }
+
+        .button-custom:hover {
+            background-color: #ff4500;
+            color: #fff;
+        }
+
+    .footer {
+        background-color: #333;
+        color: #fff;
+        padding: 20px;
+    }
+
+        .footer a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+
+            .footer a:hover {
+                text-decoration: underline;
+            }
+    /**/
+    .food-special-today-box img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .food-special-today-box {
+        text-align: center;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+        .food-special-today-box img {
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+
+    .name-special-food {
+        font-size: 1.2rem; /* Thay đổi kích thước chữ cho tên sản phẩm */
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .price-special-food {
+        font-size: 1rem;
+        color: #f39c12; /* Màu vàng cho giá */
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .introduce-special-food {
+        font-size: 0.9rem;
+        color: #555;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .button-custom {
+        font-weight: bold;
+        font-size: 1rem;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        display: block;
+        margin: 0 auto; /* Căn giữa nút */
+        text-align: center;
+        width: 100%;
+    }
+</style>
+
+<body class="container-fuild p-0 col-md-12 m-auto">
+    <div class="frame-1 row p-0 m-0 text-center align-items-center">
+        <div class="col-6 p-0 text-start p-2">
+            <h1 class="display-4 lh-base">
+                <span class="text-white">Món </span>
+                <span class="yellow-text">ngon</span>
+                <span class="highlight-main"> MỖI NGÀY</span>
+                <span class="text-white">&</span>
+                <span class="yellow-text"> thèm</span>
+                <span class="highlight-main"> CHẢY DÃI</span>
+            </h1>
+            <p class="text-white">
+                Chúng tôi sẽ chiêu đãi bạn bằng cả tâm hồn và nhiệt huyết.
+            </p>
+        </div>
+        <div class="col-6 p-0">
+            <img src="/landingpage/image-slogan.png" alt="Delicious Food" class="img-fluid" />
+        </div>
+    </div>
+    <div class="frame-2 text-center">
+        <h1 class="display-4 lh-base">
+            <span class="text-white">Món Ăn </span>
+            <span class="highlight-main"> Đặc Biệt</span>
+            <span class="text-white">Ngày</span>
+            <span class="yellow-text"> Hôm Nay</span>
+        </h1>
+        <p class="text-white text-center">Món ăn được chọn lọc từ</p>
+        <p class="text-white text-center">những nguyên liệu tươi ngon nhất.</p>
+        <div class="container mt-5">
+            <div class="col-md-12 row text-white" id="special-foods"></div>
+        </div>
+
+
+        @if (!isLoaded)
+        {
+            <p>Loading...</p>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-danger">@errorMessage</p>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var product in filter)
+                {
+                    <div class="col-md-3 mb-4">
+                        <div class="food-special-today-box border border-0">
+                            <img src="@(GetImageSource(product.ProductImage))"
+                                 alt="@product.ProductName"
+                                 class="img-fluid mb-3 rounded-circle"
+                                 style="width: 100%; object-fit: cover;" />
+
+                            <p class="name-special-food fs-3 highlight-main">@product.ProductName</p>
+                            <p class="price-special-food fs-4 yellow-text">@FormatPrice(product.Price)</p>
+                            <p class="introduce-special-food">@product.ProductDescription</p>
+                            <a href="https://nhahangtechtitans.com/book-table"
+                               class="btn button-custom">Đặt ngay</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+    <div class="frame-3 pt-5 pb-5">
+        <h1 class="display-4 pt-5 lh-base slogan-main-2 text-center">
+            <span class="text-white">Luôn </span>
+            <span class="highlight-main"> Tận Tình</span>
+            <span class="text-white">& Luôn</span>
+            <span class="yellow-text"> Hết Mình</span>
+        </h1>
+        <p class="slogan-sub fw-lighter text-center mx-auto text-white"
+           style="width: 80%">
+            Nhà hàng của chúng tôi là một loại nhà hàng chuyên phục vụ thức ăn và đồ
+            uống, ngoài ra còn có các món ăn nhẹ như bánh ngọt hoặc đồ ăn nhẹ.
+        </p>
+        <div class="col-md-12 row mx-auto text-center mt-3">
+            <div class="text-center">
+                <ul class="text-center" style="list-style: none">
+                    <li style="color: #ffffff; font-size: 30px; font-weight: 500">
+                        Đặt món theo ý
+                        <img src="./figma-to-html/images/v259_19443.png"
+                             style="width: 50px"
+                             alt="" />
+                    </li>
+                    <li style="color: #ffffff; font-size: 30px; font-weight: 500">
+                        Nhiều ưu đãi
+                        <img src="./figma-to-html/images/v259_19445.png"
+                             style="width: 50px"
+                             alt="" />
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <a href="#"
+               class="btn btn-default rounded-5 mt-3"
+               style="
+            background-color: #ff6600 !important;
+            font-size: 30px !important;
+            color: #ffffff !important;
+            width: 230px;
+            height: 65px;
+          ">Về chúng tôi!</a>
+        </div>
+    </div>
+    <div class="frame-4 d-flex flex-column align-items-center">
+        <h1 class="display-4 pt-5 lh-base slogan-main-2 text-center">
+            <span class="highlight-main">Thực Đơn</span>
+            <span class="text-white">Của Chúng Tôi</span>
+            <span class="yellow-text">Sẽ Luôn</span>
+            <span class="text-white">Khiến Bạn</span>
+            <span class="highlight-main">Say Đắm</span>
+        </h1>
+        <br />
+        <div class="menu d-flex flex-wrap justify-content-center m-2">
+            <button class="btn btn-outline-light m-2">Ramen</button>
+            <button class="btn btn-outline-light m-2">Breakfast</button>
+            <button class="btn btn-outline-light m-2">Lunch</button>
+            <button class="btn btn-outline-light m-2">Dinner</button>
+            <button class="btn btn-outline-light m-2">Mexican</button>
+            <button class="btn btn-outline-light m-2">Italian</button>
+            <button class="btn btn-outline-light m-2">Desserts</button>
+            <button class="btn btn-outline-light m-2">Drinks</button>
+        </div>
+
+        <div class="col-md-12 row text-white">
+            <div class="container mt-5">
+                <div class="col-md-12 row text-white" id="special-foods-1"></div>
+            </div>
+        </div>
+
+        @if (!isLoaded)
+        {
+            <p>Loading...</p>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-danger">@errorMessage</p>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var product1 in filter1)
+                {
+                    <div class="col-md-3 mb-4">
+                        <div class="food-special-today-box border border-0">
+                            <img src="@(GetImageSource(product1.ProductImage))"
+                                 alt="@product1.ProductName"
+                                 class="img-fluid mb-3 rounded-circle"
+                                 style="width: 100%; object-fit: cover;" />
+
+                            <p class="name-special-food fs-3 highlight-main">@product1.ProductName</p>
+                            <p class="price-special-food fs-4 yellow-text">@FormatPrice(product1.Price)</p>
+                            <p class="introduce-special-food">@product1.ProductDescription</p>
+                            <a href="https://nhahangtechtitans.com/book-table"
+                               class="btn button-custom">Đặt ngay</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    <div class="footer container-fuild mt-5" style="background-color: gray; padding: 30px 20px">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <h1 style="font-size: 32px; font-weight: bold">Việt Nam Food</h1>
+                <p style="font-size: 15px; line-height: 1.5">
+                    Việt Nam Food kính chúc quý khách ngon miệng
+                </p>
+                <img src="/landingpage/Social_media.png"
+                     alt="Social Media"
+                     style="width: 60%; margin-top: 15px" />
+            </div>
+            <div class="col-md-4 mb-4">
+                <h2 style="font-size: 30px; font-weight: bold; margin-bottom: 15px">
+                    Liên hệ
+                </h2>
+                <p style="font-size: 14px; margin-bottom: 5px">
+                    Địa chỉ: 127 Võ Văn Kiệt, P. An Hòa, Q. Ninh Kiều, TP. Cần Thơ
+                </p>
+                <p style="font-size: 14px; margin-bottom: 5px">
+                    Email: restaurantvietnam@gmail.com
+                </p>
+                <p style="font-size: 14px; margin-bottom: 5px">Phone: 0939 660 295</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 15px">
+                    Theo dõi chúng tôi
+                </h2>
+                <a href="#"
+                   style="
+              text-decoration: none;
+              color: #007bff;
+              font-size: 14px;
+              margin-right: 10px;
+            ">Facebook</a>
+                <a href="#"
+                   style="text-decoration: none; color: #007bff; font-size: 14px">Instagram</a>
+                <form class="mb-5" style="margin-top: 15px">
+                    <label for="email" style="font-size: 14px">Đăng ký nhận tin:</label><br />
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           placeholder="Nhập email của bạn"
+                           style="
+                width: 80%;
+                padding: 10px;
+                margin-top: 10px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+              "
+                           required />
+                    <button type="submit"
+                            style="
+                padding: 10px 20px;
+                margin-top: 10px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+              ">
+                        Gửi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger intent="WELCOME"
+                  chat-title="Service"
+                  agent-id="5810ed83-bdb4-4084-8ba7-c8c55dc158ce"
+                  language-code="vi"></df-messenger>
+</body>
+
+
+@code{
+    private List<DATN.Shared.Product> listProd = new List<DATN.Shared.Product>();
+    private List<DATN.Shared.Unit> listUnit = new List<DATN.Shared.Unit>();
+    private List<DATN.Shared.Category> listCategory = new List<DATN.Shared.Category>();
+    private List<DATN.Shared.Product> filter = new List<DATN.Shared.Product>();
+    private List<DATN.Shared.Product> filter1 = new List<DATN.Shared.Product>();
+    private bool isLoaded = false;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProductsAsync();
+        isLoaded = true;
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        try
+        {
+            listProd = await httpClient.GetFromJsonAsync<List<DATN.Shared.Product>>("api/Product/GetProduct");
+            listUnit = await httpClient.GetFromJsonAsync<List<DATN.Shared.Unit>>("api/Unit/GetUnit");
+            listCategory = await httpClient.GetFromJsonAsync<List<DATN.Shared.Category>>("api/Category/GetCategories");
+
+            // Randomly select 1 to 8 products
+            var random = new Random();
+            int count = random.Next(8, 8);
+            filter = listProd.OrderBy(x => random.Next()).Take(count).ToList();
+
+            var random1 = new Random();
+            int count1 = random.Next(8, 8);
+            filter1 = listProd.OrderBy(x => random1.Next()).Take(count1).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading product: {ex.Message}";
+        }
+    }
+
+    private string GetImageSource(byte[] imageBytes)
+    {
+        if (imageBytes == null || imageBytes.Length == 0)
+        {
+            // Trả về hình ảnh mặc định nếu không có dữ liệu
+            return "https://via.placeholder.com/150";
+        }
+
+        // Chuyển đổi byte[] thành chuỗi base64
+        var base64Image = Convert.ToBase64String(imageBytes);
+        return $"data:image/jpeg;base64,{base64Image}";
+    }
+
+
+
+    private string FormatPrice(decimal price)
+    {
+        return string.Format("{0:N0} VND", price);
+    }
+
+}

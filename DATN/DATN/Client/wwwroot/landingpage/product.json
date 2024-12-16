@@ -1,0 +1,101 @@
+{
+    "specialFoods": [
+      {
+        "id": 1,
+        "name": "Gà Quay Ngũ Vị",
+        "price": "120.000 VND",
+        "description": "Gà quay thơm lừng với hương vị đặc trưng từ 5 loại gia vị",
+        "imageUrl": "Kebab.png",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 2,
+        "name": "Bánh Pizza Hải Sản",
+        "price": "200.000 VND",
+        "description": "Phô mai thơm ngon, topping hải sản tươi sống",
+        "imageUrl": "https://i.pinimg.com/736x/a2/80/82/a28082e148c9678dad60ddd2a50b1474.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 3,
+        "name": "Sushi Nhật Bản",
+        "price": "150.000 VND",
+        "description": "Sushi tươi ngon với nguyên liệu nhập khẩu",
+        "imageUrl": "https://i.pinimg.com/736x/b1/21/41/b121419a4f6e16be30b58364b1b5681c.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 4,
+        "name": "Bánh Mì Heo Quay",
+        "price": "50.000 VND",
+        "description": "Bánh mì giòn tan với nhân thịt heo quay và rau thơm",
+        "imageUrl": "https://i.pinimg.com/736x/5b/ef/69/5bef6908acefd6d439757f8d701ae1d9.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 5,
+        "name": "Phở Truyền Thống",
+        "price": "60.000 VND",
+        "description": "Hương vị đặc trưng phở bò truyền thống Việt Nam",
+        "imageUrl": "https://i.pinimg.com/736x/8c/e5/f8/8ce5f8f6be5bef52542fd1aa5a12aca3.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 6,
+        "name": "Mì Ý Carbonara",
+        "price": "130.000 VND",
+        "description": "Mì Ý sốt kem trứng cùng với thịt xông khói",
+        "imageUrl": "https://i.pinimg.com/736x/02/34/81/02348196d356b6924374dd106323790d.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 7,
+        "name": "Cơm Tấm Sườn",
+        "price": "80.000 VND",
+        "description": "Cơm tấm sườn nướng thơm ngon đậm vị miền Nam",
+        "imageUrl": "https://i.pinimg.com/736x/c6/52/b7/c652b7e1346981f3fff5209cc070aba7.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 8,
+        "name": "Salad trộn Hy Lạp",
+        "price": "70.000 VND",
+        "description": "Salad tươi mát với ô liu, feta và rau củ quả",
+        "imageUrl": "https://i.pinimg.com/736x/c1/16/46/c11646a428c4232d0e62aacaefd2c91b.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 9,
+        "name": "Thịt Bò Bít Tết",
+        "price": "250.000 VND",
+        "description": "Bò bít tết mềm mịn cùng sốt tiêu đen đậm đà",
+        "imageUrl": "https://i.pinimg.com/736x/94/65/0e/94650e966b4217f20036db4b55464e12.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 10,
+        "name": "Tôm Hùm Nướng",
+        "price": "500.000 VND",
+        "description": "Tôm hùm nướng bơ tỏi thơm lừng, hấp dẫn",
+        "imageUrl": "https://i.pinimg.com/736x/71/65/95/716595e7649e0867fe7f766265629ef9.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 11,
+        "name": "Lẩu Thái Hải Sản",
+        "price": "300.000 VND",
+        "description": "Lẩu thái cay nồng với hải sản tươi sống hương vị chua cay",
+        "imageUrl": "https://i.pinimg.com/736x/92/d3/e7/92d3e7d674f2fbc2ffd523889d56cfd3.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      },
+      {
+        "id": 12,
+        "name": "Bánh Xèo Miền Tây",
+        "price": "35.000 VND",
+        "description": "Bánh xèo giòn rụm, nhân tôm thịt, rau sống và nước mắm chua ngọt",
+        "imageUrl": "https://i.pinimg.com/736x/68/f6/4e/68f64e148a89d6ddb8293f2b1aacaad7.jpg",
+        "orderLink": "https://nhahangtechtitans.com/book-table"
+      }
+    ]
+  }
+  

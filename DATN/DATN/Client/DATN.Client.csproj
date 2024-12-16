@@ -41,6 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\landingpage\image-slogan.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\css\AdminStatistic.css" />
   </ItemGroup>
 
