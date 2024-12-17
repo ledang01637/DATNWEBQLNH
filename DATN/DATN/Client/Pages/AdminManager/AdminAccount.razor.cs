@@ -154,12 +154,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditAccount(int accountId)
         {
-            Navigation.NavigateTo($"/editaccount/{accountId}");
+            Navigation.NavigateTo($"/admin/editaccount/{accountId}");
         }
 
         private void CreateAccount()
         {
-            Navigation.NavigateTo($"/createaccount");
+            Navigation.NavigateTo($"/admin/createaccount");
         }
 
         private void FilterAccount(ChangeEventArgs e)

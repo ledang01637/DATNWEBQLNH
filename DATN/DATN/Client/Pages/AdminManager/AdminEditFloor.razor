@@ -1,5 +1,4 @@
-
-@page "/editfloor/{FloorId:int}"
+@page "/admin/editfloor/{FloorId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -99,7 +98,7 @@
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminunit");
+                Navigation.NavigateTo("/admin/adminunit");
             }
             else
             {

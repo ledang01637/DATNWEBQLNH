@@ -39,12 +39,12 @@ namespace DATN.Client.Pages
 
                     if (responseVnPay.OrderDescription == "Thanh toán hóa đơn")
                     {
-                        Navigation.NavigateTo("/food-ordered");
+                        Navigation.NavigateTo("/internal/food-ordered");
                         return;
                     }
                     else
                     {
-                        Navigation.NavigateTo("/book-table");
+                        Navigation.NavigateTo("/internal/book-table");
                         return;
                     }
 

@@ -77,12 +77,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditCategory(int categoryId)
         {
-            Navigation.NavigateTo($"/editcategory/{categoryId}");
+            Navigation.NavigateTo($"/admin/editcategory/{categoryId}");
         }
 
         private void CreateCategory()
         {
-            Navigation.NavigateTo($"/createcategory");
+            Navigation.NavigateTo($"/admin/createcategory");
         }
 
         private void FilterCategories(ChangeEventArgs e)

@@ -1,4 +1,4 @@
-﻿@page "/editcategory/{CategoryId:int}"
+﻿@page "/admin/editcategory/{CategoryId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -105,7 +105,7 @@
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/admincategory");
+                Navigation.NavigateTo("/admin/admincategory");
             }
             else
             {

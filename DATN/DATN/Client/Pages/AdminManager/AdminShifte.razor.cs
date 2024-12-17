@@ -101,11 +101,11 @@ namespace DATN.Client.Pages.AdminManager
         }
         private void EditShifte(int shifteId)
         {
-            Navigation.NavigateTo($"/editshifte/{shifteId}");
+            Navigation.NavigateTo($"/admin/editshifte/{shifteId}");
         }
         private void CreateShifte()
         {
-            Navigation.NavigateTo($"/createshifte");
+            Navigation.NavigateTo($"/admin/createshifte");
         }
 
         //employeeshifte
@@ -147,11 +147,11 @@ namespace DATN.Client.Pages.AdminManager
         }
         private void EditEmployeeShifte(int employeeShifteId)
         {
-            Navigation.NavigateTo($"/editemployeeShifte/{employeeShifteId}");
+            Navigation.NavigateTo($"/admin/editemployeeShifte/{employeeShifteId}");
         }
         private void CreateEmployeeShifte()
         {
-            Navigation.NavigateTo($"/createemployeeShifte");
+            Navigation.NavigateTo($"/admin/createemployeeShifte");
         }
 
 

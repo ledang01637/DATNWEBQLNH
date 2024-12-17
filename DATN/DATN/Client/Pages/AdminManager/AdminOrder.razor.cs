@@ -97,12 +97,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditOrder(int orderId)
         {
-            Navigation.NavigateTo($"/editorder/{orderId}");
+            Navigation.NavigateTo($"/admin/editorder/{orderId}");
         }
 
         private void CreateOrder()
         {
-            Navigation.NavigateTo($"/createorder");
+            Navigation.NavigateTo($"/admin/createorder");
         }
 
         private void Filter(ChangeEventArgs e)
@@ -149,12 +149,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditOrderItem(int orderitemId)
         {
-            Navigation.NavigateTo($"/editorderitem/{orderitemId}");
+            Navigation.NavigateTo($"/admin/editorderitem/{orderitemId}");
         }
 
         private void CreateOrderItem()
         {
-            Navigation.NavigateTo($"/createorderitem");
+            Navigation.NavigateTo($"/admin/createorderitem");
         }
 
         private void FilterOrderItem(ChangeEventArgs e)

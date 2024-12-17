@@ -1,4 +1,4 @@
-﻿@page "/createmenu"
+﻿@page "/admin/createmenu"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -88,7 +88,7 @@
                 successMessage = "Success";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminmenu");
+                Navigation.NavigateTo("/admin/adminmenu");
             }
             else
             {

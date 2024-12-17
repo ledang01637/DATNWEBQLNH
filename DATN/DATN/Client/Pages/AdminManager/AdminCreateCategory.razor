@@ -1,4 +1,4 @@
-﻿@page "/createcategory"
+﻿@page "/admin/createcategory"
 
 
 @using DATN.Shared
@@ -83,20 +83,20 @@
             {
                 successMessage = "Thêm thành công!";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/admincategory");
+                Navigation.NavigateTo("/admin/admincategory");
                 await JS.InvokeVoidAsync("showAlert","success", "Thành Công");
                 StateHasChanged();
             }
             else
             {
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
-                Navigation.NavigateTo("/admincategory");
+                Navigation.NavigateTo("/admin/admincategory");
             }
         }
         catch (Exception ex)
         {
             await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
-            Navigation.NavigateTo("/admincategory");
+            Navigation.NavigateTo("/admin/admincategory");
         }
     }
 

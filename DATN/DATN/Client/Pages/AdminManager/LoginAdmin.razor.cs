@@ -71,15 +71,15 @@ namespace DATN.Client.Pages.AdminManager
                             await JS.InvokeVoidAsync("showAlert", "success", "Thành công");
                             if (user.Identity.IsAuthenticated && (user.IsInRole("admin")))
                             {
-                                Navigation.NavigateTo("/Statistic", true);
+                                Navigation.NavigateTo("/admin/Statistic", true);
                             }
                             else if(user.Identity.IsAuthenticated && (user.IsInRole("chef")))
                             {
-                                Navigation.NavigateTo("/manager-chef", true);
+                                Navigation.NavigateTo("/employee/manager-chef", true);
                             }
                             else
                             {
-                                Navigation.NavigateTo("/manager", true);
+                                Navigation.NavigateTo("/employee/manager", true);
                             }
                         }
                         else

@@ -1,4 +1,4 @@
-﻿@page "/createfloor"
+﻿@page "/admin/createfloor"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -75,7 +75,7 @@
             {
                 successMessage = "Success";
                 errorMessage = string.Empty;
-                Navigation.NavigateTo("/adminunit");
+                Navigation.NavigateTo("/admin/adminunit");
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
             }
             else

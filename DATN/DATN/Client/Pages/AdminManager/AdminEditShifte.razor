@@ -1,5 +1,4 @@
-
-@page "/editshifte/{ShifteId:int}"
+@page "/admin/editshifte/{ShifteId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -213,7 +212,7 @@
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminshifte");
+                Navigation.NavigateTo("/admin/adminshifte");
             }
             else
             {

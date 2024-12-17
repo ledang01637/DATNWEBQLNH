@@ -1,4 +1,4 @@
-﻿@page "/editemployee/{employeeId:int}"
+﻿@page "/admin/editemployee/{employeeId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -175,7 +175,7 @@
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminemployee");
+                Navigation.NavigateTo("/admin/adminemployee");
             }
             else
             {

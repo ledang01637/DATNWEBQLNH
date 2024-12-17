@@ -1,4 +1,4 @@
-﻿@page "/createemployee"
+﻿@page "/admin/createemployee"
 @using DATN.Shared
 @using System.Text.RegularExpressions
 @layout LayoutAdmin
@@ -206,6 +206,6 @@
             successMessage = string.Empty;
             await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
-        Navigation.NavigateTo("/adminemployee");
+        Navigation.NavigateTo("/admin/adminemployee");
     }
 }

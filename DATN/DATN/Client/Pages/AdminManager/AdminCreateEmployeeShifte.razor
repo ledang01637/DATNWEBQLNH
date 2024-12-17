@@ -1,4 +1,4 @@
-﻿@page "/createemployeeshifte"
+﻿@page "/admin/createemployeeshifte"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -105,7 +105,7 @@
             successMessage = string.Empty;
             await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Thất Bại");
         }
-        Navigation.NavigateTo("/adminshifte");
+        Navigation.NavigateTo("/admin/adminshifte");
         StateHasChanged();
 
 

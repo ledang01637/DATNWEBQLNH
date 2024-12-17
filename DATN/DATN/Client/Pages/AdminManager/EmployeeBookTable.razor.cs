@@ -91,7 +91,7 @@ namespace DATN.Client.Pages.AdminManager
 
                     }
                     await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đặt bàn thành công");
-                    Navigation.NavigateTo("/manager", true);
+                    Navigation.NavigateTo("/employee/manager", true);
                 }
             }
             catch (Exception ex)

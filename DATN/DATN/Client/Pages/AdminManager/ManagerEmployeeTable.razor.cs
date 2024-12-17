@@ -62,7 +62,7 @@ namespace DATN.Client.Pages.AdminManager
         private bool IsProcess = false;
         private bool IsProcessOrder = false;
         private bool FirstLoad = false;
-        private readonly string urlBookTable = "/employee-book-table";
+        private readonly string urlBookTable = "/employee/employee-book-table";
 
 
         protected override async Task OnInitializedAsync()
@@ -279,7 +279,7 @@ namespace DATN.Client.Pages.AdminManager
                     {
                         await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng đăng nhập bằng tài khoản nhân viên hoặc thêm nhân viên mới");
                         await Task.Delay(1000);
-                        Navigation.NavigateTo("/login-admin");
+                        Navigation.NavigateTo("/admin/login-admin");
                         return;
                     }
                 }
@@ -957,7 +957,7 @@ namespace DATN.Client.Pages.AdminManager
                         else
                         {
                             await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng đăng nhập lại");
-                            Navigation.NavigateTo("/login-admin");
+                            Navigation.NavigateTo("/admin/login-admin");
                         }
                     }
                 }

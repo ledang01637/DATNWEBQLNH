@@ -81,12 +81,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditProduct(int productId)
         {
-            Navigation.NavigateTo($"/editproduct/{productId}");
+            Navigation.NavigateTo($"/admin/editproduct/{productId}");
         }
 
         private void CreateProduct()
         {
-            Navigation.NavigateTo($"/createproduct");
+            Navigation.NavigateTo($"/admin/createproduct");
         }
 
         private void Filter(ChangeEventArgs e)

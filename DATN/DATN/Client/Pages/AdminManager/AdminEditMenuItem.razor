@@ -1,5 +1,4 @@
-
-@page "/editmenuitem/{MenuItemId:int}"
+@page "/admin/editmenuitem/{MenuItemId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -125,7 +124,7 @@
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminmenu");
+                Navigation.NavigateTo("/admin/adminmenu");
             }
             else
             {

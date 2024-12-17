@@ -1,5 +1,4 @@
-
-@page "/editvoucher/{VoucherId:int}"
+@page "/admin/editvoucher/{VoucherId:int}"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -119,7 +118,7 @@
                 successMessage = "Cập nhật thành công!";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminvoucher");
+                Navigation.NavigateTo("/admin/adminvoucher");
             }
             else
             {

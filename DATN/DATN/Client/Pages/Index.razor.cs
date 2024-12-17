@@ -391,12 +391,12 @@ namespace DATN.Client.Pages
             {
                 ListCartDTO.Note = note;
             }
-            Navigation.NavigateTo("/order-list");
+            Navigation.NavigateTo("/internal/order-list");
         }
         private async void NaviCustomer()
         {
             await _localStorageService.GetItemAsync("n");
-            Navigation.NavigateTo("/customer");
+            Navigation.NavigateTo("/internal/customer");
 
         }
 

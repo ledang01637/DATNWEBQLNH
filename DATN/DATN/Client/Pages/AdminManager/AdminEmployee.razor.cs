@@ -77,12 +77,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditEmployee(int employeeId)
         {
-            Navigation.NavigateTo($"/editemployee/{employeeId}");
+            Navigation.NavigateTo($"/admin/editemployee/{employeeId}");
         }
 
         private void CreateEmployee()
         {
-            Navigation.NavigateTo("/createemployee");
+            Navigation.NavigateTo("/admin/createemployee");
         }
 
         private void FilterEmployee(ChangeEventArgs e)

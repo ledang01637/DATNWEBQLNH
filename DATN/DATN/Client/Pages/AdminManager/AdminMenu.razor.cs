@@ -85,12 +85,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditMenu(int menuId)
         {
-            Navigation.NavigateTo($"/editmenu/{menuId}");
+            Navigation.NavigateTo($"/admin/editmenu/{menuId}");
         }
 
         private void CreateMenu()
         {
-            Navigation.NavigateTo($"/createmenu");
+            Navigation.NavigateTo($"/admin/createmenu");
         }
 
         private void Filter(ChangeEventArgs e)

@@ -184,7 +184,7 @@ namespace DATN.Client.Pages.AdminManager
             }
             tablesChanges.Clear();
             isMoveTable = false;
-            Navigation.NavigateTo("edittable", true);
+            Navigation.NavigateTo(Navigation.Uri, true);
         }
 
         [JSInvokable("MoveFloor")]

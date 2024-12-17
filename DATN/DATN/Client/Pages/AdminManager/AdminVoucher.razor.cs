@@ -79,12 +79,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditVoucher(int voucherId)
         {
-            Navigation.NavigateTo($"/editvoucher/{voucherId}");
+            Navigation.NavigateTo($"/admin/editvoucher/{voucherId}");
         }
 
         private void CreateVoucher()
         {
-            Navigation.NavigateTo($"/createvoucher");
+            Navigation.NavigateTo($"/admin/createvoucher");
         }
 
         private void Filter(ChangeEventArgs e)

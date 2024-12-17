@@ -1,4 +1,4 @@
-﻿@page "/createorder"
+﻿@page "/admin/createorder"
 @using DATN.Shared
 @layout LayoutAdmin
 @inject HttpClient httpClient
@@ -244,7 +244,7 @@
                 successMessage = "Success";
                 errorMessage = string.Empty;
                 await JS.InvokeVoidAsync("showAlert", "success", "Thành Công");
-                Navigation.NavigateTo("/adminorder");
+                Navigation.NavigateTo("/admin/adminorder");
             }
             else
             {

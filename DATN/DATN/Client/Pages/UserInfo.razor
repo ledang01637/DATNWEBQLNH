@@ -1,4 +1,4 @@
-﻿@page "/userinfo"
+﻿@page "/internal/userinfo"
 @layout MainLayout
 @inject HttpClient httpClient
 @inject LocalStorageService _localStorageService
@@ -19,11 +19,11 @@
     </div>
 
     <ul class="menu-list">
-        <li><a href="personalinformation">Thông tin cá nhân <span>></span></a></li>
-        <li><a href="passwordchange">Đổi mật khẩu <span>></span></a></li>
-        <li><a href="connnectbank">Liên kết ngân hàng <span>></span></a></li>
+        <li><a href="/internal/personalinformation">Thông tin cá nhân <span>></span></a></li>
+        <li><a href="/internal/passwordchange">Đổi mật khẩu <span>></span></a></li>
+        <li><a href="/internal/connnectbank">Liên kết ngân hàng <span>></span></a></li>
         <li><a @onclick="() => Naviga(urlAccumulated)">Đổi điểm tích lũy <span>></span></a></li>
-        <li><a href="purchasehistory">Lịch sử mua hàng <span>></span></a></li>
+        <li><a href="/internal/purchasehistory">Lịch sử mua hàng <span>></span></a></li>
     </ul>
 
     <button class="logout-btn bg-dark border-dark shadow" @onclick="Logout">Đăng xuất</button>

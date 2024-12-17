@@ -55,7 +55,7 @@ namespace DATN.Client.Shared
         {
             isShow = isCheck;
             string query = "?isCheckBookTable="+ isCheck;
-            Navigation.NavigateTo("/manager" + query,true);
+            Navigation.NavigateTo("/employee/manager" + query,true);
         }
 
         private void Logout()
