@@ -1,4 +1,5 @@
 ﻿using DATN.Shared;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -12,6 +13,11 @@ namespace DATN.Client.Shared
         private bool isAcceptWifi;
         private string errorMessage;
         private bool isLoading;
+        public string name { get; set; } = string.Empty;
+
+        EventCallback<string> even_callback => EventCallback.Factory.Create(this, (Action<string>)NontifyLayoutWithDataCustomerName);
+
+
 
         protected override async Task OnInitializedAsync()
         {
@@ -37,6 +43,17 @@ namespace DATN.Client.Shared
                 isLoading = false;
             }
         }
+
+        public void NontifyLayoutWithDataCustomerName(string  _name)
+        {
+            string[] nameParts = _name.Split(' ');
+
+            string lastName = nameParts[nameParts.Length - 1];
+
+            name = lastName;
+        }
+
     }
+
 
 }

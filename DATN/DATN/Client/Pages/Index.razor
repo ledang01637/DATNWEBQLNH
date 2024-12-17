@@ -9,176 +9,190 @@
 
 
 
-<section class="food_section">
-    <div class="container foodcustom">
-        <div class="mb-2 ">
-            <div id="carouselFade" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    @if (menus == null)
-                    {
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    }
-                    else if (!menus.Any())
-                    {
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        @for (int i = 0; i < menus.Count; i += 2)
+@if (isProcessing)
+{
+    <div class="layout-rain">
+        <div class="bubbles" id="bubbles">
+            <img src="images/shipper.png" class="shipper" alt="">
+        </div>
+    </div>
+}
+else
+{
+    <section class="food_section">
+        <div class="container foodcustom">
+            <div class="mb-2 ">
+                <div id="carouselFade" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @if (menus == null)
                         {
-                            <div class="carousel-item @((i == 0) ? "active" : "")">
-                                <div class="row">
-                                    @for (int j = i; j < i + 2 && j < menus.Count; j++)
-                                    {
-                                        var colors = new List<string> { "#fff7d9", "#53ccec", "#fff3f1", "#ffecb6", "#e2f1a0", "#c2e0f4,#e9d1d1" };
-                                        var random = new Random();
-                                        string currentColor = colors[random.Next(colors.Count)];
-
-                                        var menu = menus[j];
-                                        <div class="col-6">
-                                            <a @onclick="() => LoadCombo(menu.MenuId)" class="card text-center shadow-sm overflow-hidden" style="background: @currentColor; cursor: pointer;">
-                                                <div class="image-container">
-                                                    <img src="/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="@menu.MenuName">
-                                                    <div class="overlay">
-                                                        <p class="card-title">@menu.MenuName</p>
-                                                        <span class="p-1 text-danger">@menu.PriceCombo.ToString("###,0##")đ</span>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    }
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
                         }
-                    }
-                </div>
+                        else if (!menus.Any())
+                        {
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            @for (int i = 0; i < menus.Count; i += 2)
+                            {
+                                <div class="carousel-item @((i == 0) ? "active" : "")">
+                                    <div class="row">
+                                        @for (int j = i; j < i + 2 && j < menus.Count; j++)
+                                        {
+                                            var colors = new List<string> { "#fff7d9", "#53ccec", "#fff3f1", "#ffecb6", "#e2f1a0", "#c2e0f4,#e9d1d1" };
+                                            var random = new Random();
+                                            string currentColor = colors[random.Next(colors.Count)];
 
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselFade" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselFade" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="heading_container heading_center">
-            <h2 class="header_custom">
-                Our Menu
-            </h2>
-        </div>
-
-        <ul class="filters_menu">
-            <li class="active" data-filter="*">All</li>
-            @if (categories == null)
-            {
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            }
-            else
-            {
-                foreach (var c in categories)
-                {
-                    <li data-filter=".@c.CategoryId">@c.CategoryName</li>
-                }
-            }
-        </ul>
-
-        <div class="row mb-2">
-            @if (!String.IsNullOrEmpty(ComboName))
-            {
-                <div class="col-6 col-lg-6 text-start fw-bold">
-                    @ComboName
-                </div>
-            }
-            else
-            {
-                <div class="col-lg-6 col-6 text-start fw-bold">
-                    Món ăn
-                </div>
-            }
-            <div class="col-lg-6 text-end ">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm..." />
-                </div>
-            </div>
-        </div>
-
-        <div class="filters-content">
-            <div class="row grid position-relative">
-                @if (products == null || isProcessing)
-                {
-                    <div class="position-absolute top-50 start-50 translate-middle">
-                        <div class="spinner-border spinner-border-sm" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                                            var menu = menus[j];
+                                            <div class="col-6">
+                                                <a @onclick="() => LoadCombo(menu.MenuId)" class="card text-center shadow-sm overflow-hidden" style="background: @currentColor; cursor: pointer;">
+                                                    <div class="image-container">
+                                                        <img src="/images/hinhanh/hambuger.png" class="card-img-top img-fluid" alt="@menu.MenuName">
+                                                        <div class="overlay">
+                                                            <p class="card-title">@menu.MenuName</p>
+                                                            <span class="p-1 text-danger">@menu.PriceCombo.ToString("###,0##")đ</span>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
                     </div>
-                }else if(!isProcessing && products.Count == 0)
+
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselFade" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselFade" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="heading_container heading_center">
+                <h2 class="header_custom">
+                    Our Menu
+                </h2>
+            </div>
+
+            <ul class="filters_menu">
+                <li class="active" data-filter="*">All</li>
+                @if (categories == null)
                 {
-                    <div class="position-absolute top-50 start-50 translate-middle">
-                        <h1 class="text-center">Không có sản phẩm</h1>
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
                 }
                 else
                 {
-
-                    foreach (var p in products)
+                    foreach (var c in categories)
                     {
-                        <div class="col-sm-6 col-md-4 all @(p.CategoryId) mb-4">
-                            <div class="box">
-                                <div class="img-box">
-                                    <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="Image">
-                                </div>
-                                <div class="detail-box">
-                                    <h5>
-                                        @p.ProductName
-                                    </h5>
-                                    <p style="display: @(p.ProductDescription == null ? "none" : "block")">@p.ProductDescription</p>
-                                    <div class="options d-flex justify-content-between align-items-center">
-                                        <h6>
-                                            @p.Price.ToString("###,0##") đ
-                                        </h6>
-                                        <a @onclick="() => AddToCart(p)" class="nav-link btn">
-                                            <i class="fa-solid fa-plus"></i>
-                                        </a>
-                                    </div>
-                                </div>
+                        <li data-filter=".@c.CategoryId">@c.CategoryName</li>
+                    }
+                }
+            </ul>
+
+            <div class="row mb-2">
+                @if (!String.IsNullOrEmpty(ComboName))
+                {
+                    <div class="col-6 col-lg-6 text-start fw-bold">
+                        @ComboName
+                    </div>
+                }
+                else
+                {
+                    <div class="col-lg-6 col-6 text-start fw-bold">
+                        Món ăn
+                    </div>
+                }
+                <div class="col-lg-6 text-end ">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchIndex" class="form-control border-start-0" placeholder="Tìm kiếm..." />
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters-content">
+                <div class="row grid position-relative">
+                    @if (products == null || isProcessing)
+                    {
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
                     }
-                }
+                    else if (!isProcessing && products.Count == 0)
+                    {
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <h1 class="text-center">Không có sản phẩm</h1>
+                        </div>
+                    }
+                    else
+                    {
 
+                        foreach (var p in products)
+                        {
+                            <div class="col-sm-6 col-md-4 all @(p.CategoryId) mb-4">
+                                <div class="box">
+                                    <div class="img-box">
+                                        <img src="data:image/png;base64,@Convert.ToBase64String(p.ProductImage)" alt="Image">
+                                    </div>
+                                    <div class="detail-box">
+                                        <h5>
+                                            @p.ProductName
+                                        </h5>
+                                        <p style="display: @(p.ProductDescription == null ? "none" : "block")">@p.ProductDescription</p>
+                                        <div class="options d-flex justify-content-between align-items-center">
+                                            <h6>
+                                                @p.Price.ToString("###,0##") đ
+                                            </h6>
+                                            <a @onclick="() => AddToCart(p)" class="nav-link btn">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                </div>
             </div>
         </div>
-    </div>
-    @if (carts != null && carts.Count > 0)
-    {
-        <div class="cart-footer fixed-bottom">
-            <div class="cart-icon" data-bs-toggle="modal" data-bs-target="#cartModal">
-                <i class="fas fa-shopping-cart fa-2x"></i>
-                <span class="badge bg-danger">@TotalQuantity</span>
+        @if (carts != null && carts.Count > 0)
+        {
+            <div class="cart-footer fixed-bottom">
+                <div class="cart-icon" data-bs-toggle="modal" data-bs-target="#cartModal">
+                    <i class="fas fa-shopping-cart fa-2x"></i>
+                    <span class="badge bg-danger">@TotalQuantity</span>
+                </div>
+                <div class="total-price text-secondary">@TotalAmount.ToString("N0") VND</div>
+                <button class="checkout-btn" @onclick="NaviOrderList">Đặt món</button>
             </div>
-            <div class="total-price text-secondary">@TotalAmount.ToString("N0") VND</div>
-            <button class="checkout-btn" @onclick="NaviOrderList">Đặt món</button>
-        </div>
-    }
+        }
 
-</section>
+    </section>
+}
+
+
 
 <button id="callButtonIndex" class="call-button">
     <i class="fa-solid fa-user"></i>
@@ -311,6 +325,41 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" @onclick="RemoveAllCarts">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal customer data -->
+
+<div class="modal fade" id="CustomerDataModal" tabindex="-1" aria-labelledby="CustomerDataModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="card p-3">
+                        <h5 class="mb-4 text-center">Khách hàng vui lòng nhập thông tin để tiện trao đổi</h5>
+                        <EditForm Model="@dataCustomerModal" OnValidSubmit="OnSubmitForm">
+                            <DataAnnotationsValidator />
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <InputText type="tel" id="phone" class="form-control" @bind-Value="dataCustomerModal.PhoneNumber" placeholder="Nhập số điện thoại" />
+                                <ValidationMessage For="@(() => dataCustomerModal.PhoneNumber)" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Tên liên hệ <span class="text-danger">*</span></label>
+                                <InputText id="name" class="form-control" @bind-Value="dataCustomerModal.Name" placeholder=" Nhập tên liên hệ" />
+                                <ValidationMessage For="@(() => dataCustomerModal.Name)" />
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                Tiếp tục
+                            </button>
+                        </EditForm>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
