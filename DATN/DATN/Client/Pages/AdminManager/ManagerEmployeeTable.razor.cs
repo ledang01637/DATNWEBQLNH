@@ -61,6 +61,7 @@ namespace DATN.Client.Pages.AdminManager
         private int numberSeatBookTable = 0;
         private bool IsProcess = false;
         private bool IsProcessOrder = false;
+        private bool FirstLoad = false;
         private readonly string urlBookTable = "/employee-book-table";
 
 

@@ -1,4 +1,5 @@
 ﻿using DATN.Client.Service;
+using DATN.Client.Shared;
 using DATN.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -22,8 +24,15 @@ namespace DATN.Client.Pages
         private List<MenuItem> menuItems = new();
         private List<Account> accounts = new();
         private List<Cart> carts = new();
+        private DataCustomer dataCustomerModal = new();
         private readonly LoginRequest loginUser = new();
         private HubConnection hubConnection;
+
+        [CascadingParameter]
+        public EventCallback<string> notifyLayout {  get; set; }
+        public string dataCustomerName { get; set; }
+
+
         private string ComboName;
         private int TotalQuantity;
         private decimal TotalAmount;
@@ -43,12 +52,123 @@ namespace DATN.Client.Pages
             await UpdateCartTotals();
             await LoadProductsAndCategories();
             await JS.InvokeVoidAsync("initializeIsotope");
+            await LoadDataCustomer();
         }
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
                 await JS.InvokeVoidAsync("initScrollToTop");
+            }
+        }
+
+
+        private async Task LoadDataCustomer()
+        {
+            var localDataCustomer = await _localStorageService.GetAsync<DataCustomer>("dataCustomer");
+
+            if (localDataCustomer == null)
+            {
+                await JS.InvokeVoidAsync("showModal", "CustomerDataModal");
+                return;
+            }
+
+            try
+            {
+                var listData = await httpClient.GetFromJsonAsync<List<DataCustomer>>("api/DataCustomer/list");
+
+                if (listData != null && listData.Count > 0)
+                {
+                    foreach (var d in listData)
+                    {
+                        if (d.CustomerGUID == localDataCustomer.CustomerGUID || (d.Name == localDataCustomer.Name && d.PhoneNumber == localDataCustomer.PhoneNumber))
+                        {
+                            //Truyền qua layout
+                            dataCustomerName = d.Name;
+                            _ = notifyLayout.InvokeAsync(dataCustomerName);
+                            return;
+                        }
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Dữ liệu khách hàng không hợp lệ.");
+            }
+ 
+        }
+
+        private async Task OnSubmitForm()
+        {
+            dataCustomerModal.OrderIDs = new();
+
+            var data = await VerifyAndSyncDataCustomer(dataCustomerModal.PhoneNumber);
+
+            if(data != null)
+            {
+                await _localStorageService.SetAsync("dataCustomer", data);
+                await JS.InvokeVoidAsync("closeModal", "CustomerDataModal");
+                await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Thành công");
+                await LoadDataCustomer();
+                return;
+            }
+
+            var localData = await _localStorageService.GetAsync<DataCustomer>("dataCustomer");
+
+            if (localData != null)
+            {
+                var response = await httpClient.PostAsJsonAsync("api/DataCustomer/save", dataCustomerModal);
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", content);
+                    return;
+                }
+
+                await _localStorageService.SetItemAsync("dataCustomer", content);
+            }
+            else
+            {
+
+                var listData = await httpClient.GetFromJsonAsync<List<DataCustomer>>("api/DataCustomer/list");
+
+                if (listData != null && listData.Any(d => d.CustomerGUID == localData.CustomerGUID))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Khách hàng đã tồn tại.");
+                    return;
+                }
+
+                var response = await httpClient.PostAsJsonAsync("api/DataCustomer/save", dataCustomerModal);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", content);
+                    return;
+                }
+
+                await _localStorageService.SetItemAsync("dataCustomer", content);
+            }
+
+            await JS.InvokeVoidAsync("closeModal", "CustomerDataModal");
+            await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Thành công");
+            await LoadDataCustomer();
+        }
+
+        private async Task<DataCustomer> VerifyAndSyncDataCustomer(string phoneNumber)
+        {
+            try
+            {
+                var customerData = await httpClient.GetFromJsonAsync<DataCustomer>($"api/DataCustomer/getbyphone?phone={phoneNumber}");
+
+                return customerData;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Lỗi khi kiểm tra khách hàng: {ex.Message}");
+                return null;
             }
         }
 
@@ -157,7 +277,6 @@ namespace DATN.Client.Pages
             isProcessing = false;
             StateHasChanged();
         }
-
 
         private async Task AddToCart(Product product)
         {
