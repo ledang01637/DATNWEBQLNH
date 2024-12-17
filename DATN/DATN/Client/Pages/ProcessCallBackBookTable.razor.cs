@@ -96,7 +96,7 @@ namespace DATN.Client.Pages
             }
 
             await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Đặt bàn thành công");
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/techtitan-landingpage");
             return;
         }
         private async Task ProcessPayment()
