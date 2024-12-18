@@ -367,7 +367,7 @@ namespace DATN.Client.Pages
         private void PrepareOrderForPayment()
         {
             order.PaymentMethod = (payMenthod == 'c') ? "Tiền mặt" : "Chuyển khoản";
-            order.Status = (payMenthod == 'c') ? "unconfirmed" : "unpaid";
+            order.Status = (payMenthod == 'c') ? "unpaid" : "unConfirmed";
             if (voucher != null && voucher.VoucherId > 0)
             {
                 order.CustomerVoucherId = customerVoucher.CustomerVoucherId;

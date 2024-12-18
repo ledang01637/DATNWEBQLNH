@@ -165,6 +165,7 @@ namespace DATN.Client.Pages
                 catch
                 {
                     await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật hóa đơn");
+                    return;
                 }
                 finally
                 {
@@ -260,10 +261,9 @@ namespace DATN.Client.Pages
             customer = await GetCustomer("no account");
             if(customer == null) { await JS.InvokeVoidAsync("showAlert","error","Lỗi","Không tìm thấy khách hàng"); return; }
 
-            //order = await GetProcessingOrderForTable(table.TableId, "processing");
             order = await GetProcessingOrderForTable(table.TableId, "unpaid");
 
-            if(order.OrderId == 0)
+            if (order.OrderId == 0)
             {
                 order = new Order
                 {
@@ -296,7 +296,7 @@ namespace DATN.Client.Pages
                 return;
             }
           
-            order = await GetProcessingOrderForTable(table.TableId, "processing");
+            order = await GetProcessingOrderForTable(table.TableId, "unpaid");
             
             if(order.OrderId == 0)
             {
@@ -359,10 +359,11 @@ namespace DATN.Client.Pages
         }
         private async Task SaveOrder(Order _order)
         {
-            if (order != null && order.Status == "processing")
+            //Employee unpaid
+            if (_order != null && _order.Status == "unpaid")
             {
-                order.TotalAmount += Total;
-                var updateOrder  = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
+                _order.TotalAmount += Total;
+                var updateOrder  = await httpClient.PutAsJsonAsync($"api/Order/{_order.OrderId}", _order);
                 isSaveOrder = true;
                 if (!updateOrder.IsSuccessStatusCode)
                 {

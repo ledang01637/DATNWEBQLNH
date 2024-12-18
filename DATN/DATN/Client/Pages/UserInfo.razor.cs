@@ -12,7 +12,7 @@ namespace DATN.Client.Pages
     public partial class UserInfo
     {
         private Customer customer = new();
-        private string urlAccumulated = "/internal/accumulatedpoints";
+        private const string urlAccumulated = "/internal/accumulatedpoints";
         protected override async Task OnInitializedAsync()
         {
             var accountType = await CheckTypeAccount();

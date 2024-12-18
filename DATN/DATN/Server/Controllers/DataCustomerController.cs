@@ -41,6 +41,11 @@ namespace DATN.Server.Controllers
                     .Select(DecryptDataCustomer)
                     .ToList();
 
+                if (string.IsNullOrWhiteSpace(dataCustomer.PhoneNumber))
+                {
+                    return BadRequest("Số điện thoại không được để trống.");
+                }
+
                 if (dataCustomerList.Any(c => c.PhoneNumber == dataCustomer.PhoneNumber))
                 {
                     return BadRequest("Số điện thoại đã tồn tại.");
@@ -94,7 +99,7 @@ namespace DATN.Server.Controllers
         }
 
         [HttpGet("getbyphone")]
-        public IActionResult GetCustomerByPhone([FromQuery] string phone)
+        public IActionResult GetCustomerByPhone([FromQuery] string phone, [FromQuery] string name)
         {
             try
             {
@@ -103,12 +108,19 @@ namespace DATN.Server.Controllers
                     return NotFound("File dữ liệu không tồn tại.");
                 }
 
-                foreach (var line in System.IO.File.ReadAllLines(FilePath))
+                var data = System.IO.File.ReadAllLines(FilePath);
+
+                if(data == null || !data.Any() || data.Length == 0 || data.All(string.IsNullOrWhiteSpace))
+                {
+                    return null;
+                }
+
+                foreach (var line in data)
                 {
                     try
                     {
                         var customer = DecryptDataCustomer(line);
-                        if (customer.PhoneNumber == phone)
+                        if (customer.PhoneNumber == phone && customer.Name == name)
                         {
                             return Ok(customer);
                         }

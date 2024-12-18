@@ -25,7 +25,7 @@ namespace DATN.Client.Pages
                         icon = "success",
                         confirmButtonText = "OK"
                     });
-                    Navigation.NavigateTo("/resetpassword");
+                    Navigation.NavigateTo("/internal/resetpassword");
                     errorMessage = null;
 
                 }

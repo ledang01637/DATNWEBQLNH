@@ -119,7 +119,7 @@ namespace DATN.Client.Pages
 
                     if (tableId <= 0) { await JS.InvokeVoidAsync("showAlert", "warning", "Thông báo", "Vui lòng quét mã QR trên bàn"); return; }
 
-                    order = await GetOrderForTable(tableId, "unpaid");
+                    order = await GetOrderForTable(tableId, "unConfirmed");
 
                     if (order.OrderId <= 0)
                     {
@@ -139,7 +139,7 @@ namespace DATN.Client.Pages
                     int numberTable = GetTableNumberFromToken(token);
 
                     order.PaymentMethod = "Chuyển khoản";
-                    order.Status = "unconfirmed";
+                    order.Status = "unpaid";
 
                     var response = await httpClient.PutAsJsonAsync($"api/Order/{order.OrderId}", order);
 

@@ -21,7 +21,7 @@ namespace DATN.Client.Pages
     {
         private LoginRequest loginUser = new LoginRequest();
         private string Token = "";
-        private readonly string url = "/noibo/register";
+        private readonly string url = "/internal/register";
         private bool IsProcess = false;
 
         private async Task HandleLogin()

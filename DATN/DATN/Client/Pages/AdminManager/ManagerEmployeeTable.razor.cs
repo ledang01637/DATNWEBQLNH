@@ -173,6 +173,10 @@ namespace DATN.Client.Pages.AdminManager
                             tableStates[tableNumber] = new TableState();
                         }
                         tableStates[tableNumber].HasPreviousOrder = true;
+                        tableStates[tableNumber].IsUsing = false;
+                        tableStates[tableNumber].HasPaymentRequest = false;
+
+
                         await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                         await UpdateCartNoteAsync(tableNumber, carts, note);
                         await InitializeButtonVisibilityAsync(tableNumber);
@@ -201,7 +205,8 @@ namespace DATN.Client.Pages.AdminManager
                     }
 
                     tableStates[_numberTable].HasPaymentRequest = true;
-                    tableStates[_numberTable].IsUsing = true;
+                    tableStates[_numberTable].IsUsing = false;
+                    tableStates[_numberTable].HasPreviousOrder = false;
 
                     await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
 
@@ -403,6 +408,7 @@ namespace DATN.Client.Pages.AdminManager
                  ?? new Dictionary<int, TableState>();
 
                 tableStates[selectedTableNumber].HasPreviousOrder = false;
+                tableStates[selectedTableNumber].HasPaymentRequest = false;
                 tableStates[selectedTableNumber].IsUsing = true;
 
                 _cartNote.CartDTOs = new List<CartDTO>();
@@ -456,6 +462,7 @@ namespace DATN.Client.Pages.AdminManager
             }
 
         }
+        
         private async Task RemoveFromCartAsync(CartDTO product)
         {
             if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
@@ -1110,6 +1117,17 @@ namespace DATN.Client.Pages.AdminManager
                     {
                         reservationModel.ReservationStatus = "Đã hủy";
                         reservationModel.UpdatedDate = DateTime.Now;
+                        var _tb = await httpClient.GetFromJsonAsync<Table>($"api/Table/{reservationModel.TableId}");
+                        if(_tb != null && _tb.TableId > 0)
+                        {
+                            _tb.Status = "empty";
+                            var response = await httpClient.PutAsJsonAsync($"api/Table/{_tb.TableId}", _tb);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không thể cập nhật trạng thái bàn");
+                                return;
+                            }
+                        }
                         await JS.InvokeVoidAsync("showModal", "ConfirmCancelModal");
                     }
                     else
@@ -1153,9 +1171,9 @@ namespace DATN.Client.Pages.AdminManager
             StateHasChanged();
         }
 
-        private void ConfirmInforCustomer()
+        private async void ConfirmInforCustomer()
         {
-            CatulatorDepositPaymentAsync();
+            await CatulatorDepositPaymentAsync();
             isEdit = false;
             reservationModel.UpdatedDate = DateTime.Now;
         }
@@ -1318,9 +1336,10 @@ namespace DATN.Client.Pages.AdminManager
             StateHasChanged();
         }
 
-        private Task CatulatorDepositPaymentAsync()
+        private async Task CatulatorDepositPaymentAsync()
         {
-            const decimal adultDeposit = 50000;
+            decimal adultDeposit = await GetFee();
+
             const decimal childDeposit = 0;
 
             var adults = reservationModel.Adults;
@@ -1328,7 +1347,35 @@ namespace DATN.Client.Pages.AdminManager
 
             reservationModel.DepositPayment = adults * adultDeposit + children * childDeposit;
             StateHasChanged();
-            return Task.CompletedTask;
+        }
+
+        private async Task<decimal> GetFee()
+        {
+            try
+            {
+                string fee = await httpClient.GetStringAsync("api/Fee/get-fee");
+
+                if (string.IsNullOrEmpty(fee))
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Không tìm thấy phí đặt cọc");
+                    return 0;
+                }
+
+                if (decimal.TryParse(fee, out var parsedFee))
+                {
+                    return parsedFee;
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Phí đặt cọc không hợp lệ");
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", $"Đã xảy ra lỗi khi lấy phí: {ex.Message}");
+                return 0;
+            }
         }
         #endregion
         private async Task<Employee> GetEmployeeByAccountId(int accountId)

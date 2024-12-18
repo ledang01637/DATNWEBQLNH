@@ -83,12 +83,16 @@ namespace DATN.Client.Pages
                     {
                         if (d.CustomerGUID == localDataCustomer.CustomerGUID || (d.Name == localDataCustomer.Name && d.PhoneNumber == localDataCustomer.PhoneNumber))
                         {
-                            //Truyền qua layout
                             dataCustomerName = d.Name;
                             _ = notifyLayout.InvokeAsync(dataCustomerName);
                             return;
                         }
                     }
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("showModal", "CustomerDataModal");
+                    return;
                 }
             }
             catch (FormatException)
@@ -102,9 +106,9 @@ namespace DATN.Client.Pages
         {
             dataCustomerModal.OrderIDs = new();
 
-            var data = await VerifyAndSyncDataCustomer(dataCustomerModal.PhoneNumber);
+            var data = await VerifyAndSyncDataCustomer(dataCustomerModal.PhoneNumber, dataCustomerModal.Name);
 
-            if(data != null)
+            if (data != null)
             {
                 await _localStorageService.SetAsync("dataCustomer", data);
                 await JS.InvokeVoidAsync("closeModal", "CustomerDataModal");
@@ -115,59 +119,40 @@ namespace DATN.Client.Pages
 
             var localData = await _localStorageService.GetAsync<DataCustomer>("dataCustomer");
 
-            if (localData != null)
+            var listData = await httpClient.GetFromJsonAsync<List<DataCustomer>>("api/DataCustomer/list");
+
+            if (listData != null && listData.Any(d => localData != null && d.CustomerGUID == localData.CustomerGUID))
             {
-                var response = await httpClient.PostAsJsonAsync("api/DataCustomer/save", dataCustomerModal);
-
-                var content = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", content);
-                    return;
-                }
-
-                await _localStorageService.SetItemAsync("dataCustomer", content);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Khách hàng đã tồn tại.");
+                return;
             }
-            else
+
+            var response = await httpClient.PostAsJsonAsync("api/DataCustomer/save", dataCustomerModal);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
             {
-
-                var listData = await httpClient.GetFromJsonAsync<List<DataCustomer>>("api/DataCustomer/list");
-
-                if (listData != null && listData.Any(d => d.CustomerGUID == localData.CustomerGUID))
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Khách hàng đã tồn tại.");
-                    return;
-                }
-
-                var response = await httpClient.PostAsJsonAsync("api/DataCustomer/save", dataCustomerModal);
-                var content = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", content);
-                    return;
-                }
-
-                await _localStorageService.SetItemAsync("dataCustomer", content);
+                await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", content);
+                return;
             }
+
+            await _localStorageService.SetItemAsync("dataCustomer", content);
 
             await JS.InvokeVoidAsync("closeModal", "CustomerDataModal");
             await JS.InvokeVoidAsync("showAlert", "success", "Thông báo", "Thành công");
             await LoadDataCustomer();
         }
 
-        private async Task<DataCustomer> VerifyAndSyncDataCustomer(string phoneNumber)
+        private async Task<DataCustomer> VerifyAndSyncDataCustomer(string phoneNumber, string Name)
         {
             try
             {
-                var customerData = await httpClient.GetFromJsonAsync<DataCustomer>($"api/DataCustomer/getbyphone?phone={phoneNumber}");
+                var customerData = await httpClient.GetFromJsonAsync<DataCustomer>($"api/DataCustomer/getbyphone?phone={phoneNumber}&name={Name}");
 
                 return customerData;
             }
-            catch (HttpRequestException ex)
+            catch
             {
-                Console.WriteLine($"Lỗi khi kiểm tra khách hàng: {ex.Message}");
                 return null;
             }
         }

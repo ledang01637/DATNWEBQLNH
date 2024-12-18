@@ -81,12 +81,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditUnit(int unitId)
         {
-            Navigation.NavigateTo($"/editunit/{unitId}");
+            Navigation.NavigateTo($"/admin/editunit/{unitId}");
         }
 
         private void CreateUnit()
         {
-            Navigation.NavigateTo($"/createunit");
+            Navigation.NavigateTo($"/admin/createunit");
         }
 
         private void Filter(ChangeEventArgs e)
@@ -152,12 +152,12 @@ namespace DATN.Client.Pages.AdminManager
 
         private void EditFloor(int floorId)
         {
-            Navigation.NavigateTo($"/editfloor/{floorId}");
+            Navigation.NavigateTo($"/admin/editfloor/{floorId}");
         }
 
         private void CreateFloor()
         {
-            Navigation.NavigateTo($"/createfloor");
+            Navigation.NavigateTo($"/admin/createfloor");
         }
 
         private void FilterFloor(ChangeEventArgs e)
