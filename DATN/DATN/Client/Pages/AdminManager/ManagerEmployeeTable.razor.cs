@@ -84,7 +84,13 @@ namespace DATN.Client.Pages.AdminManager
 
                 hubConnection = new HubConnectionBuilder()
                     .WithUrl(Navigation.ToAbsoluteUri("/ProcessHub"))
+                    .WithAutomaticReconnect()
                     .Build();
+
+                hubConnection.Closed += (error) => {
+                    Navigation.NavigateTo(Navigation.Uri, true);
+                    return Task.CompletedTask;
+                };
 
                 await SetupHubEvents();
                 await hubConnection.StartAsync();
@@ -127,7 +133,7 @@ namespace DATN.Client.Pages.AdminManager
             var tableStatesTask = _localStorageService.GetDictionaryAsync<int, TableState>("TableState");
             var tableOrdersTask = _localStorageService.GetDictionaryAsync<int, List<Order>>("tableOrders");
 
-            await Task.WhenAll(numTablesTask, requestsTask, cartNoteTask, cartsByTableTask, tableButtonVisibilityTask, tableColorsCacheTask, tableStatesTask,tableOrdersTask);
+            await Task.WhenAll(numTablesTask, requestsTask, cartNoteTask, cartsByTableTask, tableButtonVisibilityTask, tableColorsCacheTask, tableStatesTask, tableOrdersTask);
 
             numtables = numTablesTask.Result ?? new List<int>();
             requests = requestsTask.Result ?? new List<RequestCustomer>();
@@ -462,7 +468,7 @@ namespace DATN.Client.Pages.AdminManager
             }
 
         }
-        
+
         private async Task RemoveFromCartAsync(CartDTO product)
         {
             if (cartsByTable.TryGetValue(selectedTableNumber, out var existingCartNote))
@@ -575,7 +581,7 @@ namespace DATN.Client.Pages.AdminManager
                 TotalAmount = order.TotalAmount;
                 order.TableId = getTable.TableId;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await HandleError(ex);
                 await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Lỗi xử lý tính toán hóa đơn");
@@ -584,7 +590,7 @@ namespace DATN.Client.Pages.AdminManager
             {
                 IsProcessOrder = false;
             }
-            
+
         }
         private async void ProcessPayment()
         {
@@ -631,7 +637,7 @@ namespace DATN.Client.Pages.AdminManager
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin update order");
+                        await JS.InvokeVoidAsync("showAlert", "error", "Lỗi", "Vui lòng liên hệ Admin");
                         return;
                     }
 
@@ -656,7 +662,9 @@ namespace DATN.Client.Pages.AdminManager
                     TotalAmount = 0;
                     IsUsing = false;
 
-                    tableOrders = new Dictionary<int, List<Order>>();
+
+
+                    tableOrders[selectedTableNumber] = new List<Order>();
 
                     await _localStorageService.SetDictionaryAsync("tableStates", tableStates);
                     await _localStorageService.SetDictionaryAsync("cartsByTable", cartsByTable);
@@ -1118,7 +1126,7 @@ namespace DATN.Client.Pages.AdminManager
                         reservationModel.ReservationStatus = "Đã hủy";
                         reservationModel.UpdatedDate = DateTime.Now;
                         var _tb = await httpClient.GetFromJsonAsync<Table>($"api/Table/{reservationModel.TableId}");
-                        if(_tb != null && _tb.TableId > 0)
+                        if (_tb != null && _tb.TableId > 0)
                         {
                             _tb.Status = "empty";
                             var response = await httpClient.PutAsJsonAsync($"api/Table/{_tb.TableId}", _tb);
